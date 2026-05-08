@@ -81,7 +81,7 @@ export function SOPPreview({
             {/* CONTENT LAYER */}
             {pageIdx === 0 && <SOPHeaderSection header={header} />}
 
-            <div className={pageIdx === 0 ? "mt-8" : "mt-2"}>
+            <div className={pageIdx === 0 ? "mt-2" : "mt-2"}>
               <SOPTable
                 activities={pageActs}
                 roles={roles}

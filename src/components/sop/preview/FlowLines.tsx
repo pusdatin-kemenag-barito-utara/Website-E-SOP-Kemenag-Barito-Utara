@@ -24,11 +24,11 @@ export function FlowLines({
         const end = symbolCoords[nextAct.id];
         if (!start || !end) return null;
 
-        const startGap = 6;
-        const endGap = 8; // Larger gap for target to accommodate arrow head
+        const startGap = 0;
+        const endGap = 0; // Touch the symbol directly
         const ySourceBottom = start.y + start.h / 2 + startGap;
         const yTargetTop = end.y - end.h / 2 - endGap;
-        const midY = (ySourceBottom + yTargetTop) / 2;
+        const midY = ySourceBottom + (yTargetTop - ySourceBottom) * 0.75; // More aggressive offset to clear row borders
 
         const isTargetDecision = nextAct.symbol === "decision";
         const isMovingRight = end.x > start.x;
@@ -80,8 +80,7 @@ export function FlowLines({
                        L ${start.x + start.w / 2 + 1} ${start.y}`}
                     fill="none"
                     stroke="#000"
-                    strokeWidth="0.8"
-                    strokeDasharray="4,3"
+                    strokeWidth="1.2"
                     strokeLinejoin="round"
                     className=""
                   />
@@ -92,25 +91,10 @@ export function FlowLines({
                        L ${start.x + start.w / 2 + 5} ${start.y + 2.5}`}
                     fill="none"
                     stroke="#000"
-                    strokeWidth="0.8"
+                    strokeWidth="1.2"
                     className=""
                   />
-                  {/* "TIDAK" TEXT LABEL - Placed at the vertical takeoff point */}
-                  <rect
-                    x={end.x - 4}
-                    y={end.y - end.h / 2 - 12}
-                    width="8"
-                    height="8"
-                    fill="white"
-                    className=""
-                  />
-                  <text
-                    x={end.x - 3}
-                    y={end.y - end.h / 2 - 6}
-                    className="text-[5pt] font-black fill-[#000]"
-                  >
-                    T
-                  </text>
+                  {/* "TIDAK" TEXT LABEL REMOVED */}
                 </g>
               )}
           </g>

@@ -20,10 +20,10 @@ export function SOPTableRow({
 }: SOPTableRowProps) {
   return (
     <tr key={act.id} className="h-[8mm] min-h-[8mm]">
-      <td className="border border-[#000] p-1 text-center text-[8.5pt] w-[8mm]">
+      <td className="border border-[#000] p-1 text-center text-[7.5pt] w-[8mm]">
         {act.no}
       </td>
-      <td className="border border-[#000] p-1.5 text-[8.5pt] font-medium leading-tight w-[50mm] text-justify">
+      <td className="border border-[#000] p-1.5 text-[8.5pt] font-medium leading-tight w-[40mm] text-justify">
         {act.kegiatan}
       </td>
       {roles.map((role) => (
@@ -44,7 +44,7 @@ export function SOPTableRow({
               {/* MAIN SYMBOL */}
               <div
                 id={noIds ? undefined : `symbol-${act.id}`}
-                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10 bg-white py-1 pointer-events-auto"
+                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10 pointer-events-auto"
               >
                 <SopSymbol type={act.symbol} />
               </div>
@@ -79,11 +79,11 @@ export function SOPTableRow({
           variant="plain"
         />
       </td>
-      <td className="border border-[#000] p-1 text-[7.5pt] leading-tight">
+      <td className="border border-[#000] p-1 text-[7.5pt] leading-tight text-justify">
         <RenderList
           text={act.keterangan}
           className="ml-1 space-y-0"
-          itemClassName="text-[7.5pt]"
+          itemClassName="text-[7pt] text-justify"
           variant="plain"
         />
       </td>

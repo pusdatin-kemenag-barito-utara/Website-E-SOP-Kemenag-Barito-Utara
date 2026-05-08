@@ -15,7 +15,7 @@ export function SOPTableHeader({ roles }: SOPTableHeaderProps) {
           No
         </th>
         <th
-          className="border border-[#000] p-1 w-[50mm] min-w-[50mm]"
+          className="border border-[#000] p-1 w-[30mm] min-w-[30mm]"
           rowSpan={2}
         >
           Aktivitas

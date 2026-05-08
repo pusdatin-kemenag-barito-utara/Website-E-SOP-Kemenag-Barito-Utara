@@ -5,6 +5,11 @@ export const INITIAL_ROLES = [
   "Petugas PTSP",
   "Operator",
   "Kepala Seksi",
+  "Bendahara Pengeluaran",
+  "KPA",
+  "PPK",
+  "PPSPM",
+  "JFT",
   "Kasubbag TU",
   "Kepala Kantor",
 ];
@@ -19,7 +24,7 @@ export const SYMBOL_OPTIONS: { value: SymbolType; label: string }[] = [
 export const DEFAULT_HEADER: SOPHeader = {
   instansi: "Kementerian Agama",
   satker: "Kantor Kabupaten Barito Utara",
-  nomor: "B- /Kk.15.6.1/OT.01.4/01/2026",
+  nomor: "B-..../Kk.15.2..../....../..../2026",
   tglBuat: "01 Januari 2026",
   tglRevisi: "-",
   tglEfektif: "02 Januari 2026",
