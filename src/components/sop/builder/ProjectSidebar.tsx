@@ -72,7 +72,7 @@ export function ProjectSidebar({
                   e.stopPropagation();
                   onDelete(sop);
                 }}
-                className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 rounded-lg flex items-center justify-center text-slate-300 hover:text-red-500 hover:bg-red-50 opacity-0 group-hover/item:opacity-100 transition-all"
+                className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 rounded-lg flex items-center justify-center text-red-500 hover:text-red-700 hover:bg-red-50 opacity-0 group-hover/item:opacity-100 transition-all"
               >
                 <Trash2 className="w-3.5 h-3.5" />
               </button>

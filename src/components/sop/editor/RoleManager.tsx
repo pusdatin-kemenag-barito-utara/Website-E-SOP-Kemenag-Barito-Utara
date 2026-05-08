@@ -16,9 +16,20 @@ interface Props {
   roles: string[];
   setRoles: React.Dispatch<React.SetStateAction<string[]>>;
   setActivities: React.Dispatch<React.SetStateAction<Activity[]>>;
+  setConfirm: (config: {
+    open: boolean;
+    title: string;
+    desc: string;
+    onConfirm: () => void;
+  }) => void;
 }
 
-export function RoleManager({ roles, setRoles, setActivities }: Props) {
+export function RoleManager({
+  roles,
+  setRoles,
+  setActivities,
+  setConfirm,
+}: Props) {
   const [newRole, setNewRole] = useState("");
 
   const addRole = () => {
@@ -29,17 +40,22 @@ export function RoleManager({ roles, setRoles, setActivities }: Props) {
   };
 
   const removeRole = (roleToRemove: string) => {
-    if (confirm(`Hapus pelaksana "${roleToRemove}"?`)) {
-      setRoles((prev) => prev.filter((r) => r !== roleToRemove));
-      setActivities((prev) =>
-        prev.map((act) => ({
-          ...act,
-          pelaksana: act.pelaksana.filter((r) => r !== roleToRemove),
-          roleForSymbol:
-            act.roleForSymbol === roleToRemove ? "" : act.roleForSymbol,
-        })),
-      );
-    }
+    setConfirm({
+      open: true,
+      title: "Hapus Pelaksana?",
+      desc: `Apakah Anda yakin ingin menghapus "${roleToRemove}" dari daftar pelaksana?`,
+      onConfirm: () => {
+        setRoles((prev) => prev.filter((r) => r !== roleToRemove));
+        setActivities((prev) =>
+          prev.map((act) => ({
+            ...act,
+            pelaksana: act.pelaksana.filter((r) => r !== roleToRemove),
+            roleForSymbol:
+              act.roleForSymbol === roleToRemove ? "" : act.roleForSymbol,
+          })),
+        );
+      },
+    });
   };
 
   const moveRole = (index: number, direction: "up" | "down") => {
@@ -130,7 +146,7 @@ export function RoleManager({ roles, setRoles, setActivities }: Props) {
 
                   <button
                     onClick={() => removeRole(role)}
-                    className="p-1.5 rounded-md text-slate-300 hover:text-red-600 hover:bg-red-50 transition-all ml-1"
+                    className="p-1.5 rounded-md text-red-500 hover:text-red-700 hover:bg-red-50 transition-all ml-1"
                     title="Hapus"
                   >
                     <Trash2 className="w-3.5 h-3.5" />

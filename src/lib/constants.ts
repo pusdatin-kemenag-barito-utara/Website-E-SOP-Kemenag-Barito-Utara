@@ -1,10 +1,9 @@
 import { SOPHeader, SymbolType } from "@/types/sop";
 
 export const INITIAL_ROLES = [
+  "Pemohon",
   "Petugas PTSP",
   "Operator",
-  "Pengawas",
-  "Administrator",
   "Kepala Seksi",
   "Kasubbag TU",
   "Kepala Kantor",
@@ -25,7 +24,7 @@ export const DEFAULT_HEADER: SOPHeader = {
   tglRevisi: "-",
   tglEfektif: "02 Januari 2026",
   disahkanOleh: "Kepala Kantor Kabupaten,",
-  pejabatNama: "H.ARBAJA, S.Ag.,M.A.P",
+  pejabatNama: "H. Arbaja, S.Ag.,M.A.P",
   pejabatNip: "197311212001121001",
   namaSOP: "SOP PELAYANAN ...........",
   dasarHukum: "KMA No. 9 Tahun 2016",

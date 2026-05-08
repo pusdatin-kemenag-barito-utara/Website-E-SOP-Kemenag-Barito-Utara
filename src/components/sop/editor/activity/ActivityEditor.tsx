@@ -25,6 +25,12 @@ interface Props {
   roles: string[];
   expandedActivities: string[];
   setExpandedActivities: React.Dispatch<React.SetStateAction<string[]>>;
+  setConfirm: (config: {
+    open: boolean;
+    title: string;
+    desc: string;
+    onConfirm: () => void;
+  }) => void;
 }
 
 export function ActivityEditor({
@@ -33,6 +39,7 @@ export function ActivityEditor({
   roles,
   expandedActivities,
   setExpandedActivities,
+  setConfirm,
 }: Props) {
   const addActivity = () => {
     const newAct: Activity = {
@@ -62,11 +69,19 @@ export function ActivityEditor({
   };
 
   const removeActivity = (id: string) => {
-    setActivities((prev) =>
-      prev
-        .filter((act) => act.id !== id)
-        .map((act, i) => ({ ...act, no: (i + 1).toString() })),
-    );
+    const act = activities.find((a) => a.id === id);
+    setConfirm({
+      open: true,
+      title: "Hapus Langkah?",
+      desc: `Apakah Anda yakin ingin menghapus "${act?.kegiatan || `Langkah ${act?.no}`}"? Tindakan ini tidak bisa dibatalkan.`,
+      onConfirm: () => {
+        setActivities((prev) =>
+          prev
+            .filter((act) => act.id !== id)
+            .map((act, i) => ({ ...act, no: (i + 1).toString() })),
+        );
+      },
+    });
   };
 
   const toggleExpand = (id: string) => {

@@ -32,6 +32,7 @@ interface BuilderHeaderProps {
   onLogout: () => void;
   onLogin: () => void;
   authLoading: boolean;
+  lastSaved: Date | null;
 }
 
 export function BuilderHeader({
@@ -48,6 +49,7 @@ export function BuilderHeader({
   onLogout,
   onLogin,
   authLoading,
+  lastSaved,
 }: BuilderHeaderProps) {
   return (
     <header className="h-16 bg-white border-b border-slate-200 px-4 md:px-6 flex items-center justify-between sticky top-0 z-50 shadow-sm print:hidden">
@@ -57,14 +59,30 @@ export function BuilderHeader({
           <ShieldCheck className="w-5 h-5 md:w-6 md:h-6 text-white relative z-10" />
         </div>
         <div className="hidden sm:block">
-          <h1 className="text-sm font-black tracking-tight flex items-center gap-2 leading-none">
-            <span className="bg-clip-text text-transparent bg-gradient-to-r from-slate-900 to-slate-600">
-              SOP Builder
-            </span>
-            <span className="text-emerald-600">Kemenag Barut</span>
-          </h1>
+          <div className="flex items-center gap-2">
+            <h1 className="text-sm font-black tracking-tight flex items-center gap-2 leading-none">
+              <span className="bg-clip-text text-transparent bg-gradient-to-r from-slate-900 to-slate-600">
+                SOP Builder
+              </span>
+              <span className="text-emerald-600">Kemenag Barut</span>
+            </h1>
+            {user && currentId && (
+              <div className="flex items-center gap-1.5 px-2 py-0.5 bg-blue-50 border border-blue-100 rounded-full animate-in fade-in duration-500">
+                <div className="w-1 h-1 rounded-full bg-blue-400 animate-pulse" />
+                <span className="text-[8px] font-black text-blue-500 uppercase tracking-tighter">
+                  Auto-Save Active
+                </span>
+              </div>
+            )}
+          </div>
           <p className="hidden md:block text-[9px] font-bold text-slate-400 uppercase tracking-widest leading-none mt-1">
-            Official Document Generator
+            {lastSaved ? (
+              <span className="text-emerald-500 font-black">
+                Terakhir disimpan: {lastSaved.toLocaleTimeString("id-ID")}
+              </span>
+            ) : (
+              "Official Document Generator"
+            )}
           </p>
         </div>
       </div>
@@ -105,12 +123,19 @@ export function BuilderHeader({
               variant="ghost"
               size="sm"
               className={cn(
-                "font-bold text-xs px-2 md:px-3 text-slate-600",
-                showProjects && "bg-slate-100",
+                "font-bold text-xs px-2 md:px-3",
+                showProjects
+                  ? "bg-amber-100 text-amber-700 shadow-sm"
+                  : "text-slate-600 hover:text-amber-600 hover:bg-amber-50",
               )}
               onClick={() => setShowProjects(!showProjects)}
             >
-              <List className="w-4 h-4 md:mr-2" />
+              <List
+                className={cn(
+                  "w-4 h-4 md:mr-2",
+                  showProjects ? "text-amber-600" : "text-amber-500",
+                )}
+              />
               <span className="hidden md:inline">PROYEK SAYA</span>
             </Button>
 
@@ -118,10 +143,10 @@ export function BuilderHeader({
               variant="outline"
               size="sm"
               className={cn(
-                "font-bold text-xs px-2 md:px-3 border-slate-200",
+                "font-bold text-xs px-2 md:px-3 transition-all",
                 currentId
-                  ? "text-blue-600 bg-blue-50 border-blue-100"
-                  : "text-slate-500",
+                  ? "text-blue-600 bg-blue-50 border-blue-200 hover:bg-blue-100 shadow-sm"
+                  : "text-blue-500 border-blue-100 hover:bg-blue-50",
               )}
               onClick={onSave}
               disabled={isSyncing}
@@ -129,7 +154,12 @@ export function BuilderHeader({
               {isSyncing ? (
                 <Loader2 className="w-4 h-4 md:mr-2 animate-spin" />
               ) : (
-                <CloudUpload className="w-4 h-4 md:mr-2" />
+                <CloudUpload
+                  className={cn(
+                    "w-4 h-4 md:mr-2",
+                    currentId ? "text-blue-600" : "text-blue-400",
+                  )}
+                />
               )}
               <span className="hidden md:inline">
                 {currentId ? "SYNC CLOUD" : "SIMPAN CLOUD"}
@@ -139,10 +169,10 @@ export function BuilderHeader({
             <Button
               variant="ghost"
               size="sm"
-              className="text-slate-400 hover:text-red-600 hover:bg-red-50 font-bold text-xs px-2 md:px-3"
+              className="text-orange-500 hover:text-red-600 hover:bg-red-50 font-bold text-xs px-2 md:px-3"
               onClick={onReset}
             >
-              <RotateCcw className="w-4 h-4 md:mr-2" />
+              <RotateCcw className="w-4 h-4 md:mr-2 text-orange-500" />
               <span className="hidden md:inline">RESET</span>
             </Button>
 

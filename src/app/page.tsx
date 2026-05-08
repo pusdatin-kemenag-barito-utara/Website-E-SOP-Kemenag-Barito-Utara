@@ -67,7 +67,26 @@ export default function SOPBuilder() {
     onConfirm: () => {},
   });
 
+  const [lastSaved, setLastSaved] = useState<Date | null>(null);
+
   // 4. Effects
+  // Auto-save to Cloud every 3 minutes
+  React.useEffect(() => {
+    if (!user || !currentId) return;
+
+    const interval = setInterval(
+      async () => {
+        const res = await saveToCloud();
+        if (res?.success) {
+          setLastSaved(new Date());
+        }
+      },
+      3 * 60 * 1000,
+    ); // 3 minutes
+
+    return () => clearInterval(interval);
+  }, [user, currentId, saveToCloud]);
+
   React.useEffect(() => {
     const updateScale = () => {
       const width = window.innerWidth;
@@ -91,8 +110,12 @@ export default function SOPBuilder() {
 
   const handleSave = async () => {
     const res = await saveToCloud();
-    if (res?.success) showToast(res.message);
-    else if (res?.message) showToast(res.message, "error");
+    if (res?.success) {
+      showToast(res.message);
+      setLastSaved(new Date());
+    } else if (res?.message) {
+      showToast(res.message, "error");
+    }
   };
 
   const handleReset = () => {
@@ -139,6 +162,7 @@ export default function SOPBuilder() {
         onLogout={signOut}
         onLogin={signInWithGoogle}
         authLoading={authLoading}
+        lastSaved={lastSaved}
       />
 
       <main className="flex-1 flex overflow-hidden h-[calc(100vh-64px)] print:overflow-visible print:h-auto print:block">
@@ -187,6 +211,7 @@ export default function SOPBuilder() {
           setActivities={setActivities}
           expandedActivities={expandedActivities}
           setExpandedActivities={setExpandedActivities}
+          setConfirm={setConfirm}
         />
 
         <LivePreview

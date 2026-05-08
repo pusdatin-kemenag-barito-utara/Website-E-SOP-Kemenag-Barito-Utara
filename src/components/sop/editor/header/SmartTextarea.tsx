@@ -77,9 +77,9 @@ export function SmartTextarea({
         <ListOrdered className="w-4 h-4" />
       </button>
 
-      <div className="absolute left-4 -bottom-5 flex items-center gap-1 opacity-0 group-focus-within:opacity-100 transition-opacity">
-        <span className="text-[9px] font-bold text-blue-500/60 uppercase tracking-tighter">
-          Tip: Tekan Enter untuk penomoran otomatis
+      <div className="absolute left-4 -bottom-5 flex items-center gap-1 opacity-40 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity duration-300">
+        <span className="text-[9px] font-bold text-slate-400 uppercase tracking-tight">
+          💡 Cukup tekan <span className="text-blue-600 font-black">ENTER</span> untuk menambah list otomatis
         </span>
       </div>
     </div>

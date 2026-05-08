@@ -60,7 +60,7 @@ export function ActivityCardHeader({
             e.stopPropagation();
             onRemove(act.id);
           }}
-          className="h-8 w-8 text-slate-300 hover:text-red-600 hover:bg-red-50"
+          className="h-8 w-8 text-red-500 hover:text-red-700 hover:bg-red-50"
         >
           <Trash2 className="w-4 h-4" />
         </Button>

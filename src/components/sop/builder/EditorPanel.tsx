@@ -19,6 +19,12 @@ interface EditorPanelProps {
   setActivities: React.Dispatch<React.SetStateAction<Activity[]>>;
   expandedActivities: string[];
   setExpandedActivities: React.Dispatch<React.SetStateAction<string[]>>;
+  setConfirm: (config: {
+    open: boolean;
+    title: string;
+    desc: string;
+    onConfirm: () => void;
+  }) => void;
 }
 
 export function EditorPanel({
@@ -33,6 +39,7 @@ export function EditorPanel({
   setActivities,
   expandedActivities,
   setExpandedActivities,
+  setConfirm,
 }: EditorPanelProps) {
   return (
     <aside
@@ -96,6 +103,7 @@ export function EditorPanel({
                 roles={roles}
                 setRoles={setRoles}
                 setActivities={setActivities}
+                setConfirm={setConfirm}
               />
             </div>
           </TabsContent>
@@ -108,6 +116,7 @@ export function EditorPanel({
                 roles={roles}
                 expandedActivities={expandedActivities}
                 setExpandedActivities={setExpandedActivities}
+                setConfirm={setConfirm}
               />
             </div>
           </TabsContent>
