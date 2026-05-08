@@ -51,7 +51,14 @@ export function useSOPCoords(
       observer.disconnect();
       clearTimeout(timer);
     };
-  }, [activities, roles, isHydrated, header, expandedActivities, activityPages]);
+  }, [
+    activities,
+    roles,
+    isHydrated,
+    header,
+    expandedActivities,
+    activityPages,
+  ]);
 
   return symbolCoords;
 }

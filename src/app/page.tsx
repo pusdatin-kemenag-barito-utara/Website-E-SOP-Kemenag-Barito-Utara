@@ -13,6 +13,8 @@ import {
   ChevronRight,
   ShieldCheck,
   Users,
+  CloudUpload,
+  Loader2,
 } from "lucide-react";
 
 // Modular Components
@@ -35,6 +37,9 @@ export default function SOPBuilder() {
     header,
     setHeader,
     resetData,
+    saveToCloud,
+    isSyncing,
+    currentId,
   } = useSOPData();
 
   const [activeSection, setActiveSection] = useState("header");
@@ -51,11 +56,12 @@ export default function SOPBuilder() {
         const newScale = (width - 60) / 794;
         setScale(Math.min(newScale, 1));
       } else {
-          // Desktop: calculate space remaining after sidebar
-          const sidebarWidth = viewMode === "edit" ? (width < 1280 ? 650 : 850) : 0;
-          const availableWidth = width - sidebarWidth - 64;
-          const newScale = availableWidth / 794;
-          setScale(Math.min(newScale, 1));
+        // Desktop: calculate space remaining after sidebar
+        const sidebarWidth =
+          viewMode === "edit" ? (width < 1280 ? 650 : 850) : 0;
+        const availableWidth = width - sidebarWidth - 64;
+        const newScale = availableWidth / 794;
+        setScale(Math.min(newScale, 1));
       }
     };
 
@@ -103,7 +109,7 @@ export default function SOPBuilder() {
                   : "text-slate-500 hover:text-slate-700",
               )}
             >
-              <Edit3 className="w-3.5 h-3.5" /> 
+              <Edit3 className="w-3.5 h-3.5" />
               <span className="hidden xs:inline">Editor</span>
             </button>
             <button
@@ -115,7 +121,7 @@ export default function SOPBuilder() {
                   : "text-slate-500 hover:text-slate-700",
               )}
             >
-              <Eye className="w-3.5 h-3.5" /> 
+              <Eye className="w-3.5 h-3.5" />
               <span className="hidden xs:inline">Preview</span>
             </button>
           </div>
@@ -128,15 +134,37 @@ export default function SOPBuilder() {
             className="text-slate-400 hover:text-red-600 hover:bg-red-50 font-bold text-xs px-2 md:px-3"
             onClick={resetData}
           >
-            <RotateCcw className="w-4 h-4 md:mr-2" /> 
+            <RotateCcw className="w-4 h-4 md:mr-2" />
             <span className="hidden md:inline">RESET</span>
           </Button>
-          
+
+          <Button
+            variant="outline"
+            size="sm"
+            className={cn(
+              "font-bold text-xs px-2 md:px-3 border-slate-200",
+              currentId
+                ? "text-blue-600 bg-blue-50 border-blue-100"
+                : "text-slate-500",
+            )}
+            onClick={saveToCloud}
+            disabled={isSyncing}
+          >
+            {isSyncing ? (
+              <Loader2 className="w-4 h-4 md:mr-2 animate-spin" />
+            ) : (
+              <CloudUpload className="w-4 h-4 md:mr-2" />
+            )}
+            <span className="hidden md:inline">
+              {currentId ? "SYNC CLOUD" : "SIMPAN CLOUD"}
+            </span>
+          </Button>
+
           <Button
             className="bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg shadow-emerald-100 font-bold px-4 md:px-6 h-9 md:h-10"
             onClick={() => window.print()}
           >
-            <Printer className="w-4 h-4 md:mr-2" /> 
+            <Printer className="w-4 h-4 md:mr-2" />
             <span className="hidden sm:inline">CETAK / PDF ASLI</span>
           </Button>
         </div>
@@ -147,8 +175,8 @@ export default function SOPBuilder() {
         <aside
           className={cn(
             "w-full lg:w-[650px] xl:w-[850px] bg-white border-r border-slate-200 flex flex-col transition-all duration-300 print:hidden h-full overflow-hidden",
-            viewMode === "preview" 
-              ? "hidden lg:flex opacity-50 pointer-events-none grayscale" 
+            viewMode === "preview"
+              ? "hidden lg:flex opacity-50 pointer-events-none grayscale"
               : "flex",
           )}
         >
@@ -228,7 +256,9 @@ export default function SOPBuilder() {
         <section
           className={cn(
             "flex-1 bg-[#F1F5F9] overflow-y-auto custom-scrollbar print:p-0 print:bg-white transition-all duration-500 h-full [scrollbar-gutter:stable]",
-            viewMode === "preview" ? "bg-white flex" : "bg-slate-100 hidden lg:flex",
+            viewMode === "preview"
+              ? "bg-white flex"
+              : "bg-slate-100 hidden lg:flex",
           )}
         >
           <div className="min-h-full w-full p-4 md:py-12 md:px-6 flex flex-col items-center">
@@ -246,12 +276,12 @@ export default function SOPBuilder() {
               </div>
             </div>
 
-            <div 
+            <div
               className="w-full flex justify-center transition-all duration-500"
-              style={{ 
-                transform: `scale(${scale})`, 
-                transformOrigin: 'top center',
-                marginBottom: `calc(297mm * ${scale - 1})` // Adjust footer margin based on scale
+              style={{
+                transform: `scale(${scale})`,
+                transformOrigin: "top center",
+                marginBottom: `calc(297mm * ${scale - 1})`, // Adjust footer margin based on scale
               }}
             >
               <SOPPreview

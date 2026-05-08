@@ -8,19 +8,31 @@ export function SOPTableHeader({ roles }: SOPTableHeaderProps) {
   return (
     <thead>
       <tr className="bg-slate-50 text-[8pt] h-[35px]">
-        <th className="border border-[#000] p-1 w-[8mm] min-w-[8mm]" rowSpan={2}>
+        <th
+          className="border border-[#000] p-1 w-[8mm] min-w-[8mm]"
+          rowSpan={2}
+        >
           No
         </th>
-        <th className="border border-[#000] p-1 w-[50mm] min-w-[50mm]" rowSpan={2}>
+        <th
+          className="border border-[#000] p-1 w-[50mm] min-w-[50mm]"
+          rowSpan={2}
+        >
           Aktivitas
         </th>
-        <th className="border border-[#000] p-1 text-center" colSpan={roles.length}>
+        <th
+          className="border border-[#000] p-1 text-center"
+          colSpan={roles.length}
+        >
           Pelaksana
         </th>
         <th className="border border-[#000] p-1 text-center" colSpan={3}>
           Mutu Baku
         </th>
-        <th className="border border-[#000] p-1 w-[16mm] min-w-[16mm]" rowSpan={2}>
+        <th
+          className="border border-[#000] p-1 w-[16mm] min-w-[16mm]"
+          rowSpan={2}
+        >
           Ket
         </th>
       </tr>

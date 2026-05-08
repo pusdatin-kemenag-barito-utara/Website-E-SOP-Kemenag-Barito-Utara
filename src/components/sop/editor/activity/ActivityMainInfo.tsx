@@ -17,7 +17,7 @@ interface ActivityMainInfoProps {
   onUpdate: (
     id: string,
     field: keyof Activity,
-    value: string | string[] | SymbolType
+    value: string | string[] | SymbolType,
   ) => void;
   SYMBOL_ICONS: Record<SymbolType, React.ElementType>;
 }
@@ -67,7 +67,10 @@ export function ActivityMainInfo({
                         className: "w-4 h-4 text-emerald-600",
                       })}
                       <span className="font-bold text-slate-700 text-sm">
-                        {SYMBOL_OPTIONS.find((o) => o.value === act.symbol)?.label}
+                        {
+                          SYMBOL_OPTIONS.find((o) => o.value === act.symbol)
+                            ?.label
+                        }
                       </span>
                     </div>
                   </SelectValue>
