@@ -7,6 +7,7 @@ import { ActivityMutuBaku } from "./ActivityMutuBaku";
 
 interface ActivityCardProps {
   act: Activity;
+  index: number;
   roles: string[];
   isExpanded: boolean;
   onToggleExpand: (id: string) => void;
@@ -21,6 +22,7 @@ interface ActivityCardProps {
 
 export function ActivityCard({
   act,
+  index,
   roles,
   isExpanded,
   onToggleExpand,
