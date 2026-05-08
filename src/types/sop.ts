@@ -37,7 +37,24 @@ export interface SOPHeader {
   pencatatan: string;
 }
 
+export interface SOPListItem {
+  id: string;
+  title: string;
+  updated_at: string;
+}
+
 export interface SOPData {
+  header: SOPHeader;
+  activities: Activity[];
+  roles: string[];
+}
+
+export interface StoredSOP {
+  id: string;
+  user_id: string;
+  created_at: string;
+  updated_at: string;
+  title: string;
   header: SOPHeader;
   activities: Activity[];
   roles: string[];

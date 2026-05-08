@@ -7,7 +7,7 @@
   --card-foreground: 222.2 84% 4.9%;
   --popover: 0 0% 100%;
   --popover-foreground: 222.2 84% 4.9%;
-  --primary: 161 94% 30%; /* Emerald 700-ish for Kemenag */
+  --primary: 161 94% 30%;
   --primary-foreground: 210 40% 98%;
   --secondary: 210 40% 96.1%;
   --secondary-foreground: 222.2 47.4% 11.2%;
@@ -60,69 +60,33 @@ body {
   background: #64748b;
 }
 
-/* Fix for html2pdf/dom-to-image capture */
-.printing-now {
-  background: white !important;
-  padding: 0 !important;
-  margin: 0 !important;
-}
-
-.printing-now .print-page {
-  box-shadow: none !important;
-  border: none !important;
-  margin: 0 !important;
-}
-
-/* Force clean backgrounds and borders during capture */
-.printing-now * {
-  box-shadow: none !important;
-  text-shadow: none !important;
-  outline: none !important;
-  background-image: none !important;
-  transition: none !important;
-  animation: none !important;
-}
-
-.printing-now .bg-slate-50,
-.printing-now .bg-slate-50\/50,
-.printing-now .bg-slate-100 {
-  background-color: transparent !important;
-}
-
+/* Print Styles */
 @media print {
   @page {
     size: A4 portrait;
     margin: 0;
   }
 
-  /* Kill all animations and transitions for print performance */
   *,
   *:before,
   *:after {
     transition: none !important;
     animation: none !important;
-    transition-duration: 0s !important;
-    animation-duration: 0s !important;
+    box-shadow: none !important;
   }
 
-  /* Only reset structural containers to prevent clipping, NOT every single element */
   html,
   body,
   main,
   section,
-  .flex-col,
   #sop-preview-container {
     overflow: visible !important;
     height: auto !important;
     min-height: 0 !important;
-  }
-
-  /* Ensure symbols keep their dimensions */
-  .sop-symbol,
-  [id^="symbol-"] {
-    height: revert !important;
-    width: revert !important;
-    overflow: visible !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    display: block !important;
+    background: white !important;
   }
 
   .print-hide,
@@ -134,37 +98,47 @@ body {
   button,
   .animate-pulse {
     display: none !important;
-    height: 0 !important;
-    width: 0 !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    visibility: hidden !important;
-  }
-
-  html,
-  body {
-    height: auto !important;
-    overflow: visible !important;
-    background-color: white !important;
-    margin: 0 !important;
-    padding: 0 !important;
   }
 
   .print-page {
-    break-inside: avoid !important;
+    page-break-after: always !important;
     break-after: page !important;
+    break-inside: avoid !important;
     display: block !important;
     margin: 0 auto !important;
     position: relative !important;
     width: 210mm !important;
-    height: 296mm !important;
+    height: 296.8mm !important; /* Slightly less than 297 to avoid overflow triggers */
     background: white !important;
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
+    overflow: hidden !important;
+  }
+
+  .print-page:last-child {
+    page-break-after: auto !important;
+    break-after: auto !important;
+    margin-bottom: 0 !important;
   }
 
   .print-page:first-child {
     break-before: avoid !important;
+  }
+
+  .print-unscale {
+    transform: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    display: block !important;
+    width: 100% !important;
+  }
+
+  /* Ensure symbols keep their dimensions */
+  .sop-symbol,
+  [id^="symbol-"] {
+    height: revert !important;
+    width: revert !important;
+    overflow: visible !important;
   }
 }
 

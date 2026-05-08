@@ -2,6 +2,8 @@ import React from "react";
 import { Input } from "@/components/ui/input";
 import { SOPHeader as SOPHeaderType } from "@/types/sop";
 import { Fingerprint, FileText, BadgeCheck, UserCheck } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { DEFAULT_HEADER } from "@/lib/constants";
 import { SectionHeader } from "../../shared/SectionHeader";
 
 interface HeaderIdentitySectionProps {
@@ -13,6 +15,9 @@ export function HeaderIdentitySection({
   header,
   updateHeader,
 }: HeaderIdentitySectionProps) {
+  const isDefaultName = header.namaSOP === DEFAULT_HEADER.namaSOP;
+  const isDefaultNomor = header.nomor === DEFAULT_HEADER.nomor;
+
   return (
     <div className="group bg-white rounded-[2rem] border border-slate-200 shadow-xl shadow-slate-200/40 overflow-hidden transition-all duration-500 hover:shadow-2xl hover:shadow-emerald-100/50 hover:border-emerald-100">
       <SectionHeader
@@ -32,7 +37,10 @@ export function HeaderIdentitySection({
           <Input
             value={header.namaSOP}
             onChange={(e) => updateHeader("namaSOP", e.target.value)}
-            className="h-12 bg-slate-50/50 border-slate-200 font-bold text-slate-800 focus:bg-white focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all rounded-xl px-4"
+            className={cn(
+              "h-12 bg-slate-50/50 border-slate-200 font-bold focus:bg-white focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all rounded-xl px-4",
+              isDefaultName ? "text-slate-400" : "text-slate-800",
+            )}
             placeholder="Masukkan judul SOP..."
           />
         </div>
@@ -45,7 +53,10 @@ export function HeaderIdentitySection({
             <Input
               value={header.nomor}
               onChange={(e) => updateHeader("nomor", e.target.value)}
-              className="h-11 bg-slate-50/50 border-slate-200 focus:bg-white focus:ring-4 focus:ring-blue-500/5 focus:border-blue-400 transition-all rounded-xl px-4 text-sm"
+              className={cn(
+                "h-11 bg-slate-50/50 border-slate-200 focus:bg-white focus:ring-4 focus:ring-blue-500/5 focus:border-blue-400 transition-all rounded-xl px-4 text-sm",
+                isDefaultNomor ? "text-slate-400" : "text-slate-700",
+              )}
             />
           </div>
           <div className="space-y-2">

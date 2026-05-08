@@ -119,15 +119,15 @@ export function useSOPData(userId?: string) {
       if (result.data) {
         const newId = result.data.id;
         setCurrentId(newId);
-        // Update URL without refreshing
         const newUrl = `${window.location.origin}${window.location.pathname}?id=${newId}`;
         window.history.pushState({ path: newUrl }, "", newUrl);
         fetchUserSops(); // Refresh list
-        alert("SOP berhasil disimpan ke Cloud!");
+        return { success: true, message: "SOP berhasil disimpan ke Cloud!" };
       }
+      return { success: false, message: "Gagal menyimpan." };
     } catch (err) {
       console.error("Cloud sync error:", err);
-      alert("Gagal menyimpan ke Cloud.");
+      return { success: false, message: "Gagal menyimpan ke Cloud." };
     } finally {
       setIsSyncing(false);
     }
@@ -135,38 +135,65 @@ export function useSOPData(userId?: string) {
 
   const loadSop = async (id: string) => {
     setIsSyncing(true);
-    const { data, error } = await supabase
-      .from("sops")
-      .select("*")
-      .eq("id", id)
-      .single();
+    try {
+      const { data, error } = await supabase
+        .from("sops")
+        .select("*")
+        .eq("id", id)
+        .single();
 
-    if (data && !error) {
-      setHeader(data.header);
-      setActivities(data.activities);
-      setRoles(data.roles);
-      setCurrentId(data.id);
-      const newUrl = `${window.location.origin}${window.location.pathname}?id=${id}`;
-      window.history.pushState({ path: newUrl }, "", newUrl);
+      if (data && !error) {
+        setHeader(data.header);
+        setActivities(data.activities);
+        setRoles(data.roles);
+        setCurrentId(data.id);
+        const newUrl = `${window.location.origin}${window.location.pathname}?id=${id}`;
+        window.history.pushState({ path: newUrl }, "", newUrl);
+        return { success: true };
+      }
+      return { success: false, message: "Gagal memuat SOP." };
+    } catch (err) {
+      console.error("Load error:", err);
+      return { success: false, message: "Terjadi kesalahan." };
+    } finally {
+      setIsSyncing(false);
     }
-    setIsSyncing(false);
+  };
+
+  const deleteSop = async (id: string) => {
+    setIsSyncing(true);
+    try {
+      const { error } = await supabase.from("sops").delete().eq("id", id);
+
+      if (error) throw error;
+
+      if (currentId === id) {
+        setCurrentId(null);
+        setActivities([]);
+        setRoles(INITIAL_ROLES);
+        setHeader(DEFAULT_HEADER);
+        const cleanUrl = `${window.location.origin}${window.location.pathname}`;
+        window.history.pushState({ path: cleanUrl }, "", cleanUrl);
+      }
+
+      fetchUserSops();
+      return { success: true, message: "SOP berhasil dihapus." };
+    } catch (err) {
+      console.error("Delete error:", err);
+      return { success: false, message: "Gagal menghapus SOP." };
+    } finally {
+      setIsSyncing(false);
+    }
   };
 
   const resetData = () => {
-    if (
-      confirm(
-        "Mulai proyek baru? Data yang belum tersimpan ke Cloud akan hilang.",
-      )
-    ) {
-      setActivities([]);
-      setRoles(INITIAL_ROLES);
-      setHeader(DEFAULT_HEADER);
-      setCurrentId(null);
-      localStorage.removeItem("sop-builder-data");
-      // Clear URL
-      const cleanUrl = `${window.location.origin}${window.location.pathname}`;
-      window.history.pushState({ path: cleanUrl }, "", cleanUrl);
-    }
+    setActivities([]);
+    setRoles(INITIAL_ROLES);
+    setHeader(DEFAULT_HEADER);
+    setCurrentId(null);
+    localStorage.removeItem("sop-builder-data");
+    const cleanUrl = `${window.location.origin}${window.location.pathname}`;
+    window.history.pushState({ path: cleanUrl }, "", cleanUrl);
   };
 
   return {
@@ -183,5 +210,6 @@ export function useSOPData(userId?: string) {
     resetData,
     saveToCloud,
     loadSop,
+    deleteSop,
   };
 }

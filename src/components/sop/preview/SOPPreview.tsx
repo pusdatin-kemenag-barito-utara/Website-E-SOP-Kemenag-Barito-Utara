@@ -47,7 +47,7 @@ export function SOPPreview({
       {/* HIDDEN MEASURER */}
       <div
         id="sop-measurer"
-        className="fixed -left-[5000px] top-0 pointer-events-none opacity-0 bg-white"
+        className="fixed -left-[5000px] top-0 pointer-events-none opacity-0 bg-white print:hidden"
         style={{ width: "210mm", padding: "10mm" }}
       >
         <div className="sop-header-area">

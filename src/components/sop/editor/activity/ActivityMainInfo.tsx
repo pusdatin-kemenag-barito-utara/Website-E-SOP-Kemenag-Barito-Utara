@@ -76,22 +76,24 @@ export function ActivityMainInfo({
                   </SelectValue>
                 </SelectTrigger>
                 <SelectContent className="bg-white border-slate-200 shadow-2xl z-[9999] min-w-[200px] rounded-xl">
-                  {SYMBOL_OPTIONS.map((opt) => (
-                    <SelectItem
-                      key={opt.value}
-                      value={opt.value}
-                      className="py-3 px-4 focus:bg-emerald-50 focus:text-emerald-900 cursor-pointer"
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className="p-2 rounded-lg bg-slate-50 border border-slate-100">
-                          {React.createElement(SYMBOL_ICONS[opt.value], {
-                            className: "w-4 h-4 text-slate-500",
-                          })}
+                  {SYMBOL_OPTIONS.filter((opt) => opt.value !== "offpage").map(
+                    (opt) => (
+                      <SelectItem
+                        key={opt.value}
+                        value={opt.value}
+                        className="py-3 px-4 focus:bg-emerald-50 focus:text-emerald-900 cursor-pointer"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 rounded-lg bg-slate-50 border border-slate-100">
+                            {React.createElement(SYMBOL_ICONS[opt.value], {
+                              className: "w-4 h-4 text-slate-500",
+                            })}
+                          </div>
+                          <span className="font-bold text-sm">{opt.label}</span>
                         </div>
-                        <span className="font-bold text-sm">{opt.label}</span>
-                      </div>
-                    </SelectItem>
-                  ))}
+                      </SelectItem>
+                    ),
+                  )}
                 </SelectContent>
               </Select>
             </div>

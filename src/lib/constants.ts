@@ -1,11 +1,13 @@
 import { SOPHeader, SymbolType } from "@/types/sop";
 
 export const INITIAL_ROLES = [
-  "Administrator",
-  "Kepala Kantor",
   "Petugas PTSP",
   "Operator",
   "Pengawas",
+  "Administrator",
+  "Kepala Seksi",
+  "Kasubbag TU",
+  "Kepala Kantor",
 ];
 
 export const SYMBOL_OPTIONS: { value: SymbolType; label: string }[] = [
@@ -18,14 +20,14 @@ export const SYMBOL_OPTIONS: { value: SymbolType; label: string }[] = [
 export const DEFAULT_HEADER: SOPHeader = {
   instansi: "Kementerian Agama",
   satker: "Kantor Kabupaten Barito Utara",
-  nomor: "B- /Kk.15.6.1/OT.01.4/01/2025",
-  tglBuat: "09 Januari 2025",
+  nomor: "B- /Kk.15.6.1/OT.01.4/01/2026",
+  tglBuat: "01 Januari 2026",
   tglRevisi: "-",
-  tglEfektif: "10 Januari 2025",
+  tglEfektif: "02 Januari 2026",
   disahkanOleh: "Kepala Kantor Kabupaten,",
-  pejabatNama: "H. Arbaja, S.Ag., M.A.P.",
-  pejabatNip: "19731112 200112 1 001",
-  namaSOP: "SOP PELAYANAN PTSP",
+  pejabatNama: "H.ARBAJA, S.Ag.,M.A.P",
+  pejabatNip: "197311212001121001",
+  namaSOP: "SOP PELAYANAN ...........",
   dasarHukum: "KMA No. 9 Tahun 2016",
   kualifikasi: "Memahami Prosedur PTSP",
   keterkaitan: "SOP Pengelolaan Surat",
