@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
@@ -95,10 +96,12 @@ export default function SOPBuilder() {
           </p>
           <div className="space-y-4 mb-8">
             <p className="text-slate-500 text-sm leading-relaxed">
-              Selamat datang di portal pembuatan SOP Digital resmi. Silakan masuk menggunakan akun Google Anda untuk mulai membuat, menyimpan, dan mengelola dokumen SOP secara profesional.
+              Selamat datang di portal pembuatan SOP Digital resmi. Silakan
+              masuk menggunakan akun Google Anda untuk mulai membuat, menyimpan,
+              dan mengelola dokumen SOP secara profesional.
             </p>
           </div>
-          <Button 
+          <Button
             onClick={signInWithGoogle}
             className="w-full h-14 bg-slate-900 hover:bg-slate-800 text-white rounded-2xl font-black text-sm flex items-center justify-center gap-3 transition-all hover:scale-[1.02] active:scale-[0.98] shadow-lg shadow-slate-200"
           >
@@ -117,7 +120,9 @@ export default function SOPBuilder() {
     return (
       <div className="h-screen w-full bg-white flex flex-col items-center justify-center">
         <Loader2 className="w-12 h-12 text-emerald-500 animate-spin mb-4" />
-        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Memuat Sesi...</p>
+        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+          Memuat Sesi...
+        </p>
       </div>
     );
   }
@@ -185,7 +190,7 @@ export default function SOPBuilder() {
                 size="sm"
                 className={cn(
                   "font-bold text-xs px-2 md:px-3 text-slate-600",
-                  showProjects && "bg-slate-100"
+                  showProjects && "bg-slate-100",
                 )}
                 onClick={() => setShowProjects(!showProjects)}
               >
@@ -218,10 +223,12 @@ export default function SOPBuilder() {
               <div className="flex items-center gap-2 ml-2 pl-2 border-l border-slate-200">
                 <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center overflow-hidden border border-slate-200 relative">
                   {user.user_metadata.avatar_url ? (
-                    <img 
-                      src={user.user_metadata.avatar_url} 
-                      alt="User" 
-                      className="w-full h-full object-cover"
+                    <Image
+                      src={user.user_metadata.avatar_url}
+                      alt="User"
+                      fill
+                      className="object-cover"
+                      unoptimized
                     />
                   ) : (
                     <Users className="w-4 h-4 text-slate-400" />
@@ -282,7 +289,9 @@ export default function SOPBuilder() {
               {userSops.length === 0 ? (
                 <div className="p-8 text-center text-slate-400">
                   <FileText className="w-8 h-8 mx-auto mb-2 opacity-20" />
-                  <p className="text-[10px] font-bold uppercase">Belum ada data</p>
+                  <p className="text-[10px] font-bold uppercase">
+                    Belum ada data
+                  </p>
                 </div>
               ) : (
                 userSops.map((sop) => (
@@ -296,17 +305,22 @@ export default function SOPBuilder() {
                       "w-full p-3 rounded-xl text-left transition-all group border",
                       currentId === sop.id
                         ? "bg-white border-emerald-200 shadow-sm"
-                        : "border-transparent hover:bg-white hover:border-slate-200"
+                        : "border-transparent hover:bg-white hover:border-slate-200",
                     )}
                   >
-                    <p className={cn(
-                      "text-xs font-bold truncate mb-1",
-                      currentId === sop.id ? "text-emerald-600" : "text-slate-700"
-                    )}>
+                    <p
+                      className={cn(
+                        "text-xs font-bold truncate mb-1",
+                        currentId === sop.id
+                          ? "text-emerald-600"
+                          : "text-slate-700",
+                      )}
+                    >
                       {sop.title}
                     </p>
                     <p className="text-[9px] text-slate-400 font-medium">
-                      Update: {new Date(sop.updated_at).toLocaleDateString('id-ID')}
+                      Update:{" "}
+                      {new Date(sop.updated_at).toLocaleDateString("id-ID")}
                     </p>
                   </button>
                 ))
