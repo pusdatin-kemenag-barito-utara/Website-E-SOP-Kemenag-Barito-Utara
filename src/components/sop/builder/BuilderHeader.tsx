@@ -13,6 +13,7 @@ import {
   LogOut,
   LogIn,
   Users,
+  ShieldAlert,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -33,6 +34,7 @@ interface BuilderHeaderProps {
   onLogin: () => void;
   authLoading: boolean;
   lastSaved: Date | null;
+  onOpenAdmin: () => void;
 }
 
 export function BuilderHeader({
@@ -50,7 +52,9 @@ export function BuilderHeader({
   onLogin,
   authLoading,
   lastSaved,
+  onOpenAdmin,
 }: BuilderHeaderProps) {
+  const isAdmin = user?.email === "kepegawaiankemenagbarut@gmail.com";
   return (
     <header className="h-16 bg-white border-b border-slate-200 px-4 md:px-6 flex items-center justify-between sticky top-0 z-50 shadow-sm print:hidden">
       <div className="flex items-center gap-2 md:gap-3">
@@ -138,6 +142,18 @@ export function BuilderHeader({
               />
               <span className="hidden md:inline">PROYEK SAYA</span>
             </Button>
+
+            {isAdmin && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="font-bold text-xs px-2 md:px-3 text-amber-600 hover:bg-amber-50 hover:text-amber-700"
+                onClick={onOpenAdmin}
+              >
+                <ShieldAlert className="w-4 h-4 md:mr-2 text-amber-500" />
+                <span className="hidden md:inline">ADMIN PANEL</span>
+              </Button>
+            )}
 
             <Button
               variant="outline"

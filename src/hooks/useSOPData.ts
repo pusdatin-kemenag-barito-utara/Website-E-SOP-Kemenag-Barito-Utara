@@ -1,15 +1,16 @@
 import { useState, useEffect, useCallback } from "react";
-import { Activity, SOPHeader, SOPData } from "@/types/sop";
+import { Activity, SOPHeader, SOPData, AdminSOPListItem } from "@/types/sop";
 import { DEFAULT_HEADER, INITIAL_ROLES } from "@/lib/constants";
 import { supabase } from "@/lib/supabase";
 
-export function useSOPData(userId?: string) {
+export function useSOPData(userId?: string, userEmail?: string | null) {
   const [isHydrated, setIsHydrated] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
   const [currentId, setCurrentId] = useState<string | null>(null);
   const [userSops, setUserSops] = useState<
-    { id: string; title: string; updated_at: string }[]
+    { id: string; title: string; updated_at: string; user_id?: string }[]
   >([]);
+  const [allSops, setAllSops] = useState<AdminSOPListItem[]>([]);
 
   const [roles, setRoles] = useState<string[]>(INITIAL_ROLES);
   const [activities, setActivities] = useState<Activity[]>([]);
@@ -97,6 +98,7 @@ export function useSOPData(userId?: string) {
         activities,
         roles,
         user_id: userId || null,
+        user_email: userEmail || null,
         updated_at: new Date().toISOString(),
       };
 
@@ -114,7 +116,11 @@ export function useSOPData(userId?: string) {
         result = await supabase.from("sops").insert(payload).select().single();
       }
 
-      if (result.error) throw result.error;
+      if (result.error) {
+        const fullError = `${result.error.message} (Code: ${result.error.code})`;
+        console.error("DETEKSI ERROR SUPABASE:", fullError);
+        throw new Error(fullError);
+      }
 
       if (result.data) {
         const newId = result.data.id;
@@ -125,13 +131,24 @@ export function useSOPData(userId?: string) {
         return { success: true, message: "SOP berhasil disimpan ke Cloud!" };
       }
       return { success: false, message: "Gagal menyimpan." };
-    } catch (err) {
+    } catch (err: unknown) {
       console.error("Cloud sync error:", err);
-      return { success: false, message: "Gagal menyimpan ke Cloud." };
+      const errorMessage =
+        err instanceof Error ? err.message : "Gagal menyimpan ke Cloud.";
+      return { success: false, message: errorMessage };
     } finally {
       setIsSyncing(false);
     }
-  }, [header, activities, roles, isHydrated, currentId, userId, fetchUserSops]);
+  }, [
+    header,
+    activities,
+    roles,
+    isHydrated,
+    currentId,
+    userId,
+    userEmail,
+    fetchUserSops,
+  ]);
 
   // Auto-save to Cloud (Debounced - 1s)
   useEffect(() => {
@@ -207,6 +224,19 @@ export function useSOPData(userId?: string) {
     window.history.pushState({ path: cleanUrl }, "", cleanUrl);
   };
 
+  const fetchAllSops = useCallback(async () => {
+    const { data, error } = await supabase
+      .from("sops")
+      .select("id, title, updated_at, user_id, user_email, header")
+      .order("updated_at", { ascending: false });
+
+    if (data && !error) {
+      setAllSops(data);
+      return { success: true, data };
+    }
+    return { success: false, message: error?.message };
+  }, []);
+
   return {
     isHydrated,
     isSyncing,
@@ -222,5 +252,7 @@ export function useSOPData(userId?: string) {
     saveToCloud,
     loadSop,
     deleteSop,
+    fetchAllSops,
+    allSops,
   };
 }

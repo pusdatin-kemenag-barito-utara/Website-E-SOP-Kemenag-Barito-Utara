@@ -59,21 +59,21 @@ export function EditorPanel({
           <TabsList className="grid w-full grid-cols-3 h-11 bg-slate-50 p-1 rounded-2xl">
             <TabsTrigger
               value="header"
-              className="rounded-xl data-[state=active]:bg-white data-[state=active]:text-emerald-600 data-[state=active]:shadow-md font-bold text-[10px] transition-all"
+              className="rounded-xl data-[state=active]:bg-white data-[state=active]:text-amber-600 data-[state=active]:shadow-md font-bold text-[10px] transition-all"
             >
-              <Settings className="w-3.5 h-3.5 mr-2" /> Konfigurasi
+              <Settings className="w-3.5 h-3.5 mr-2 text-amber-600" /> Konfigurasi
             </TabsTrigger>
             <TabsTrigger
               value="roles"
-              className="rounded-xl data-[state=active]:bg-white data-[state=active]:text-emerald-600 data-[state=active]:shadow-md font-bold text-[10px] transition-all"
+              className="rounded-xl data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-md font-bold text-[10px] transition-all"
             >
-              <Users className="w-3.5 h-3.5 mr-2" /> Pelaksana
+              <Users className="w-3.5 h-3.5 mr-2 text-blue-600" /> Pelaksana
             </TabsTrigger>
             <TabsTrigger
               value="activities"
               className="rounded-xl data-[state=active]:bg-white data-[state=active]:text-emerald-600 data-[state=active]:shadow-md font-bold text-[10px] transition-all"
             >
-              <FileText className="w-3.5 h-3.5 mr-2" /> Alur Kerja
+              <FileText className="w-3.5 h-3.5 mr-2 text-emerald-600" /> Alur Kerja
             </TabsTrigger>
           </TabsList>
         </div>
@@ -82,7 +82,7 @@ export function EditorPanel({
           <TabsContent value="header" className="mt-0 outline-none">
             <div className="px-6 py-4">
               <div className="flex items-center gap-2 mb-6">
-                <ShieldCheck className="w-5 h-5 text-emerald-600" />
+                <ShieldCheck className="w-5 h-5 text-amber-600" />
                 <h2 className="text-sm font-black text-slate-800 uppercase tracking-wider leading-none">
                   Identitas & Legalitas
                 </h2>
@@ -94,7 +94,7 @@ export function EditorPanel({
           <TabsContent value="roles" className="mt-0 outline-none">
             <div className="px-6 py-4">
               <div className="flex items-center gap-2 mb-6">
-                <Users className="w-5 h-5 text-emerald-600" />
+                <Users className="w-5 h-5 text-blue-600" />
                 <h2 className="text-sm font-black text-slate-800 uppercase tracking-wider leading-none">
                   Manajemen Pelaksana
                 </h2>

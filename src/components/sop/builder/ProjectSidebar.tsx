@@ -21,7 +21,7 @@ export function ProjectSidebar({
   onNew,
 }: ProjectSidebarProps) {
   return (
-    <aside className="w-[300px] bg-slate-50 border-r border-slate-200 flex flex-col h-full print:hidden">
+    <aside className="bg-slate-50 flex flex-col h-full print:hidden">
       <div className="p-4 border-b border-slate-200 flex items-center justify-between bg-white">
         <h2 className="text-xs font-black text-slate-800 uppercase tracking-widest leading-none">
           Daftar SOP Saya

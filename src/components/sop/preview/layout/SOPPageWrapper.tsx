@@ -23,7 +23,7 @@ export function SOPPageWrapper({
         boxSizing: "border-box",
       }}
     >
-      <div className="absolute right-4 text-[7pt] font-bold text-[#000] top-2">
+      <div className="absolute right-4 text-[7pt] font-bold text-[#000] top-3">
         Halaman {pageIdx + 1} dari {totalVisiblePages}
       </div>
       {children}

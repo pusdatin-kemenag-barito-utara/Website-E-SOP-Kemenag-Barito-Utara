@@ -1,6 +1,6 @@
 import React, { useRef } from "react";
 import { Calendar as CalendarIcon } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn, formatIndonesianDate } from "@/lib/utils";
 
 interface DatePickerProps {
   value: string;
@@ -16,34 +16,6 @@ export function DatePicker({
   className,
 }: DatePickerProps) {
   const inputRef = useRef<HTMLInputElement>(null);
-
-  // Function to format date to Indonesian style (e.g., 09 Januari 2025)
-  const formatDateIndo = (dateStr: string) => {
-    if (!dateStr || dateStr === "-") return "-";
-    try {
-      const date = new Date(dateStr);
-      if (isNaN(date.getTime())) return dateStr;
-
-      const months = [
-        "Januari",
-        "Februari",
-        "Maret",
-        "April",
-        "Mei",
-        "Juni",
-        "Juli",
-        "Agustus",
-        "September",
-        "Oktober",
-        "November",
-        "Desember",
-      ];
-
-      return `${date.getDate().toString().padStart(2, "0")} ${months[date.getMonth()]} ${date.getFullYear()}`;
-    } catch {
-      return dateStr;
-    }
-  };
 
   return (
     <div className="space-y-2 group">
@@ -61,7 +33,7 @@ export function DatePicker({
         <CalendarIcon className="w-4 h-4 text-slate-400 mr-3 group-hover:text-blue-500 transition-colors" />
 
         <span className="text-[13px] font-bold text-slate-700">
-          {formatDateIndo(value)}
+          {formatIndonesianDate(value)}
         </span>
 
         {/* Hidden native date input */}

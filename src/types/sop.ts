@@ -66,3 +66,12 @@ export interface SymbolCoord {
   w: number;
   h: number;
 }
+
+export interface AdminSOPListItem {
+  id: string;
+  title: string;
+  updated_at: string;
+  user_id: string;
+  user_email?: string;
+  header: SOPHeader;
+}

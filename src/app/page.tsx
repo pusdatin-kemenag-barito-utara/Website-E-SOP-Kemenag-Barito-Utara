@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { Loader2 } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 // Builder Layout Components
 import { WelcomeScreen } from "@/components/sop/builder/WelcomeScreen";
@@ -9,6 +10,7 @@ import { BuilderHeader } from "@/components/sop/builder/BuilderHeader";
 import { ProjectSidebar } from "@/components/sop/builder/ProjectSidebar";
 import { EditorPanel } from "@/components/sop/builder/EditorPanel";
 import { LivePreview } from "@/components/sop/builder/LivePreview";
+import { AdminPanel } from "@/components/sop/builder/AdminPanel";
 
 // UI Components
 import { ToastCustom, ToastType } from "@/components/ui/toast-custom";
@@ -38,11 +40,14 @@ export default function SOPBuilder() {
     isSyncing,
     currentId,
     userSops,
-  } = useSOPData(user?.id);
+    fetchAllSops,
+    allSops,
+  } = useSOPData(user?.id, user?.email);
 
   // 3. UI State
   const [activeSection, setActiveSection] = useState("header");
   const [showProjects, setShowProjects] = useState(false);
+  const [showAdmin, setShowAdmin] = useState(false);
   const [expandedActivities, setExpandedActivities] = useState<string[]>([]);
   const [viewMode, setViewMode] = useState<"edit" | "preview">("edit");
   const [scale, setScale] = useState(1);
@@ -150,41 +155,52 @@ export default function SOPBuilder() {
         onLogin={signInWithGoogle}
         authLoading={authLoading}
         lastSaved={lastSaved}
+        onOpenAdmin={() => setShowAdmin(true)}
       />
 
       <main className="flex-1 flex overflow-hidden h-[calc(100vh-64px)] print:overflow-visible print:h-auto print:block">
-        {user && showProjects && (
-          <ProjectSidebar
-            userSops={userSops}
-            currentId={currentId}
-            onLoad={(id) => {
-              loadSop(id);
-              if (window.innerWidth < 1024) setShowProjects(false);
-            }}
-            onNew={() => {
-              setConfirm({
-                open: true,
-                title: "Buat Proyek Baru?",
-                desc: "Data saat ini akan di-reset. Pastikan sudah tersimpan di Cloud jika ingin membukanya lagi nanti.",
-                onConfirm: () => {
-                  resetData();
-                  setShowProjects(false);
-                },
-              });
-            }}
-            onDelete={(sop) => {
-              setConfirm({
-                open: true,
-                title: "Hapus Proyek?",
-                desc: `Anda yakin ingin menghapus "${sop.title}"? Tindakan ini tidak bisa dibatalkan.`,
-                onConfirm: async () => {
-                  const res = await deleteSop(sop.id);
-                  if (res.success) showToast(res.message);
-                },
-              });
-            }}
-          />
-        )}
+        {/* Animated Sidebar Wrapper */}
+        <div
+          className={cn(
+            "h-full overflow-hidden transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] border-r border-slate-200 bg-slate-50",
+            user && showProjects
+              ? "w-[300px] opacity-100"
+              : "w-0 opacity-0 border-r-0",
+          )}
+        >
+          <div className="w-[300px] h-full">
+            <ProjectSidebar
+              userSops={userSops}
+              currentId={currentId}
+              onLoad={(id) => {
+                loadSop(id);
+                if (window.innerWidth < 1024) setShowProjects(false);
+              }}
+              onNew={() => {
+                setConfirm({
+                  open: true,
+                  title: "Buat Proyek Baru?",
+                  desc: "Data saat ini akan di-reset. Pastikan sudah tersimpan di Cloud jika ingin membukanya lagi nanti.",
+                  onConfirm: () => {
+                    resetData();
+                    setShowProjects(false);
+                  },
+                });
+              }}
+              onDelete={(sop) => {
+                setConfirm({
+                  open: true,
+                  title: "Hapus Proyek?",
+                  desc: `Anda yakin ingin menghapus "${sop.title}"? Tindakan ini tidak bisa dibatalkan.`,
+                  onConfirm: async () => {
+                    const res = await deleteSop(sop.id);
+                    if (res.success) showToast(res.message);
+                  },
+                });
+              }}
+            />
+          </div>
+        </div>
 
         <EditorPanel
           viewMode={viewMode}
@@ -226,6 +242,13 @@ export default function SOPBuilder() {
         onConfirm={confirm.onConfirm}
         title={confirm.title}
         description={confirm.desc}
+      />
+      <AdminPanel
+        isOpen={showAdmin}
+        onClose={() => setShowAdmin(false)}
+        allSops={allSops}
+        onLoadSop={loadSop}
+        onRefresh={fetchAllSops}
       />
     </div>
   );

@@ -15,7 +15,7 @@ export function SOPTableHeader({ roles }: SOPTableHeaderProps) {
           No
         </th>
         <th
-          className="border border-[#000] p-1 w-[30mm] min-w-[30mm]"
+          className="border border-[#000] p-1 w-[25mm] min-w-[25mm]"
           rowSpan={2}
         >
           Aktivitas
@@ -30,7 +30,7 @@ export function SOPTableHeader({ roles }: SOPTableHeaderProps) {
           Mutu Baku
         </th>
         <th
-          className="border border-[#000] p-1 w-[16mm] min-w-[16mm]"
+          className="border border-[#000] p-1 w-[20mm] min-w-[20mm]"
           rowSpan={2}
         >
           Ket
@@ -45,13 +45,13 @@ export function SOPTableHeader({ roles }: SOPTableHeaderProps) {
             {role}
           </th>
         ))}
-        <th className="border border-[#000] p-0.5 w-[16mm] font-semibold">
+        <th className="border border-[#000] p-0.5 w-[12mm] font-semibold">
           Persyaratan
         </th>
-        <th className="border border-[#000] p-0.5 w-[10mm] font-semibold">
+        <th className="border border-[#000] p-0.5 w-[15mm] font-semibold">
           Waktu
         </th>
-        <th className="border border-[#000] p-0.5 w-[16mm] font-semibold">
+        <th className="border border-[#000] p-0.5 w-[12mm] font-semibold">
           Output
         </th>
       </tr>

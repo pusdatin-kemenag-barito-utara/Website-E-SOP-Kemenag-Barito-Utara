@@ -1,6 +1,7 @@
 import React from "react";
 import { SOPHeader } from "@/types/sop";
 import { RenderList } from "../../shared/RenderList";
+import { formatIndonesianDate } from "@/lib/utils";
 
 interface SOPHeaderSectionProps {
   header: SOPHeader;
@@ -39,32 +40,27 @@ export function SOPHeaderSection({ header }: SOPHeaderSectionProps) {
             </div>
           </div>
           <div className="divide-y-[1px] divide-[#000] flex flex-col">
-            <div className="p-2 text-[7.5pt] grid grid-cols-[26mm_1fr] gap-x-1 gap-y-0.5 flex-1 text-black leading-tight">
-              <span className="font-bold uppercase">Nomor SOP</span>
+            <div className="p-2 text-[7.5pt] grid grid-cols-[25mm_1fr] gap-x-1 gap-y-0.5 flex-1 text-black leading-tight">
+              <span className="font-bold uppercase">NOMOR SOP</span>
               <span>: {header.nomor}</span>
-              <span className="font-bold uppercase">Tgl. Pembuatan</span>
-              <span>: {header.tglBuat}</span>
-              <span className="font-bold uppercase">Tgl. Revisi</span>
-              <span>: {header.tglRevisi || "-"}</span>
-              <span className="font-bold uppercase">Tgl. Efektif</span>
-              <span>: {header.tglEfektif}</span>
-              <span className="font-bold uppercase">Disahkan Oleh</span>
-              <div className="flex flex-row items-start">
-                <span className="w-4 text-left">:</span>
-                <div className="flex flex-col items-center flex-1">
-                  <span className="w-full text-center">
-                    {header.disahkanOleh}
-                  </span>
-                  <span className="text-[9pt] my-7 text-black">$</span>
-                  <span className="text-[8pt] font-bold underline underline-offset-2 text-center leading-tight">
+              <span className="font-bold uppercase">TGL. PEMBUATAN</span>
+              <span>: {formatIndonesianDate(header.tglBuat)}</span>
+              <span className="font-bold uppercase">TGL. REVISI</span>
+              <span>: {formatIndonesianDate(header.tglRevisi)}</span>
+              <span className="font-bold uppercase">TGL. EFEKTIF</span>
+              <span>: {formatIndonesianDate(header.tglEfektif)}</span>
+              <span className="font-bold uppercase">DISAHKAN OLEH</span>
+              <div className="flex flex-col">
+                <span className="leading-tight">: {header.disahkanOleh}</span>
+                <div className="flex flex-col items-start mt-6 pl-2">
+                  <span className="text-[9pt] mb-7 ml-11 text-black">$</span>
+                  <span className="text-[8pt] font-bold leading-tight">
                     {header.pejabatNama}
                   </span>
-                  <span className="text-[6pt] font-bold mt-1 text-center">
+                  <span className="text-[7pt] font-bold mt-1">
                     NIP. {header.pejabatNip}
                   </span>
                 </div>
-                <div className="w-4" />{" "}
-                {/* Balancing spacer for the colon on the left */}
               </div>
             </div>
           </div>
