@@ -14,7 +14,7 @@ interface ActivityCardProps {
   onUpdate: (
     id: string,
     field: keyof Activity,
-    value: string | string[] | SymbolType
+    value: string | string[] | SymbolType,
   ) => void;
   onRemove: (id: string) => void;
   SYMBOL_ICONS: Record<SymbolType, React.ElementType>;

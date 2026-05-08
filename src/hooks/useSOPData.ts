@@ -7,7 +7,9 @@ export function useSOPData(userId?: string) {
   const [isHydrated, setIsHydrated] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
   const [currentId, setCurrentId] = useState<string | null>(null);
-  const [userSops, setUserSops] = useState<{id: string, title: string, updated_at: string}[]>([]);
+  const [userSops, setUserSops] = useState<
+    { id: string; title: string; updated_at: string }[]
+  >([]);
 
   const [roles, setRoles] = useState<string[]>(INITIAL_ROLES);
   const [activities, setActivities] = useState<Activity[]>([]);
@@ -151,7 +153,11 @@ export function useSOPData(userId?: string) {
   };
 
   const resetData = () => {
-    if (confirm("Mulai proyek baru? Data yang belum tersimpan ke Cloud akan hilang.")) {
+    if (
+      confirm(
+        "Mulai proyek baru? Data yang belum tersimpan ke Cloud akan hilang.",
+      )
+    ) {
       setActivities([]);
       setRoles(INITIAL_ROLES);
       setHeader(DEFAULT_HEADER);
