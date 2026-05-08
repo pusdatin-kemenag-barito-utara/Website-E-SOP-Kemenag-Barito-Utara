@@ -1,26 +1,174 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --background: 210 40% 98%;
+  --foreground: 222.2 84% 4.9%;
+  --card: 0 0% 100%;
+  --card-foreground: 222.2 84% 4.9%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 222.2 84% 4.9%;
+  --primary: 161 94% 30%; /* Emerald 700-ish for Kemenag */
+  --primary-foreground: 210 40% 98%;
+  --secondary: 210 40% 96.1%;
+  --secondary-foreground: 222.2 47.4% 11.2%;
+  --muted: 210 40% 96.1%;
+  --muted-foreground: 215.4 16.3% 46.9%;
+  --accent: 210 40% 96.1%;
+  --accent-foreground: 222.2 47.4% 11.2%;
+  --destructive: 0 84.2% 60.2%;
+  --destructive-foreground: 210 40% 98%;
+  --border: 214.3 31.8% 91.4%;
+  --input: 214.3 31.8% 91.4%;
+  --ring: 161 94% 30%;
+  --radius: 0.75rem;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
   font-family: Arial, Helvetica, sans-serif;
+  font-feature-settings:
+    "rlig" 1,
+    "calt" 1;
+}
+
+.animate-in {
+  animation-duration: 300ms;
+  animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  animation-fill-mode: forwards;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #f8fafc;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #94a3b8;
+  border-radius: 10px;
+  border: 2px solid #f8fafc;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #64748b;
+}
+
+/* Fix for html2pdf/dom-to-image capture */
+.printing-now {
+  background: white !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+.printing-now .print-page {
+  box-shadow: none !important;
+  border: none !important;
+  margin: 0 !important;
+}
+
+/* Force clean backgrounds and borders during capture */
+.printing-now * {
+  box-shadow: none !important;
+  text-shadow: none !important;
+  outline: none !important;
+  background-image: none !important;
+  transition: none !important;
+  animation: none !important;
+}
+
+.printing-now .bg-slate-50,
+.printing-now .bg-slate-50\/50,
+.printing-now .bg-slate-100 {
+  background-color: transparent !important;
+}
+
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 0;
+  }
+
+  /* Kill all animations and transitions for print performance */
+  *,
+  *:before,
+  *:after {
+    transition: none !important;
+    animation: none !important;
+    transition-duration: 0s !important;
+    animation-duration: 0s !important;
+  }
+
+  /* Only reset structural containers to prevent clipping, NOT every single element */
+  html,
+  body,
+  main,
+  section,
+  .flex-col,
+  #sop-preview-container {
+    overflow: visible !important;
+    height: auto !important;
+    min-height: 0 !important;
+  }
+
+  /* Ensure symbols keep their dimensions */
+  .sop-symbol,
+  [id^="symbol-"] {
+    height: revert !important;
+    width: revert !important;
+    overflow: visible !important;
+  }
+
+  .print-hide,
+  aside,
+  header,
+  footer,
+  nav,
+  .tabs-list,
+  button,
+  .animate-pulse {
+    display: none !important;
+    height: 0 !important;
+    width: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    visibility: hidden !important;
+  }
+
+  html,
+  body {
+    height: auto !important;
+    overflow: visible !important;
+    background-color: white !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  .print-page {
+    break-inside: avoid !important;
+    break-after: page !important;
+    display: block !important;
+    margin: 0 auto !important;
+    position: relative !important;
+    width: 210mm !important;
+    height: 296mm !important;
+    background: white !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  .print-page:first-child {
+    break-before: avoid !important;
+  }
+}
+
+.sop-preview-force-black,
+.sop-preview-force-black * {
+  border-color: #000 !important;
 }

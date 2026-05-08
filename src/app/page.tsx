@@ -1,64 +1,273 @@
-import Image from "next/image";
+"use client";
 
-export default function Home() {
+import React, { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Settings,
+  FileText,
+  Printer,
+  RotateCcw,
+  Eye,
+  Edit3,
+  ChevronRight,
+  ShieldCheck,
+  Users,
+} from "lucide-react";
+
+// Modular Components
+import { SOPHeaderEditor } from "@/components/sop/editor/header/SOPHeaderEditor";
+import { RoleManager } from "@/components/sop/editor/RoleManager";
+import { ActivityEditor } from "@/components/sop/editor/activity/ActivityEditor";
+import { SOPPreview } from "@/components/sop/preview/SOPPreview";
+
+// Hooks & Types
+import { useSOPData } from "@/hooks/useSOPData";
+import { cn } from "@/lib/utils";
+
+export default function SOPBuilder() {
+  const {
+    isHydrated,
+    roles,
+    setRoles,
+    activities,
+    setActivities,
+    header,
+    setHeader,
+    resetData,
+  } = useSOPData();
+
+  const [activeSection, setActiveSection] = useState("header");
+  const [expandedActivities, setExpandedActivities] = useState<string[]>([]);
+  const [viewMode, setViewMode] = useState<"edit" | "preview">("edit");
+  const [scale, setScale] = useState(1);
+
+  React.useEffect(() => {
+    const updateScale = () => {
+      const width = window.innerWidth;
+      if (width < 1024) {
+        // Mobile & Tablet: scale based on 210mm (approx 794px)
+        // Add more padding (80px instead of 40px) to make it look neater
+        const newScale = (width - 60) / 794;
+        setScale(Math.min(newScale, 1));
+      } else {
+          // Desktop: calculate space remaining after sidebar
+          const sidebarWidth = viewMode === "edit" ? (width < 1280 ? 650 : 850) : 0;
+          const availableWidth = width - sidebarWidth - 64;
+          const newScale = availableWidth / 794;
+          setScale(Math.min(newScale, 1));
+      }
+    };
+
+    window.addEventListener("resize", updateScale);
+    updateScale();
+    return () => window.removeEventListener("resize", updateScale);
+  }, [viewMode]);
+
+  if (!isHydrated) return null;
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <div className="h-screen bg-[#F8FAFC] flex flex-col font-sans text-slate-900 overflow-hidden">
+      {/* TOP NAVIGATION BAR */}
+      <header className="h-16 bg-white border-b border-slate-200 px-4 md:px-6 flex items-center justify-between sticky top-0 z-50 shadow-sm print:hidden">
+        <div className="flex items-center gap-2 md:gap-3">
+          <div className="w-9 h-9 md:w-10 md:h-10 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-200 flex-shrink-0 relative overflow-hidden group">
+            <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
+            <ShieldCheck className="w-5 h-5 md:w-6 md:h-6 text-white relative z-10" />
+          </div>
+          <div className="hidden sm:block">
+            <h1 className="text-sm font-black tracking-tight flex items-center gap-2">
+              <span className="bg-clip-text text-transparent bg-gradient-to-r from-slate-900 to-slate-600">
+                SOP Builder
+              </span>
+              <span className="text-emerald-600">Kemenag Barut</span>
+              <span className="hidden lg:inline text-emerald-600 text-[10px] bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-100 font-black">
+                PRO
+              </span>
+            </h1>
+            <p className="hidden md:block text-[9px] font-bold text-slate-400 uppercase tracking-widest leading-none">
+              Official Document Generator
+            </p>
+          </div>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+
+        <div className="flex items-center gap-2 md:gap-3">
+          {/* Mobile View Toggle */}
+          <div className="flex items-center bg-slate-100 p-1 rounded-xl">
+            <button
+              onClick={() => setViewMode("edit")}
+              className={cn(
+                "px-3 md:px-4 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-2",
+                viewMode === "edit"
+                  ? "bg-white text-emerald-600 shadow-sm"
+                  : "text-slate-500 hover:text-slate-700",
+              )}
+            >
+              <Edit3 className="w-3.5 h-3.5" /> 
+              <span className="hidden xs:inline">Editor</span>
+            </button>
+            <button
+              onClick={() => setViewMode("preview")}
+              className={cn(
+                "px-3 md:px-4 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-2",
+                viewMode === "preview"
+                  ? "bg-white text-emerald-600 shadow-sm"
+                  : "text-slate-500 hover:text-slate-700",
+              )}
+            >
+              <Eye className="w-3.5 h-3.5" /> 
+              <span className="hidden xs:inline">Preview</span>
+            </button>
+          </div>
+
+          <div className="h-6 w-[1px] bg-slate-200 mx-1 hidden sm:block" />
+
+          <Button
+            variant="ghost"
+            size="sm"
+            className="text-slate-400 hover:text-red-600 hover:bg-red-50 font-bold text-xs px-2 md:px-3"
+            onClick={resetData}
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+            <RotateCcw className="w-4 h-4 md:mr-2" /> 
+            <span className="hidden md:inline">RESET</span>
+          </Button>
+          
+          <Button
+            className="bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg shadow-emerald-100 font-bold px-4 md:px-6 h-9 md:h-10"
+            onClick={() => window.print()}
           >
-            Documentation
-          </a>
+            <Printer className="w-4 h-4 md:mr-2" /> 
+            <span className="hidden sm:inline">CETAK / PDF ASLI</span>
+          </Button>
         </div>
+      </header>
+
+      <main className="flex-1 flex overflow-hidden h-[calc(100vh-64px)]">
+        {/* LEFT SIDEBAR: EDITOR CONTROLS */}
+        <aside
+          className={cn(
+            "w-full lg:w-[650px] xl:w-[850px] bg-white border-r border-slate-200 flex flex-col transition-all duration-300 print:hidden h-full overflow-hidden",
+            viewMode === "preview" 
+              ? "hidden lg:flex opacity-50 pointer-events-none grayscale" 
+              : "flex",
+          )}
+        >
+          <Tabs
+            value={activeSection}
+            onValueChange={setActiveSection}
+            className="h-full flex flex-col overflow-hidden"
+          >
+            <div className="px-4 md:px-6 py-4 border-b border-slate-100">
+              <TabsList className="grid w-full grid-cols-3 h-11 bg-slate-50 p-1 rounded-2xl">
+                <TabsTrigger
+                  value="header"
+                  className="rounded-xl data-[state=active]:bg-white data-[state=active]:text-emerald-600 data-[state=active]:shadow-md font-bold text-[10px] transition-all"
+                >
+                  <Settings className="w-3.5 h-3.5 mr-2" /> Konfigurasi
+                </TabsTrigger>
+                <TabsTrigger
+                  value="roles"
+                  className="rounded-xl data-[state=active]:bg-white data-[state=active]:text-emerald-600 data-[state=active]:shadow-md font-bold text-[10px] transition-all"
+                >
+                  <Users className="w-3.5 h-3.5 mr-2" /> Pelaksana
+                </TabsTrigger>
+                <TabsTrigger
+                  value="activities"
+                  className="rounded-xl data-[state=active]:bg-white data-[state=active]:text-emerald-600 data-[state=active]:shadow-md font-bold text-[10px] transition-all"
+                >
+                  <FileText className="w-3.5 h-3.5 mr-2" /> Alur Kerja
+                </TabsTrigger>
+              </TabsList>
+            </div>
+
+            <div className="flex-1 overflow-y-auto custom-scrollbar bg-[#FDFDFD] min-h-0 [scrollbar-gutter:stable]">
+              <TabsContent value="header" className="mt-0 outline-none">
+                <div className="px-6 py-4">
+                  <div className="flex items-center gap-2 mb-6">
+                    <ShieldCheck className="w-5 h-5 text-emerald-600" />
+                    <h2 className="text-sm font-black text-slate-800 uppercase tracking-wider">
+                      Identitas & Legalitas
+                    </h2>
+                  </div>
+                  <SOPHeaderEditor header={header} setHeader={setHeader} />
+                </div>
+              </TabsContent>
+
+              <TabsContent value="roles" className="mt-0 outline-none">
+                <div className="px-6 py-4">
+                  <div className="flex items-center gap-2 mb-6">
+                    <Users className="w-5 h-5 text-emerald-600" />
+                    <h2 className="text-sm font-black text-slate-800 uppercase tracking-wider">
+                      Manajemen Pelaksana
+                    </h2>
+                  </div>
+                  <RoleManager
+                    roles={roles}
+                    setRoles={setRoles}
+                    setActivities={setActivities}
+                  />
+                </div>
+              </TabsContent>
+
+              <TabsContent value="activities" className="mt-0 outline-none">
+                <div className="px-2">
+                  <ActivityEditor
+                    activities={activities}
+                    setActivities={setActivities}
+                    roles={roles}
+                    expandedActivities={expandedActivities}
+                    setExpandedActivities={setExpandedActivities}
+                  />
+                </div>
+              </TabsContent>
+            </div>
+          </Tabs>
+        </aside>
+
+        {/* RIGHT AREA: REAL-TIME PREVIEW */}
+        <section
+          className={cn(
+            "flex-1 bg-[#F1F5F9] overflow-y-auto custom-scrollbar print:p-0 print:bg-white transition-all duration-500 h-full [scrollbar-gutter:stable]",
+            viewMode === "preview" ? "bg-white flex" : "bg-slate-100 hidden lg:flex",
+          )}
+        >
+          <div className="min-h-full w-full p-4 md:py-12 md:px-6 flex flex-col items-center">
+            {/* Breadcrumb style indicator */}
+            <div className="w-full max-w-[1000px] mb-4 md:mb-8 flex items-center justify-between print:hidden">
+              <div className="hidden md:flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">
+                <span>KEMENAG</span>
+                <ChevronRight className="w-3 h-3" />
+                <span>SOP BUILDER</span>
+                <ChevronRight className="w-3 h-3" />
+                <span className="text-emerald-600">LIVE PREVIEW</span>
+              </div>
+              <div className="bg-emerald-50 text-emerald-600 border border-emerald-100 px-3 py-1 rounded-full text-[9px] font-black animate-pulse mx-auto md:mx-0">
+                SYNCING ACTIVE
+              </div>
+            </div>
+
+            <div 
+              className="w-full flex justify-center transition-all duration-500"
+              style={{ 
+                transform: `scale(${scale})`, 
+                transformOrigin: 'top center',
+                marginBottom: `calc(297mm * ${scale - 1})` // Adjust footer margin based on scale
+              }}
+            >
+              <SOPPreview
+                header={header}
+                activities={activities}
+                roles={roles}
+                isHydrated={isHydrated}
+                expandedActivities={expandedActivities}
+              />
+            </div>
+
+            <footer className="mt-20 text-slate-400 text-[9px] font-black tracking-[0.3em] uppercase pb-12 print:hidden">
+              Generated by Digital SOP Builder System &bull; 2025
+            </footer>
+          </div>
+        </section>
       </main>
     </div>
   );
