@@ -46,6 +46,8 @@ export default function SOPBuilder() {
   const [expandedActivities, setExpandedActivities] = useState<string[]>([]);
   const [viewMode, setViewMode] = useState<"edit" | "preview">("edit");
   const [scale, setScale] = useState(1);
+  const [zoom, setZoom] = useState(1);
+  const effectiveScale = scale * zoom;
   const [toast, setToast] = useState<{
     visible: boolean;
     message: string;
@@ -69,23 +71,7 @@ export default function SOPBuilder() {
 
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
 
-  // 4. Effects
-  // Auto-save to Cloud every 3 minutes
-  React.useEffect(() => {
-    if (!user || !currentId) return;
-
-    const interval = setInterval(
-      async () => {
-        const res = await saveToCloud();
-        if (res?.success) {
-          setLastSaved(new Date());
-        }
-      },
-      3 * 60 * 1000,
-    ); // 3 minutes
-
-    return () => clearInterval(interval);
-  }, [user, currentId, saveToCloud]);
+  // 4. Effects (Auto-save handled by useSOPData)
 
   React.useEffect(() => {
     const updateScale = () => {
@@ -94,14 +80,15 @@ export default function SOPBuilder() {
         setScale(Math.min((width - 60) / 794, 1));
       } else {
         const sidebarWidth =
-          viewMode === "edit" ? (width < 1280 ? 650 : 850) : 0;
+          (viewMode === "edit" ? (width < 1280 ? 550 : 700) : 0) +
+          (showProjects ? 300 : 0);
         setScale(Math.min((width - sidebarWidth - 64) / 794, 1));
       }
     };
     window.addEventListener("resize", updateScale);
     updateScale();
     return () => window.removeEventListener("resize", updateScale);
-  }, [viewMode]);
+  }, [viewMode, showProjects]);
 
   // 5. Handlers
   const showToast = (message: string, type: ToastType = "success") => {
@@ -216,7 +203,9 @@ export default function SOPBuilder() {
 
         <LivePreview
           viewMode={viewMode}
-          scale={scale}
+          scale={effectiveScale}
+          zoom={zoom}
+          setZoom={setZoom}
           header={header}
           activities={activities}
           roles={roles}

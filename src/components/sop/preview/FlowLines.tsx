@@ -69,34 +69,33 @@ export function FlowLines({
               strokeWidth="1.2"
               strokeLinecap="round"
             />
-            {(act.symbol === "process" || act.symbol === "terminator") &&
-              nextAct.symbol === "decision" && (
-                <g>
-                  {/* RETURN LINE (Loop back for 'No' path) */}
-                  {/* Routing STRAIGHT UP from decision column, then horizontal to target */}
-                  <path
-                    d={`M ${end.x} ${end.y - end.h / 2} 
+            {act.symbol === "process" && nextAct.symbol === "decision" && (
+              <g>
+                {/* RETURN LINE (Loop back for 'No' path) */}
+                {/* Routing STRAIGHT UP from decision column, then horizontal to target */}
+                <path
+                  d={`M ${end.x} ${end.y - end.h / 2} 
                        L ${end.x} ${start.y} 
                        L ${start.x + start.w / 2 + 1} ${start.y}`}
-                    fill="none"
-                    stroke="#000"
-                    strokeWidth="1.2"
-                    strokeLinejoin="round"
-                    className=""
-                  />
-                  {/* RETURN ARROW */}
-                  <path
-                    d={`M ${start.x + start.w / 2 + 5} ${start.y - 2.5} 
+                  fill="none"
+                  stroke="#000"
+                  strokeWidth="1.2"
+                  strokeLinejoin="round"
+                  className=""
+                />
+                {/* RETURN ARROW */}
+                <path
+                  d={`M ${start.x + start.w / 2 + 5} ${start.y - 2.5} 
                        L ${start.x + start.w / 2 + 1} ${start.y} 
                        L ${start.x + start.w / 2 + 5} ${start.y + 2.5}`}
-                    fill="none"
-                    stroke="#000"
-                    strokeWidth="1.2"
-                    className=""
-                  />
-                  {/* "TIDAK" TEXT LABEL REMOVED */}
-                </g>
-              )}
+                  fill="none"
+                  stroke="#000"
+                  strokeWidth="1.2"
+                  className=""
+                />
+                {/* "TIDAK" TEXT LABEL REMOVED */}
+              </g>
+            )}
           </g>
         );
       })}

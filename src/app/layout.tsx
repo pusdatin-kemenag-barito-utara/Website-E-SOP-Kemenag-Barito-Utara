@@ -4,6 +4,9 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "SOP Builder Digital",
   description: "Standard Operating Procedure Builder for Kemenag",
+  icons: {
+    icon: "/kemenag-512.png",
+  },
 };
 
 export default function RootLayout({

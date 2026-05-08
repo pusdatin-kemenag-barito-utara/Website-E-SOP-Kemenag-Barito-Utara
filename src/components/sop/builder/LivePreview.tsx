@@ -1,12 +1,15 @@
 import React from "react";
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, ZoomIn, ZoomOut, RotateCcw } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { SOPPreview } from "@/components/sop/preview/SOPPreview";
 import { SOPHeader, Activity } from "@/types/sop";
+import { Button } from "@/components/ui/button";
 
 interface LivePreviewProps {
   viewMode: "edit" | "preview";
   scale: number;
+  zoom: number;
+  setZoom: React.Dispatch<React.SetStateAction<number>>;
   header: SOPHeader;
   activities: Activity[];
   roles: string[];
@@ -17,12 +20,17 @@ interface LivePreviewProps {
 export function LivePreview({
   viewMode,
   scale,
+  zoom,
+  setZoom,
   header,
   activities,
   roles,
   isHydrated,
   expandedActivities,
 }: LivePreviewProps) {
+  const handleZoomIn = () => setZoom((prev) => Math.min(prev + 0.1, 2));
+  const handleZoomOut = () => setZoom((prev) => Math.max(prev - 0.1, 0.5));
+  const handleResetZoom = () => setZoom(1);
   return (
     <section
       className={cn(
@@ -41,8 +49,44 @@ export function LivePreview({
             <ChevronRight className="w-3 h-3" />
             <span className="text-emerald-600">LIVE PREVIEW</span>
           </div>
-          <div className="bg-emerald-50 text-emerald-600 border border-emerald-100 px-3 py-1 rounded-full text-[9px] font-black animate-pulse mx-auto md:mx-0">
-            SYNCING ACTIVE
+          <div className="flex items-center gap-4">
+            <div className="flex items-center bg-white border border-slate-200 rounded-full p-1 shadow-sm">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-7 w-7 rounded-full text-slate-500 hover:text-emerald-600 hover:bg-emerald-50"
+                onClick={handleZoomOut}
+                title="Zoom Out"
+              >
+                <ZoomOut className="w-3.5 h-3.5" />
+              </Button>
+              <div className="px-2 min-w-[45px] text-center border-x border-slate-100">
+                <span className="text-[10px] font-black text-slate-600">
+                  {Math.round(zoom * 100)}%
+                </span>
+              </div>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-7 w-7 rounded-full text-slate-500 hover:text-emerald-600 hover:bg-emerald-50"
+                onClick={handleZoomIn}
+                title="Zoom In"
+              >
+                <ZoomIn className="w-3.5 h-3.5" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="ml-1 h-7 w-7 rounded-full text-slate-400 hover:text-slate-600 hover:bg-slate-100"
+                onClick={handleResetZoom}
+                title="Reset Zoom"
+              >
+                <RotateCcw className="w-3.5 h-3.5" />
+              </Button>
+            </div>
+            <div className="bg-emerald-50 text-emerald-600 border border-emerald-100 px-3 py-1 rounded-full text-[9px] font-black animate-pulse">
+              SYNCING ACTIVE
+            </div>
           </div>
         </div>
 

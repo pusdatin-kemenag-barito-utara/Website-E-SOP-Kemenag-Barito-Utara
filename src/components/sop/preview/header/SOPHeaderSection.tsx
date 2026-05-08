@@ -122,8 +122,11 @@ export function SOPHeaderSection({ header }: SOPHeaderSectionProps) {
             <h4 className="text-[9pt] font-black mb-1.5 uppercase underline decoration-1 underline-offset-2">
               Peringatan:
             </h4>
-            <div className="text-[8.5pt] italic text-black leading-tight font-medium text-justify">
-              <RenderList text={header.peringatan} />
+            <div className="text-[8.5pt] text-red-600 leading-tight font-medium text-justify">
+              <RenderList
+                text={header.peringatan}
+                itemClassName="text-red-600"
+              />
             </div>
           </div>
           <div className="p-1.5 min-h-[35px]">

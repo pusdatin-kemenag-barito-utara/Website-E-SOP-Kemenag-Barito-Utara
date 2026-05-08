@@ -29,7 +29,7 @@ export function ActivityMainInfo({
   SYMBOL_ICONS,
 }: ActivityMainInfoProps) {
   return (
-    <div className="flex-1 space-y-6">
+    <div className="flex-1 space-y-4">
       <div className="space-y-2">
         <div className="flex items-center gap-2 mb-1">
           <div className="w-1.5 h-4 bg-emerald-500 rounded-full" />
@@ -46,7 +46,7 @@ export function ActivityMainInfo({
               value={act.kegiatan}
               onChange={(e) => onUpdate(act.id, "kegiatan", e.target.value)}
               placeholder="Apa yang dilakukan pada tahap ini?"
-              className="h-[188px] bg-white border-slate-200 focus:border-emerald-500 focus:ring-emerald-500/10 transition-all resize-none rounded-xl text-sm leading-relaxed p-4"
+              className="h-[100px] bg-white border-slate-200 focus:border-emerald-500 focus:ring-emerald-500/10 transition-all resize-none rounded-xl text-sm leading-relaxed p-4"
             />
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -60,7 +60,7 @@ export function ActivityMainInfo({
                   if (val) onUpdate(act.id, "symbol", val);
                 }}
               >
-                <SelectTrigger className="h-11 bg-white border-slate-200 hover:border-emerald-300 transition-colors rounded-xl">
+                <SelectTrigger className="h-10 bg-white border-slate-200 hover:border-emerald-300 transition-colors rounded-xl">
                   <SelectValue>
                     <div className="flex items-center gap-2">
                       {React.createElement(SYMBOL_ICONS[act.symbol] || Square, {
@@ -107,7 +107,7 @@ export function ActivityMainInfo({
                   if (val) onUpdate(act.id, "roleForSymbol", val);
                 }}
               >
-                <SelectTrigger className="h-11 bg-white border-slate-200 hover:border-blue-300 transition-colors rounded-xl">
+                <SelectTrigger className="h-10 bg-white border-slate-200 hover:border-blue-300 transition-colors rounded-xl">
                   <SelectValue placeholder="Pilih Pelaksana">
                     <div className="flex items-center gap-2">
                       <Users className="w-4 h-4 text-blue-500" />

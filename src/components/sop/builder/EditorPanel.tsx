@@ -44,7 +44,7 @@ export function EditorPanel({
   return (
     <aside
       className={cn(
-        "flex-1 lg:flex-none lg:w-[650px] xl:w-[850px] bg-white border-r border-slate-200 flex flex-col transition-all duration-300 print:hidden h-full overflow-hidden",
+        "flex-1 lg:flex-none lg:w-[550px] xl:w-[700px] bg-white border-r border-slate-200 flex flex-col transition-all duration-300 print:hidden h-full overflow-hidden",
         viewMode === "preview"
           ? "hidden lg:flex opacity-50 pointer-events-none grayscale"
           : "flex",

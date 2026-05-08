@@ -1,15 +1,9 @@
 import { SOPHeader, SymbolType } from "@/types/sop";
 
 export const INITIAL_ROLES = [
-  "Pemohon",
   "Petugas PTSP",
   "Operator",
   "Kepala Seksi",
-  "Bendahara Pengeluaran",
-  "KPA",
-  "PPK",
-  "PPSPM",
-  "JFT",
   "Kasubbag TU",
   "Kepala Kantor",
 ];

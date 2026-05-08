@@ -78,7 +78,7 @@ export function useSOPData(userId?: string) {
     fetch();
   }, [fetchUserSops]);
 
-  // Auto-save to localStorage
+  // Auto-save to localStorage (Immediate)
   useEffect(() => {
     if (isHydrated) {
       const dataToSave: SOPData = { header, activities, roles };
@@ -132,6 +132,17 @@ export function useSOPData(userId?: string) {
       setIsSyncing(false);
     }
   }, [header, activities, roles, isHydrated, currentId, userId, fetchUserSops]);
+
+  // Auto-save to Cloud (Debounced - 1s)
+  useEffect(() => {
+    if (!isHydrated || !userId || !currentId) return;
+
+    const timer = setTimeout(() => {
+      saveToCloud();
+    }, 1000); // Save after 1 second of inactivity
+
+    return () => clearTimeout(timer);
+  }, [header, activities, roles, isHydrated, userId, currentId, saveToCloud]);
 
   const loadSop = async (id: string) => {
     setIsSyncing(true);

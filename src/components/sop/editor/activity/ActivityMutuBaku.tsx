@@ -10,7 +10,7 @@ interface ActivityMutuBakuProps {
 
 export function ActivityMutuBaku({ act, onUpdate }: ActivityMutuBakuProps) {
   return (
-    <div className="w-full lg:w-[320px] space-y-6">
+    <div className="w-full lg:w-[280px] space-y-4">
       <div className="space-y-4">
         <div className="flex items-center gap-2 mb-1">
           <div className="w-1.5 h-4 bg-blue-500 rounded-full" />
@@ -18,10 +18,21 @@ export function ActivityMutuBaku({ act, onUpdate }: ActivityMutuBakuProps) {
             Mutu Baku
           </label>
         </div>
-        <div className="p-5 bg-slate-50 rounded-2xl border border-slate-200 space-y-4">
+        <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-3">
           <div className="space-y-1.5">
             <span className="text-[9px] font-bold text-slate-400 uppercase ml-1">
-              Estimasi Waktu
+              Persyaratan
+            </span>
+            <Textarea
+              value={act.persyaratan}
+              onChange={(e) => onUpdate(act.id, "persyaratan", e.target.value)}
+              placeholder="Berkas yang dibutuhkan..."
+              className="min-h-[60px] bg-white border-slate-200 rounded-lg text-sm font-medium resize-none transition-all focus:ring-4 focus:ring-blue-500/5"
+            />
+          </div>
+          <div className="space-y-1.5">
+            <span className="text-[9px] font-bold text-slate-400 uppercase ml-1">
+              Waktu
             </span>
             <Input
               value={act.waktu}
@@ -32,23 +43,12 @@ export function ActivityMutuBaku({ act, onUpdate }: ActivityMutuBakuProps) {
           </div>
           <div className="space-y-1.5">
             <span className="text-[9px] font-bold text-slate-400 uppercase ml-1">
-              Hasil / Output
+              Hasil Output
             </span>
             <Textarea
               value={act.output}
               onChange={(e) => onUpdate(act.id, "output", e.target.value)}
               placeholder="Misal: Draft SK"
-              className="min-h-[60px] bg-white border-slate-200 rounded-lg text-sm font-medium resize-none transition-all focus:ring-4 focus:ring-blue-500/5"
-            />
-          </div>
-          <div className="space-y-1.5">
-            <span className="text-[9px] font-bold text-slate-400 uppercase ml-1">
-              Persyaratan
-            </span>
-            <Textarea
-              value={act.persyaratan}
-              onChange={(e) => onUpdate(act.id, "persyaratan", e.target.value)}
-              placeholder="Berkas yang dibutuhkan..."
               className="min-h-[60px] bg-white border-slate-200 rounded-lg text-sm font-medium resize-none transition-all focus:ring-4 focus:ring-blue-500/5"
             />
           </div>

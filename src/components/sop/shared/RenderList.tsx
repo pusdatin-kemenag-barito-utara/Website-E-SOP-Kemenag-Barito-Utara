@@ -17,7 +17,8 @@ export function RenderList({
   const items = text.split("\n").filter((t) => t.trim() !== "");
   if (items.length === 0) return null;
 
-  const isOrdered = variant === "ordered";
+  // Only show numbers if there's more than one item
+  const isOrdered = variant === "ordered" && items.length > 1;
 
   return (
     <div className={cn("space-y-0.5", className)}>
@@ -25,8 +26,7 @@ export function RenderList({
         <div
           key={i}
           className={cn(
-            "text-[8.5pt] font-medium text-black leading-tight flex gap-1",
-            isOrdered ? "text-justify" : "text-left",
+            "text-[8.5pt] font-medium text-black leading-tight flex gap-1 text-justify",
             itemClassName,
           )}
         >

@@ -50,8 +50,8 @@ export function ActivityCard({
         )}
       >
         <div className="overflow-hidden">
-          <div className="p-6 border-t border-slate-100 bg-white/50 backdrop-blur-sm">
-            <div className="flex flex-col lg:flex-row gap-8">
+          <div className="p-4 border-t border-slate-100 bg-white/50 backdrop-blur-sm">
+            <div className="flex flex-col lg:flex-row gap-6">
               <ActivityMainInfo
                 act={act}
                 roles={roles}

@@ -20,7 +20,7 @@ export function SOPTableRow({
 }: SOPTableRowProps) {
   return (
     <tr key={act.id} className="h-[8mm] min-h-[8mm]">
-      <td className="border border-[#000] p-1 text-center text-[7.5pt] w-[8mm]">
+      <td className="border border-[#000] p-1 text-center text-[7.5pt] font-medium text-black w-[8mm]">
         {act.no}
       </td>
       <td className="border border-[#000] p-1.5 text-[8.5pt] font-medium leading-tight w-[40mm] text-justify">
@@ -68,7 +68,7 @@ export function SOPTableRow({
           variant="plain"
         />
       </td>
-      <td className="border border-[#000] p-1 text-[7.5pt] text-center">
+      <td className="border border-[#000] p-1 text-[7.5pt] font-medium text-black text-center">
         {act.waktu}
       </td>
       <td className="border border-[#000] p-1 text-[7.5pt] leading-tight">
