@@ -34,6 +34,7 @@ export function ActivityCard({
     <div className="border border-slate-200 rounded-2xl bg-white shadow-sm overflow-hidden group hover:border-emerald-300 transition-all hover:shadow-md">
       <ActivityCardHeader
         act={act}
+        index={index}
         isExpanded={isExpanded}
         onToggleExpand={onToggleExpand}
         onRemove={onRemove}

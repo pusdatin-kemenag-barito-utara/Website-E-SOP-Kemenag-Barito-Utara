@@ -7,7 +7,6 @@ import {
   Settings,
   FileText,
   Printer,
-  RotateCcw,
   Eye,
   Edit3,
   ChevronRight,
@@ -217,9 +216,13 @@ export default function SOPBuilder() {
               </Button>
 
               <div className="flex items-center gap-2 ml-2 pl-2 border-l border-slate-200">
-                <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center overflow-hidden border border-slate-200">
+                <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center overflow-hidden border border-slate-200 relative">
                   {user.user_metadata.avatar_url ? (
-                    <img src={user.user_metadata.avatar_url} alt="User" />
+                    <img 
+                      src={user.user_metadata.avatar_url} 
+                      alt="User" 
+                      className="w-full h-full object-cover"
+                    />
                   ) : (
                     <Users className="w-4 h-4 text-slate-400" />
                   )}

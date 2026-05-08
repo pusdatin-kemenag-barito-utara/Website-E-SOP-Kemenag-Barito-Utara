@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 
 interface ActivityCardHeaderProps {
   act: Activity;
+  index: number;
   isExpanded: boolean;
   onToggleExpand: (id: string) => void;
   onRemove: (id: string) => void;
@@ -15,6 +16,7 @@ interface ActivityCardHeaderProps {
 
 export function ActivityCardHeader({
   act,
+  index,
   isExpanded,
   onToggleExpand,
   onRemove,
@@ -29,10 +31,10 @@ export function ActivityCardHeader({
       onClick={() => onToggleExpand(act.id)}
     >
       <div className="w-10 h-10 flex items-center justify-center bg-emerald-600 text-white rounded-xl font-black text-sm shadow-sm shadow-emerald-200">
-        {act.no}
+        {index + 1}
       </div>
       <div className="flex-1 min-w-0">
-        <p className="text-sm font-bold text-slate-700">Alur {act.no}</p>
+        <p className="text-sm font-bold text-slate-700">Langkah {index + 1}</p>
         <div className="flex gap-3 mt-1.5">
           <div className="flex items-center gap-1">
             {React.createElement(SYMBOL_ICONS[act.symbol], {

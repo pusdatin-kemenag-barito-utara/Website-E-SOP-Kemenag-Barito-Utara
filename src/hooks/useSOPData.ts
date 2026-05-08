@@ -70,7 +70,10 @@ export function useSOPData(userId?: string) {
   }, [userId]);
 
   useEffect(() => {
-    fetchUserSops();
+    const fetch = async () => {
+      await fetchUserSops();
+    };
+    fetch();
   }, [fetchUserSops]);
 
   // Auto-save to localStorage
