@@ -1,6 +1,7 @@
 import React from "react";
 import Image from "next/image";
-import { Button } from "@/components/ui/button";
+import Link from "next/link";
+import { Button, buttonVariants } from "@/components/ui/button";
 import {
   ShieldCheck,
   Edit3,
@@ -14,6 +15,7 @@ import {
   LogIn,
   Users,
   ShieldAlert,
+  Wrench,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -226,6 +228,17 @@ export function BuilderHeader({
             LOGIN GOOGLE
           </Button>
         )}
+
+        <Link
+          href="/tools"
+          className={cn(
+            buttonVariants({ variant: "ghost", size: "sm" }),
+            "font-bold text-xs px-2 md:px-3 text-slate-600 hover:text-emerald-600 hover:bg-emerald-50 transition-all"
+          )}
+        >
+          <Wrench className="w-4 h-4 md:mr-2 text-slate-400 group-hover:text-emerald-500" />
+          <span className="hidden md:inline uppercase">Tools</span>
+        </Link>
 
         <Button
           className="bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg shadow-emerald-100 font-bold px-4 md:px-6 h-9 md:h-10"

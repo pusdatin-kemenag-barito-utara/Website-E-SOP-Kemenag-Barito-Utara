@@ -28,7 +28,6 @@ body {
   color: hsl(var(--foreground));
   margin: 0;
   padding: 0;
-  overflow: hidden;
   font-family: Arial, Helvetica, sans-serif;
   font-feature-settings:
     "rlig" 1,
