@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Activity, SOPHeader, SOPData, AdminSOPListItem } from "@/types/sop";
 import { DEFAULT_HEADER, INITIAL_ROLES } from "@/lib/constants";
@@ -40,7 +40,7 @@ async function fetchSopById(id: string) {
 export function useSOPData(userId?: string, userEmail?: string | null) {
   const queryClient = useQueryClient();
   const [isHydrated, setIsHydrated] = useState(false);
-  const [isSyncing, setIsSyncing] = useState(false);
+  const [isManualSyncing, setIsManualSyncing] = useState(false);
   const [currentId, setCurrentId] = useState<string | null>(null);
 
   const [roles, setRoles] = useState<string[]>(INITIAL_ROLES);
@@ -50,7 +50,6 @@ export function useSOPData(userId?: string, userEmail?: string | null) {
   // Query: User SOPs list
   const {
     data: userSops = [],
-    refetch: refetchUserSops,
   } = useQuery({
     queryKey: ["userSops", userId],
     queryFn: () => fetchUserSopsFromDb(userId!),
@@ -186,14 +185,12 @@ export function useSOPData(userId?: string, userEmail?: string | null) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [header, activities, roles, isHydrated, userId, currentId]);
 
-  useEffect(() => {
-    setIsSyncing(saveMutation.isPending || deleteMutation.isPending);
-  }, [saveMutation.isPending, deleteMutation.isPending]);
+  const isSyncing = isManualSyncing || saveMutation.isPending || deleteMutation.isPending;
 
   const saveToCloud = useCallback(async () => {
     if (!isHydrated) return;
     try {
-      const result = await saveMutation.mutateAsync();
+      await saveMutation.mutateAsync();
       return { success: true, message: "SOP berhasil disimpan ke Cloud!" };
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Gagal menyimpan.";
@@ -203,7 +200,7 @@ export function useSOPData(userId?: string, userEmail?: string | null) {
 
   const loadSop = useCallback(
     async (id: string) => {
-      setIsSyncing(true);
+      setIsManualSyncing(true);
       try {
         const data = await fetchSopById(id);
         if (data) {
@@ -219,7 +216,7 @@ export function useSOPData(userId?: string, userEmail?: string | null) {
       } catch {
         return { success: false, message: "Terjadi kesalahan." };
       } finally {
-        setIsSyncing(false);
+        setIsManualSyncing(false);
       }
     },
     [],
@@ -237,7 +234,7 @@ export function useSOPData(userId?: string, userEmail?: string | null) {
     [deleteMutation],
   );
 
-  const resetData = () => {
+  const resetData = useCallback(() => {
     setActivities([]);
     setRoles(INITIAL_ROLES);
     setHeader(DEFAULT_HEADER);
@@ -245,7 +242,15 @@ export function useSOPData(userId?: string, userEmail?: string | null) {
     localStorage.removeItem("sop-builder-data");
     const cleanUrl = `${window.location.origin}${window.location.pathname}`;
     window.history.pushState({ path: cleanUrl }, "", cleanUrl);
-  };
+  }, []);
+
+  const previousUserId = useRef(userId || null);
+  useEffect(() => {
+    if (previousUserId.current !== null && previousUserId.current !== (userId || null)) {
+      resetData();
+    }
+    previousUserId.current = userId || null;
+  }, [userId, resetData]);
 
   const fetchAllSops = useCallback(() => {
     refetchAllSops();
