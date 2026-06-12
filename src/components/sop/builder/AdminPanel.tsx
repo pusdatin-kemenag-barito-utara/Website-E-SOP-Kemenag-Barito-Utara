@@ -44,115 +44,112 @@ export function AdminPanel({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[100] bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200">
-      <div className="bg-white w-full max-w-5xl h-[85vh] rounded-[2.5rem] shadow-2xl flex flex-col overflow-hidden border border-slate-200 animate-in zoom-in-95 duration-300">
+    <div className="fixed inset-0 z-[100] bg-background/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-200">
+      <div className="bg-card w-full max-w-5xl h-[85vh] rounded-2xl shadow-2xl border border-border flex flex-col overflow-hidden animate-in zoom-in-95 duration-300">
         {/* Header */}
-        <div className="p-6 md:p-8 bg-gradient-to-r from-slate-900 to-slate-800 text-white flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 bg-amber-500 rounded-2xl flex items-center justify-center shadow-lg shadow-amber-500/20">
-              <ShieldAlert className="w-6 h-6 text-white" />
+        <div className="p-5 md:p-6 bg-gradient-to-r from-foreground to-foreground/90 text-background flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-amber-500 rounded-xl flex items-center justify-center shadow-md shadow-amber-500/20">
+              <ShieldAlert className="w-5 h-5 text-white" />
             </div>
             <div>
-              <h2 className="text-xl font-black tracking-tight">
-                Admin Dashboard
+              <h2 className="text-base font-bold tracking-tight text-background">
+                Admin Panel
               </h2>
-              <p className="text-slate-400 text-xs font-bold uppercase tracking-widest mt-0.5">
-                Monitoring Seluruh Dokumen SOP ({allSops.length} Total)
+              <p className="text-background/60 text-[10px] font-medium tracking-wide mt-0.5">
+                {allSops.length} dokumen SOP
               </p>
             </div>
           </div>
           <Button
             variant="ghost"
             size="icon"
-            className="text-slate-400 hover:text-white hover:bg-white/10 rounded-xl h-10 w-10"
+            className="text-background/60 hover:text-background hover:bg-background/10 rounded-lg h-9 w-9"
             onClick={onClose}
+            aria-label="Tutup"
           >
-            <X className="w-6 h-6" />
+            <X className="w-5 h-5" />
           </Button>
         </div>
 
         {/* Search & Stats */}
-        <div className="p-4 md:p-6 border-b border-slate-100 flex flex-col md:flex-row gap-4 items-center justify-between bg-slate-50/50">
-          <div className="relative w-full md:w-96 group">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-emerald-500 transition-colors" />
+        <div className="p-4 border-b border-border flex flex-col md:flex-row gap-3 items-center justify-between bg-muted">
+          <div className="relative w-full md:w-80">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
             <input
               type="text"
-              placeholder="Cari Judul SOP atau Instansi..."
-              className="w-full pl-11 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-medium focus:outline-none focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all"
+              placeholder="Cari judul atau instansi..."
+              className="w-full h-9 pl-9 pr-3 bg-background border border-border rounded-lg text-xs font-medium focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all placeholder:text-muted-foreground"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
           </div>
-          <div className="flex gap-2">
-            <div className="px-4 py-2 bg-emerald-50 border border-emerald-100 rounded-xl flex flex-col items-center min-w-[80px]">
-              <span className="text-[10px] font-black text-emerald-600 uppercase tracking-tighter">
-                Aktif
-              </span>
-              <span className="text-lg font-black text-emerald-700 leading-none mt-1">
-                {allSops.length}
-              </span>
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            <div className="px-3 py-1.5 bg-primary/10 border border-primary/20 rounded-lg flex items-center gap-2">
+              <div className="w-1.5 h-1.5 rounded-full bg-primary" />
+              <span className="font-semibold text-primary">{allSops.length}</span>
+              <span className="text-muted-foreground">Total</span>
             </div>
-            {/* Add more stats if needed */}
           </div>
         </div>
 
         {/* List Body */}
-        <div className="flex-1 overflow-y-auto p-4 md:p-8 custom-scrollbar">
+        <div className="flex-1 overflow-y-auto p-4 md:p-5 custom-scrollbar">
           {filteredSops.length === 0 ? (
-            <div className="h-full flex flex-col items-center justify-center text-slate-400">
-              <FileText className="w-16 h-16 mb-4 opacity-10" />
-              <p className="text-sm font-bold uppercase tracking-widest">
+            <div className="h-full flex flex-col items-center justify-center">
+              <FileText className="w-12 h-12 mb-3 text-muted-foreground/20" />
+              <p className="text-xs font-medium text-muted-foreground">
                 Tidak ada data ditemukan
               </p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               {filteredSops.map((sop: AdminSOPListItem) => (
                 <div
                   key={sop.id}
-                  className="group bg-white border border-slate-200 p-5 rounded-[1.5rem] hover:border-emerald-500 hover:shadow-xl hover:shadow-emerald-500/5 transition-all cursor-pointer flex items-start gap-4"
+                  className="group bg-card border border-border p-4 rounded-xl hover:border-primary/30 hover:shadow-md transition-all cursor-pointer flex items-start gap-3"
                   onClick={() => {
                     onLoadSop(sop.id);
                     onClose();
                   }}
                 >
-                  <div className="w-10 h-10 bg-slate-50 rounded-xl flex items-center justify-center group-hover:bg-emerald-50 transition-colors flex-shrink-0">
-                    <FileText className="w-5 h-5 text-slate-400 group-hover:text-emerald-600 transition-colors" />
+                  <div className="w-9 h-9 bg-muted rounded-lg flex items-center justify-center group-hover:bg-primary/10 transition-colors flex-shrink-0">
+                    <FileText className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <h3 className="font-bold text-slate-800 text-sm truncate group-hover:text-emerald-700 transition-colors">
+                    <h3 className="text-sm font-semibold text-foreground truncate group-hover:text-primary transition-colors leading-snug">
                       {sop.title}
                     </h3>
-                    <div className="flex flex-col gap-1 mt-2">
-                      <div className="flex items-center gap-2 text-slate-500">
-                        <User className="w-3 h-3" />
-                        <span className="text-[10px] font-medium truncate">
+                    <div className="flex flex-wrap gap-x-3 gap-y-1 mt-1.5">
+                      <div className="flex items-center gap-1 text-muted-foreground">
+                        <User className="w-2.5 h-2.5" />
+                        <span className="text-[9px] font-medium truncate max-w-[100px]">
                           {sop.header?.satker || "Umum"}
                         </span>
                       </div>
                       {sop.user_email && (
-                        <div className="flex items-center gap-2 text-emerald-600/70">
-                          <Mail className="w-3 h-3" />
-                          <span className="text-[10px] font-bold truncate">
+                        <div className="flex items-center gap-1 text-primary/70">
+                          <Mail className="w-2.5 h-2.5" />
+                          <span className="text-[9px] font-medium truncate max-w-[120px]">
                             {sop.user_email}
                           </span>
                         </div>
                       )}
-                      <div className="flex items-center gap-2 text-slate-400">
-                        <Calendar className="w-3 h-3" />
-                        <span className="text-[10px] font-medium">
-                          Update:{" "}
-                          {new Date(sop.updated_at).toLocaleDateString(
-                            "id-ID",
-                            { day: "numeric", month: "long", year: "numeric" },
-                          )}
+                      <div className="flex items-center gap-1 text-muted-foreground/70">
+                        <Calendar className="w-2.5 h-2.5" />
+                        <span className="text-[9px] font-medium">
+                          {new Date(sop.updated_at).toLocaleDateString("id-ID", {
+                            day: "numeric",
+                            month: "short",
+                            year: "numeric",
+                          })}
                         </span>
                       </div>
                     </div>
                   </div>
-                  <div className="self-center">
-                    <div className="w-8 h-8 rounded-full border border-slate-100 flex items-center justify-center text-slate-300 group-hover:border-emerald-200 group-hover:text-emerald-500 transition-all">
-                      <ChevronRight className="w-4 h-4" />
+                  <div className="self-center flex-shrink-0">
+                    <div className="w-7 h-7 rounded-full border border-border flex items-center justify-center text-muted-foreground/40 group-hover:border-primary/30 group-hover:text-primary transition-all">
+                      <ChevronRight className="w-3.5 h-3.5" />
                     </div>
                   </div>
                 </div>
@@ -162,9 +159,9 @@ export function AdminPanel({
         </div>
 
         {/* Footer */}
-        <div className="p-4 bg-slate-50 border-t border-slate-100 text-center">
-          <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">
-            Privileged Admin Access • Kemenag Barito Utara Digital System
+        <div className="p-3 bg-muted border-t border-border text-center">
+          <p className="text-[8px] font-medium text-muted-foreground tracking-wide">
+            Privileged Admin Access &bull; Kemenag Barito Utara Digital System
           </p>
         </div>
       </div>

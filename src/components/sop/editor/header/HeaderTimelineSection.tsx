@@ -14,13 +14,13 @@ export function HeaderTimelineSection({
   updateHeader,
 }: HeaderTimelineSectionProps) {
   return (
-    <div className="bg-white rounded-[2rem] border border-slate-200 shadow-lg shadow-slate-200/30 overflow-hidden hover:border-blue-200 transition-colors">
+    <div className="bg-card border border-border rounded-xl overflow-visible">
       <SectionHeader
         icon={Calendar}
         title="Timeline Dokumen"
         colorClass="text-blue-500"
       />
-      <div className="p-4 md:p-6 grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-6">
+      <div className="p-4 grid grid-cols-1 sm:grid-cols-3 gap-4">
         <DatePicker
           label="Tgl Buat"
           value={header.tglBuat}
@@ -35,7 +35,6 @@ export function HeaderTimelineSection({
           label="Tgl Efektif"
           value={header.tglEfektif}
           onChange={(val) => updateHeader("tglEfektif", val)}
-          className="bg-emerald-50/50 border-emerald-100 hover:border-emerald-300 group-focus-within:border-emerald-400 group-focus-within:ring-emerald-500/10"
         />
       </div>
     </div>

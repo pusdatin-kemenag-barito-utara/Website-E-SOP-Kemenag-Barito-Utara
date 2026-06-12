@@ -1,5 +1,5 @@
 import React from "react";
-import { ChevronRight, ZoomIn, ZoomOut, RotateCcw } from "lucide-react";
+import { Edit3, Eye, ZoomIn, ZoomOut, RotateCcw } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { SOPPreview } from "@/components/sop/preview/SOPPreview";
 import { SOPHeader, Activity } from "@/types/sop";
@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 
 interface LivePreviewProps {
   viewMode: "edit" | "preview";
+  setViewMode: (mode: "edit" | "preview") => void;
   scale: number;
   zoom: number;
   setZoom: React.Dispatch<React.SetStateAction<number>>;
@@ -19,6 +20,7 @@ interface LivePreviewProps {
 
 export function LivePreview({
   viewMode,
+  setViewMode,
   scale,
   zoom,
   setZoom,
@@ -34,58 +36,75 @@ export function LivePreview({
   return (
     <section
       className={cn(
-        "flex-1 bg-[#F1F5F9] overflow-y-auto custom-scrollbar print:p-0 print:bg-white transition-all duration-500 h-full [scrollbar-gutter:stable] print:flex print:visible",
+        "flex-1 overflow-y-auto custom-scrollbar print:p-0 print:bg-white transition-all duration-500 h-full [scrollbar-gutter:stable] print:flex print:visible bg-dot-grid-subtle",
         viewMode === "preview"
-          ? "bg-white flex"
-          : "bg-slate-100 hidden lg:flex",
+          ? "bg-card flex"
+          : "bg-card hidden lg:flex",
       )}
     >
-      <div className="min-h-full w-full p-4 md:py-12 md:px-6 flex flex-col items-center print:p-0 print:m-0">
-        <div className="w-full max-w-[1000px] mb-4 md:mb-8 flex items-center justify-between print:hidden">
-          <div className="hidden md:flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] leading-none">
-            <span>KEMENAG</span>
-            <ChevronRight className="w-3 h-3" />
-            <span>SOP BUILDER</span>
-            <ChevronRight className="w-3 h-3" />
-            <span className="text-emerald-600">LIVE PREVIEW</span>
+      <div className="min-h-full w-full p-4 md:py-8 md:px-4 flex flex-col items-center print:p-0 print:m-0">
+        <div className="w-full max-w-[1000px] mb-4 flex items-center justify-between print:hidden">
+          <div className="hidden md:flex items-center bg-muted p-0.5 rounded-lg">
+            <button
+              onClick={() => setViewMode("edit")}
+              className={cn(
+                "px-2.5 py-1 rounded-md text-xs font-medium transition-all flex items-center gap-1.5",
+                viewMode === "edit"
+                  ? "bg-background text-foreground shadow-sm"
+                  : "text-slate-500 dark:text-slate-400 hover:text-foreground",
+              )}
+            >
+              <Edit3 className="w-3.5 h-3.5" />
+              <span>Editor</span>
+            </button>
+            <button
+              onClick={() => setViewMode("preview")}
+              className={cn(
+                "px-2.5 py-1 rounded-md text-xs font-medium transition-all flex items-center gap-1.5",
+                viewMode === "preview"
+                  ? "bg-background text-foreground shadow-sm"
+                  : "text-slate-500 dark:text-slate-400 hover:text-foreground",
+              )}
+            >
+              <Eye className="w-3.5 h-3.5" />
+              <span>Preview</span>
+            </button>
           </div>
-          <div className="flex items-center gap-4">
-            <div className="flex items-center bg-white border border-slate-200 rounded-full p-1 shadow-sm">
+          <div className="flex items-center">
+            <div className="flex items-center bg-background border border-border rounded-lg p-0.5 shadow-sm">
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-7 w-7 rounded-full text-slate-500 hover:text-emerald-600 hover:bg-emerald-50"
+                className="h-6 w-6 rounded-md text-muted-foreground hover:text-foreground"
                 onClick={handleZoomOut}
-                title="Zoom Out"
+                aria-label="Zoom Out"
               >
-                <ZoomOut className="w-3.5 h-3.5" />
+                <ZoomOut className="w-3 h-3" />
               </Button>
-              <div className="px-2 min-w-[45px] text-center border-x border-slate-100">
-                <span className="text-[10px] font-black text-slate-600">
+              <div className="px-1.5 min-w-[36px] text-center">
+                <span className="text-[10px] font-semibold text-foreground">
                   {Math.round(zoom * 100)}%
                 </span>
               </div>
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-7 w-7 rounded-full text-slate-500 hover:text-emerald-600 hover:bg-emerald-50"
+                className="h-6 w-6 rounded-md text-muted-foreground hover:text-foreground"
                 onClick={handleZoomIn}
-                title="Zoom In"
+                aria-label="Zoom In"
               >
-                <ZoomIn className="w-3.5 h-3.5" />
+                <ZoomIn className="w-3 h-3" />
               </Button>
+              <div className="w-px h-4 bg-border mx-0.5" />
               <Button
                 variant="ghost"
                 size="icon"
-                className="ml-1 h-7 w-7 rounded-full text-slate-400 hover:text-slate-600 hover:bg-slate-100"
+                className="h-6 w-6 rounded-md text-muted-foreground hover:text-foreground"
                 onClick={handleResetZoom}
-                title="Reset Zoom"
+                aria-label="Reset Zoom"
               >
-                <RotateCcw className="w-3.5 h-3.5" />
+                <RotateCcw className="w-3 h-3" />
               </Button>
-            </div>
-            <div className="bg-emerald-50 text-emerald-600 border border-emerald-100 px-3 py-1 rounded-full text-[9px] font-black animate-pulse">
-              SYNCING ACTIVE
             </div>
           </div>
         </div>
@@ -107,7 +126,7 @@ export function LivePreview({
           />
         </div>
 
-        <footer className="mt-20 text-slate-400 text-[9px] font-black tracking-[0.3em] uppercase pb-12 print:hidden leading-none">
+        <footer className="mt-16 text-muted-foreground/50 text-[8px] font-medium tracking-wider uppercase pb-8 print:hidden leading-none">
           Generated by Digital SOP Builder System &bull; 2026
         </footer>
       </div>

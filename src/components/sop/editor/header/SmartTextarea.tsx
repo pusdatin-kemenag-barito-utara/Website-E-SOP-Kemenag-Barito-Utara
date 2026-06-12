@@ -21,7 +21,6 @@ export function SmartTextarea({
       const before = val.substring(0, start);
       const after = val.substring(start);
 
-      // Check the current line for numbering
       const lines = before.split("\n");
       const currentLine = lines[lines.length - 1];
       const match = currentLine.match(/^(\d+)[\.\)]\s*/);
@@ -33,18 +32,10 @@ export function SmartTextarea({
         const newValue = before + insertText + after;
         onValueChange(newValue);
 
-        // Adjust cursor position after render
         setTimeout(() => {
           textarea.selectionStart = textarea.selectionEnd =
             start + insertText.length;
         }, 0);
-      } else if (currentLine.trim() === "" && lines.length > 1) {
-        // If previous line had numbering but current is empty, maybe user wants to start numbering
-        const prevLine = lines[lines.length - 2];
-        const prevMatch = prevLine.match(/^(\d+)[\.\)]\s*/);
-        if (prevMatch) {
-          // This is a bit complex for a simple textarea, let's just do manual start
-        }
       }
     }
   };
@@ -64,7 +55,7 @@ export function SmartTextarea({
         onKeyDown={handleKeyDown}
         onChange={(e) => onValueChange(e.target.value)}
         className={cn(
-          "pr-10", // Space for the list toggle icon
+          "min-h-[80px] bg-background border-border rounded-lg text-sm leading-relaxed resize-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20 pr-10",
           className,
         )}
       />
@@ -72,14 +63,13 @@ export function SmartTextarea({
         type="button"
         onClick={startNumbering}
         title="Mulai Daftar Berangka"
-        className="absolute right-3 top-3 p-1.5 rounded-lg bg-slate-100 text-slate-400 hover:bg-blue-50 hover:text-blue-600 transition-all opacity-0 group-hover:opacity-100"
+        className="absolute right-2.5 top-2.5 p-1 rounded-md bg-muted text-muted-foreground hover:bg-primary/10 hover:text-primary transition-all opacity-0 group-hover:opacity-100 group-focus-within:opacity-100"
       >
-        <ListOrdered className="w-4 h-4" />
+        <ListOrdered className="w-3.5 h-3.5" />
       </button>
-
-      <div className="absolute left-4 -bottom-5 flex items-center gap-1 opacity-40 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity duration-300">
-        <span className="text-[9px] font-bold text-slate-400 uppercase tracking-tight">
-          💡 Cukup tekan <span className="text-blue-600 font-black">ENTER</span> untuk menambah list otomatis
+      <div className="absolute left-3 -bottom-4 opacity-0 group-hover:opacity-40 group-focus-within:opacity-100 transition-opacity">
+        <span className="text-[7px] font-medium text-muted-foreground tracking-tight">
+          Tekan ENTER untuk list otomatis
         </span>
       </div>
     </div>

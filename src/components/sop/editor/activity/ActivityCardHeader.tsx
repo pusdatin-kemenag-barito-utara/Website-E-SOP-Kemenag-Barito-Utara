@@ -1,5 +1,4 @@
 import React from "react";
-import { Button } from "@/components/ui/button";
 import { Trash2, ChevronDown, ChevronUp } from "lucide-react";
 import { Activity, SymbolType } from "@/types/sop";
 import { SYMBOL_OPTIONS } from "@/lib/constants";
@@ -25,50 +24,49 @@ export function ActivityCardHeader({
   return (
     <div
       className={cn(
-        "flex items-center gap-4 p-4 cursor-pointer transition-colors",
-        isExpanded ? "bg-slate-50" : "bg-white hover:bg-slate-50/50",
+        "flex items-center gap-3 p-3 cursor-pointer transition-colors",
+        isExpanded ? "bg-muted" : "hover:bg-muted",
       )}
       onClick={() => onToggleExpand(act.id)}
     >
-      <div className="w-10 h-10 flex items-center justify-center bg-emerald-600 text-white rounded-xl font-black text-sm shadow-sm shadow-emerald-200">
+      <div className="w-8 h-8 flex items-center justify-center bg-primary text-primary-foreground rounded-lg font-bold text-xs shrink-0">
         {index + 1}
       </div>
       <div className="flex-1 min-w-0">
-        <p className="text-sm font-bold text-slate-700">Langkah {index + 1}</p>
-        <div className="flex gap-3 mt-1.5">
+        <p className="text-sm font-semibold text-foreground">Langkah {index + 1}</p>
+        <div className="flex gap-3 mt-0.5">
           <div className="flex items-center gap-1">
             {React.createElement(SYMBOL_ICONS[act.symbol], {
-              className: "w-3 h-3 text-emerald-500",
+              className: "w-2.5 h-2.5 text-primary",
             })}
-            <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">
+            <span className="text-[8px] font-medium text-muted-foreground tracking-wide">
               {SYMBOL_OPTIONS.find((o) => o.value === act.symbol)?.label}
             </span>
           </div>
           <div className="flex items-center gap-1">
-            <div className="w-1.5 h-1.5 rounded-full bg-blue-500" />
-            <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">
+            <div className="w-1 h-1 rounded-full bg-blue-500" />
+            <span className="text-[8px] font-medium text-muted-foreground tracking-wide">
               {act.roleForSymbol || "Pelaksana"}
             </span>
           </div>
         </div>
       </div>
       <div className="flex items-center gap-1">
-        <Button
-          variant="ghost"
-          size="icon"
+        <button
           onClick={(e) => {
             e.stopPropagation();
             onRemove(act.id);
           }}
-          className="h-8 w-8 text-red-500 hover:text-red-700 hover:bg-red-50"
+          className="h-7 w-7 rounded-md flex items-center justify-center text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-all"
+          aria-label="Hapus langkah"
         >
-          <Trash2 className="w-4 h-4" />
-        </Button>
-        <div className="p-1">
+          <Trash2 className="w-3.5 h-3.5" />
+        </button>
+        <div className="p-0.5 text-muted-foreground">
           {isExpanded ? (
-            <ChevronUp className="w-4 h-4 text-slate-400" />
+            <ChevronUp className="w-4 h-4" />
           ) : (
-            <ChevronDown className="w-4 h-4 text-slate-400" />
+            <ChevronDown className="w-4 h-4" />
           )}
         </div>
       </div>

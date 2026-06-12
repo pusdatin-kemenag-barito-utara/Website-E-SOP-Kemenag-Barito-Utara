@@ -34,8 +34,8 @@ export function SOPHeaderSection({ header }: SOPHeaderSectionProps) {
                 Telepon/Faximili (0519) 21269, 21047, 21772, 21894
               </p>
               <p className="text-[6pt] font-medium leading-tight whitespace-nowrap">
-                e-mail: kemenagbaritoutara@gmail.com & website:
-                https://kemenag-baritoutara.com
+                E-mail: baritoutara@kemenag.go.id / Website:
+                www.baritoutara.kemenag.go.id
               </p>
             </div>
           </div>

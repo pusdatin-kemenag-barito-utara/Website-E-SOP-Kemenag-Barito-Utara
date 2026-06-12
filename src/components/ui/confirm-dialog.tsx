@@ -17,7 +17,6 @@ interface ConfirmDialogProps {
   description: string;
   confirmText?: string;
   cancelText?: string;
-  isDestructive?: boolean;
 }
 
 export function ConfirmDialog({
@@ -31,21 +30,22 @@ export function ConfirmDialog({
 }: ConfirmDialogProps) {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[400px] rounded-[2rem] border border-slate-200 shadow-2xl p-8 bg-white overflow-hidden">
+      <DialogContent className="sm:max-w-[380px] rounded-xl border-border shadow-2xl p-6 bg-card overflow-hidden">
         <DialogHeader className="items-center text-center">
-          <div className="w-16 h-16 bg-red-50 rounded-3xl flex items-center justify-center mb-4">
-            <AlertTriangle className="w-8 h-8 text-red-500" />
+          <div className="w-12 h-12 bg-destructive/10 rounded-xl flex items-center justify-center mb-3">
+            <AlertTriangle className="w-6 h-6 text-destructive" />
           </div>
-          <DialogTitle className="text-xl font-black text-slate-900 tracking-tight">
+          <DialogTitle className="text-base font-bold text-foreground tracking-tight">
             {title}
           </DialogTitle>
-          <DialogDescription className="text-slate-500 font-medium leading-relaxed mt-2">
+          <DialogDescription className="text-sm text-muted-foreground leading-relaxed mt-1">
             {description}
           </DialogDescription>
         </DialogHeader>
-        <div className="flex flex-col gap-2 mt-8">
+        <div className="flex flex-col gap-2 mt-6">
           <Button
-            className="w-full h-12 bg-red-600 hover:bg-red-700 text-white rounded-xl font-black text-sm flex items-center justify-center gap-2"
+            variant="destructive"
+            className="w-full h-10 text-sm font-semibold flex items-center justify-center gap-2"
             onClick={() => {
               onConfirm();
               onClose();
@@ -56,7 +56,7 @@ export function ConfirmDialog({
           </Button>
           <Button
             variant="ghost"
-            className="w-full h-12 text-slate-400 hover:text-slate-600 font-bold text-sm"
+            className="w-full h-10 text-sm font-medium text-muted-foreground"
             onClick={onClose}
           >
             {cancelText}

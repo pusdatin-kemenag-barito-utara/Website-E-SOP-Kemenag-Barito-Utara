@@ -10,59 +10,57 @@ interface ActivityMutuBakuProps {
 
 export function ActivityMutuBaku({ act, onUpdate }: ActivityMutuBakuProps) {
   return (
-    <div className="w-full lg:w-[280px] space-y-4">
-      <div className="space-y-4">
-        <div className="flex items-center gap-2 mb-1">
-          <div className="w-1.5 h-4 bg-blue-500 rounded-full" />
-          <label className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em]">
-            Mutu Baku
-          </label>
+    <div className="w-full lg:w-[280px] space-y-3">
+      <div className="flex items-center gap-1.5">
+        <div className="w-1 h-3.5 bg-blue-500 rounded-full" />
+        <span className="text-[9px] font-semibold text-muted-foreground tracking-wide">
+          Mutu Baku
+        </span>
+      </div>
+      <div className="p-3 bg-muted rounded-lg border border-border space-y-3">
+        <div className="space-y-1">
+          <span className="text-[8px] font-medium text-muted-foreground ml-0.5">
+            Persyaratan
+          </span>
+          <Textarea
+            value={act.persyaratan}
+            onChange={(e) => onUpdate(act.id, "persyaratan", e.target.value)}
+            placeholder="Berkas yang dibutuhkan..."
+            className="min-h-[50px] text-sm"
+          />
         </div>
-        <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-3">
-          <div className="space-y-1.5">
-            <span className="text-[9px] font-bold text-slate-400 uppercase ml-1">
-              Persyaratan
-            </span>
-            <Textarea
-              value={act.persyaratan}
-              onChange={(e) => onUpdate(act.id, "persyaratan", e.target.value)}
-              placeholder="Berkas yang dibutuhkan..."
-              className="min-h-[60px] bg-white border-slate-200 rounded-lg text-sm font-medium resize-none transition-all focus:ring-4 focus:ring-blue-500/5"
-            />
-          </div>
-          <div className="space-y-1.5">
-            <span className="text-[9px] font-bold text-slate-400 uppercase ml-1">
-              Waktu
-            </span>
-            <Input
-              value={act.waktu}
-              onChange={(e) => onUpdate(act.id, "waktu", e.target.value)}
-              placeholder="Misal: 10 Menit"
-              className="h-10 bg-white border-slate-200 rounded-lg text-sm font-medium"
-            />
-          </div>
-          <div className="space-y-1.5">
-            <span className="text-[9px] font-bold text-slate-400 uppercase ml-1">
-              Hasil Output
-            </span>
-            <Textarea
-              value={act.output}
-              onChange={(e) => onUpdate(act.id, "output", e.target.value)}
-              placeholder="Misal: Draft SK"
-              className="min-h-[60px] bg-white border-slate-200 rounded-lg text-sm font-medium resize-none transition-all focus:ring-4 focus:ring-blue-500/5"
-            />
-          </div>
-          <div className="space-y-1.5">
-            <span className="text-[9px] font-bold text-slate-400 uppercase ml-1">
-              Keterangan
-            </span>
-            <Textarea
-              value={act.keterangan}
-              onChange={(e) => onUpdate(act.id, "keterangan", e.target.value)}
-              placeholder="Catatan tambahan (Opsional)..."
-              className="min-h-[60px] bg-white border-slate-200 rounded-lg text-sm font-medium resize-none transition-all focus:ring-4 focus:ring-blue-500/5"
-            />
-          </div>
+        <div className="space-y-1">
+          <span className="text-[8px] font-medium text-muted-foreground ml-0.5">
+            Waktu
+          </span>
+          <Input
+            value={act.waktu}
+            onChange={(e) => onUpdate(act.id, "waktu", e.target.value)}
+            placeholder="Misal: 10 Menit"
+            className="h-9 text-sm"
+          />
+        </div>
+        <div className="space-y-1">
+          <span className="text-[8px] font-medium text-muted-foreground ml-0.5">
+            Hasil Output
+          </span>
+          <Textarea
+            value={act.output}
+            onChange={(e) => onUpdate(act.id, "output", e.target.value)}
+            placeholder="Misal: Draft SK"
+            className="min-h-[50px] text-sm"
+          />
+        </div>
+        <div className="space-y-1">
+          <span className="text-[8px] font-medium text-muted-foreground ml-0.5">
+            Keterangan
+          </span>
+          <Textarea
+            value={act.keterangan}
+            onChange={(e) => onUpdate(act.id, "keterangan", e.target.value)}
+            placeholder="Catatan tambahan..."
+            className="min-h-[50px] text-sm"
+          />
         </div>
       </div>
     </div>

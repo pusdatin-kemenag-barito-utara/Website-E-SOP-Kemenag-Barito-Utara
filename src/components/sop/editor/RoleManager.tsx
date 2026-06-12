@@ -1,15 +1,24 @@
 import React, { useState } from "react";
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+  arrayMove,
+  useSortable,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  Plus,
-  Users,
-  ChevronUp,
-  ChevronDown,
-  Trash2,
-  List,
-  GripVertical,
-} from "lucide-react";
+import { Plus, Users, Trash2, List, GripVertical } from "lucide-react";
 import { Activity } from "@/types/sop";
 
 interface Props {
@@ -24,6 +33,68 @@ interface Props {
   }) => void;
 }
 
+interface SortableRoleProps {
+  role: string;
+  index: number;
+  onRemove: (role: string) => void;
+}
+
+function SortableRole({ role, index, onRemove }: SortableRoleProps) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: role });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  };
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className={cn(
+        "flex items-center gap-2 px-3 py-2 border-b border-border last:border-0 transition-colors",
+        isDragging ? "z-10 opacity-50 bg-accent shadow-sm rounded-lg" : "hover:bg-accent/50",
+      )}
+    >
+      <button
+        className="flex items-center text-muted-foreground/40 cursor-grab active:cursor-grabbing touch-none"
+        {...attributes}
+        {...listeners}
+        aria-label="Seret untuk urutkan"
+      >
+        <GripVertical className="w-3.5 h-3.5" />
+      </button>
+
+      <span className="text-[9px] font-medium text-muted-foreground/60 w-4 text-right">
+        {(index + 1).toString().padStart(2, "0")}
+      </span>
+
+      <span className="flex-1 text-xs font-medium text-foreground">
+        {role}
+      </span>
+
+      <div className="flex items-center gap-1">
+        <button
+          onClick={() => onRemove(role)}
+          className="p-1 rounded-md text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-all"
+          aria-label="Hapus"
+        >
+          <Trash2 className="w-3.5 h-3.5" />
+        </button>
+      </div>
+    </div>
+  );
+}
+
+import { cn } from "@/lib/utils";
+
 export function RoleManager({
   roles,
   setRoles,
@@ -31,6 +102,13 @@ export function RoleManager({
   setConfirm,
 }: Props) {
   const [newRole, setNewRole] = useState("");
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    }),
+  );
 
   const addRole = () => {
     if (newRole.trim() && !roles.includes(newRole.trim())) {
@@ -58,107 +136,73 @@ export function RoleManager({
     });
   };
 
-  const moveRole = (index: number, direction: "up" | "down") => {
-    const newRoles = [...roles];
-    const targetIndex = direction === "up" ? index - 1 : index + 1;
-
-    if (targetIndex >= 0 && targetIndex < roles.length) {
-      [newRoles[index], newRoles[targetIndex]] = [
-        newRoles[targetIndex],
-        newRoles[index],
-      ];
-      setRoles(newRoles);
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (over && active.id !== over.id) {
+      setRoles((prev) => {
+        const oldIndex = prev.indexOf(active.id as string);
+        const newIndex = prev.indexOf(over.id as string);
+        return arrayMove(prev, oldIndex, newIndex);
+      });
     }
   };
 
   return (
-    <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm max-w-4xl mx-auto">
+    <div className="bg-card border border-border rounded-xl overflow-hidden">
       <div className="p-4 space-y-4">
-        {/* COMPACT ADD ROLE */}
-        <div className="flex items-center gap-2 bg-slate-50 p-1.5 rounded-xl border border-slate-200 focus-within:bg-white focus-within:ring-2 focus-within:ring-blue-100 transition-all">
-          <div className="ml-2 text-slate-400">
+        <div className="flex items-center gap-2 bg-muted p-1.5 rounded-lg border border-border focus-within:bg-background focus-within:ring-2 focus-within:ring-primary/20 transition-all">
+          <div className="ml-2 text-muted-foreground">
             <Plus className="w-4 h-4" />
           </div>
           <Input
             placeholder="Tambah pelaksana baru..."
-            className="h-8 border-none bg-transparent focus-visible:ring-0 text-xs font-semibold"
+            className="h-8 border-none bg-transparent focus-visible:ring-0 text-xs font-medium"
             value={newRole}
             onChange={(e) => setNewRole(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && addRole()}
           />
           <Button
             size="sm"
-            className="h-8 px-4 bg-blue-600 hover:bg-blue-700 text-white font-bold text-[10px] rounded-lg"
+            className="h-8 px-3 text-[10px] font-semibold"
             onClick={addRole}
           >
-            TAMBAH
+            Tambah
           </Button>
         </div>
 
-        {/* COMPACT LIST */}
-        <div className="border border-slate-100 rounded-xl overflow-hidden divide-y divide-slate-50">
-          <div className="bg-slate-50/50 px-4 py-2 flex items-center justify-between">
-            <div className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest">
+        <div className="border border-border rounded-lg overflow-hidden">
+          <div className="bg-muted px-3 py-2 flex items-center justify-between">
+            <div className="flex items-center gap-1.5 text-[9px] font-medium text-muted-foreground tracking-wide">
               <List className="w-3 h-3" />
               Daftar Pelaksana ({roles.length})
             </div>
           </div>
 
           <div className="max-h-[400px] overflow-y-auto custom-scrollbar">
-            {roles.map((role, index) => (
-              <div
-                key={role}
-                className="flex items-center gap-2 px-3 py-2 hover:bg-blue-50/50 transition-colors group border-b border-slate-50 last:border-0"
+            <DndContext
+              sensors={sensors}
+              collisionDetection={closestCenter}
+              onDragEnd={handleDragEnd}
+            >
+              <SortableContext
+                items={roles}
+                strategy={verticalListSortingStrategy}
               >
-                {/* GRIP HANDLE - ALWAYS VISIBLE */}
-                <div className="flex items-center text-slate-300 cursor-ns-resize">
-                  <GripVertical className="w-4 h-4" />
-                </div>
-
-                <span className="text-[10px] font-black text-slate-300 w-4">
-                  {(index + 1).toString().padStart(2, "0")}
-                </span>
-
-                <span className="flex-1 text-[11px] font-bold text-slate-600">
-                  {role}
-                </span>
-
-                {/* CONTROLS - ALWAYS VISIBLE BUT SUBTLE */}
-                <div className="flex items-center gap-1">
-                  <div className="flex bg-slate-100 rounded-md p-0.5">
-                    <button
-                      disabled={index === 0}
-                      onClick={() => moveRole(index, "up")}
-                      className="p-1 rounded-sm text-slate-400 hover:text-blue-600 hover:bg-white disabled:opacity-20 transition-all"
-                      title="Naik"
-                    >
-                      <ChevronUp className="w-3 h-3" />
-                    </button>
-                    <button
-                      disabled={index === roles.length - 1}
-                      onClick={() => moveRole(index, "down")}
-                      className="p-1 rounded-sm text-slate-400 hover:text-blue-600 hover:bg-white disabled:opacity-20 transition-all"
-                      title="Turun"
-                    >
-                      <ChevronDown className="w-3 h-3" />
-                    </button>
-                  </div>
-
-                  <button
-                    onClick={() => removeRole(role)}
-                    className="p-1.5 rounded-md text-red-500 hover:text-red-700 hover:bg-red-50 transition-all ml-1"
-                    title="Hapus"
-                  >
-                    <Trash2 className="w-3.5 h-3.5" />
-                  </button>
-                </div>
-              </div>
-            ))}
+                {roles.map((role, index) => (
+                  <SortableRole
+                    key={role}
+                    role={role}
+                    index={index}
+                    onRemove={removeRole}
+                  />
+                ))}
+              </SortableContext>
+            </DndContext>
 
             {roles.length === 0 && (
-              <div className="py-10 text-center text-slate-300">
-                <Users className="w-6 h-6 mx-auto mb-2 opacity-20" />
-                <p className="text-[10px] font-bold uppercase tracking-widest">
+              <div className="py-10 text-center">
+                <Users className="w-6 h-6 mx-auto mb-2 text-muted-foreground/20" />
+                <p className="text-[10px] font-medium text-muted-foreground/60 uppercase tracking-wider">
                   Belum ada data
                 </p>
               </div>

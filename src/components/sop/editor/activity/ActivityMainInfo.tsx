@@ -29,112 +29,107 @@ export function ActivityMainInfo({
   SYMBOL_ICONS,
 }: ActivityMainInfoProps) {
   return (
-    <div className="flex-1 space-y-4">
-      <div className="space-y-2">
-        <div className="flex items-center gap-2 mb-1">
-          <div className="w-1.5 h-4 bg-emerald-500 rounded-full" />
-          <label className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em]">
-            Informasi Utama
-          </label>
+    <div className="flex-1 space-y-3">
+      <div className="flex items-center gap-1.5">
+        <div className="w-1 h-3.5 bg-primary rounded-full" />
+        <span className="text-[9px] font-semibold text-muted-foreground tracking-wide">
+          Informasi Utama
+        </span>
+      </div>
+      <div className="space-y-3">
+        <div className="space-y-1">
+          <span className="text-[8px] font-medium text-muted-foreground ml-0.5">
+            Deskripsi Aktivitas
+          </span>
+          <Textarea
+            value={act.kegiatan}
+            onChange={(e) => onUpdate(act.id, "kegiatan", e.target.value)}
+            placeholder="Apa yang dilakukan pada tahap ini?"
+            className="min-h-[80px] text-sm leading-relaxed"
+          />
         </div>
-        <div className="space-y-4">
-          <div className="space-y-1.5">
-            <span className="text-[9px] font-bold text-slate-400 uppercase ml-1">
-              Deskripsi Aktivitas
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="space-y-1">
+            <span className="text-[8px] font-medium text-muted-foreground ml-0.5">
+              Simbol Alur
             </span>
-            <Textarea
-              value={act.kegiatan}
-              onChange={(e) => onUpdate(act.id, "kegiatan", e.target.value)}
-              placeholder="Apa yang dilakukan pada tahap ini?"
-              className="h-[100px] bg-white border-slate-200 focus:border-emerald-500 focus:ring-emerald-500/10 transition-all resize-none rounded-xl text-sm leading-relaxed p-4"
-            />
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="space-y-1.5">
-              <span className="text-[9px] font-bold text-slate-400 uppercase ml-1">
-                Simbol Alur
-              </span>
-              <Select
-                value={act.symbol}
-                onValueChange={(val: SymbolType | null) => {
-                  if (val) onUpdate(act.id, "symbol", val);
-                }}
-              >
-                <SelectTrigger className="h-10 bg-white border-slate-200 hover:border-emerald-300 transition-colors rounded-xl">
-                  <SelectValue>
-                    <div className="flex items-center gap-2">
-                      {React.createElement(SYMBOL_ICONS[act.symbol] || Square, {
-                        className: "w-4 h-4 text-emerald-600",
-                      })}
-                      <span className="font-bold text-slate-700 text-sm">
-                        {
-                          SYMBOL_OPTIONS.find((o) => o.value === act.symbol)
-                            ?.label
-                        }
-                      </span>
-                    </div>
-                  </SelectValue>
-                </SelectTrigger>
-                <SelectContent className="bg-white border-slate-200 shadow-2xl z-[9999] min-w-[200px] rounded-xl">
-                  {SYMBOL_OPTIONS.filter((opt) => opt.value !== "offpage").map(
-                    (opt) => (
-                      <SelectItem
-                        key={opt.value}
-                        value={opt.value}
-                        className="py-3 px-4 focus:bg-emerald-50 focus:text-emerald-900 cursor-pointer"
-                      >
-                        <div className="flex items-center gap-3">
-                          <div className="p-2 rounded-lg bg-slate-50 border border-slate-100">
-                            {React.createElement(SYMBOL_ICONS[opt.value], {
-                              className: "w-4 h-4 text-slate-500",
-                            })}
-                          </div>
-                          <span className="font-bold text-sm">{opt.label}</span>
-                        </div>
-                      </SelectItem>
-                    ),
-                  )}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-1.5">
-              <span className="text-[9px] font-bold text-slate-400 uppercase ml-1">
-                Pelaksana Utama
-              </span>
-              <Select
-                value={act.roleForSymbol}
-                onValueChange={(val: string | null) => {
-                  if (val) onUpdate(act.id, "roleForSymbol", val);
-                }}
-              >
-                <SelectTrigger className="h-10 bg-white border-slate-200 hover:border-blue-300 transition-colors rounded-xl">
-                  <SelectValue placeholder="Pilih Pelaksana">
-                    <div className="flex items-center gap-2">
-                      <Users className="w-4 h-4 text-blue-500" />
-                      <span className="font-bold text-slate-700 text-sm truncate max-w-[120px]">
-                        {act.roleForSymbol || "Pilih Pelaksana"}
-                      </span>
-                    </div>
-                  </SelectValue>
-                </SelectTrigger>
-                <SelectContent className="bg-white border-slate-200 shadow-2xl z-[9999] min-w-[240px] rounded-xl">
-                  {roles.map((role) => (
+            <Select
+              value={act.symbol}
+              onValueChange={(val: SymbolType | null) => {
+                if (val) onUpdate(act.id, "symbol", val);
+              }}
+            >
+              <SelectTrigger className="h-9">
+                <SelectValue>
+                  <div className="flex items-center gap-2">
+                    {React.createElement(SYMBOL_ICONS[act.symbol] || Square, {
+                      className: "w-3.5 h-3.5 text-primary",
+                    })}
+                    <span className="font-medium text-sm text-foreground">
+                      {SYMBOL_OPTIONS.find((o) => o.value === act.symbol)?.label}
+                    </span>
+                  </div>
+                </SelectValue>
+              </SelectTrigger>
+              <SelectContent className="min-w-[200px]">
+                {SYMBOL_OPTIONS.filter((opt) => opt.value !== "offpage").map(
+                  (opt) => (
                     <SelectItem
-                      key={role}
-                      value={role}
-                      className="py-3 px-4 focus:bg-blue-50 focus:text-blue-900 cursor-pointer"
+                      key={opt.value}
+                      value={opt.value}
+                      className="py-2.5 px-3 focus:bg-primary/10 cursor-pointer"
                     >
-                      <div className="flex items-center gap-3">
-                        <div className="p-2 rounded-lg bg-slate-50 border border-slate-100">
-                          <Users className="w-4 h-4 text-blue-500" />
+                      <div className="flex items-center gap-2.5">
+                        <div className="p-1.5 rounded-md bg-muted border border-border">
+                          {React.createElement(SYMBOL_ICONS[opt.value], {
+                            className: "w-3.5 h-3.5 text-muted-foreground",
+                          })}
                         </div>
-                        <span className="font-bold text-sm">{role}</span>
+                        <span className="font-medium text-sm">{opt.label}</span>
                       </div>
                     </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+                  ),
+                )}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-1">
+            <span className="text-[8px] font-medium text-muted-foreground ml-0.5">
+              Pelaksana Utama
+            </span>
+            <Select
+              value={act.roleForSymbol}
+              onValueChange={(val: string | null) => {
+                if (val) onUpdate(act.id, "roleForSymbol", val);
+              }}
+            >
+              <SelectTrigger className="h-9">
+                <SelectValue placeholder="Pilih Pelaksana">
+                  <div className="flex items-center gap-2">
+                    <Users className="w-3.5 h-3.5 text-blue-500" />
+                    <span className="font-medium text-sm text-foreground truncate max-w-[100px]">
+                      {act.roleForSymbol || "Pilih"}
+                    </span>
+                  </div>
+                </SelectValue>
+              </SelectTrigger>
+              <SelectContent className="min-w-[200px]">
+                {roles.map((role) => (
+                  <SelectItem
+                    key={role}
+                    value={role}
+                    className="py-2.5 px-3 focus:bg-primary/10 cursor-pointer"
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <div className="p-1.5 rounded-md bg-muted border border-border">
+                        <Users className="w-3.5 h-3.5 text-blue-500" />
+                      </div>
+                      <span className="font-medium text-sm">{role}</span>
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
         </div>
       </div>

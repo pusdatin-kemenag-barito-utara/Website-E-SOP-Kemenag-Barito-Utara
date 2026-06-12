@@ -128,9 +128,9 @@ export default function SOPBuilder() {
 
   if (authLoading) {
     return (
-      <div className="h-screen w-full bg-white flex flex-col items-center justify-center">
-        <Loader2 className="w-12 h-12 text-emerald-500 animate-spin mb-4" />
-        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none">
+      <div className="h-screen w-full bg-background flex flex-col items-center justify-center">
+        <Loader2 className="w-8 h-8 text-primary animate-spin mb-3" />
+        <p className="text-[9px] font-semibold text-muted-foreground tracking-wide">
           Memuat Sesi...
         </p>
       </div>
@@ -139,11 +139,15 @@ export default function SOPBuilder() {
 
   // 7. Main Builder UI
   return (
-    <div className="h-screen bg-[#F8FAFC] flex flex-col font-sans text-slate-900 overflow-hidden print:overflow-visible print:h-auto print:bg-white">
+    <div className="h-screen bg-gradient-to-br from-background via-background to-emerald-50/40 dark:from-background dark:via-background dark:to-emerald-950/20 flex flex-col text-foreground overflow-hidden print:overflow-visible print:h-auto print:bg-white relative">
+      {/* Background Decorations */}
+      <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-emerald-100/30 dark:bg-emerald-900/10 rounded-full blur-3xl animate-float pointer-events-none" />
+      <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-teal-100/20 dark:bg-teal-900/10 rounded-full blur-3xl animate-float-delayed pointer-events-none" />
+      <div className="absolute inset-0 bg-dot-grid-subtle pointer-events-none" />
+
+      <div className="relative z-10 flex flex-col flex-1 min-h-0">
       <BuilderHeader
         user={user}
-        viewMode={viewMode}
-        setViewMode={setViewMode}
         showProjects={showProjects}
         setShowProjects={setShowProjects}
         isSyncing={isSyncing}
@@ -158,11 +162,11 @@ export default function SOPBuilder() {
         onOpenAdmin={() => setShowAdmin(true)}
       />
 
-      <main className="flex-1 flex overflow-hidden h-[calc(100vh-64px)] print:overflow-visible print:h-auto print:block">
+      <main className="flex-1 flex overflow-hidden print:overflow-visible print:h-auto print:block">
         {/* Animated Sidebar Wrapper */}
         <div
           className={cn(
-            "h-full overflow-hidden transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] border-r border-slate-200 bg-slate-50",
+            "h-full overflow-hidden transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] border-r border-border bg-muted",
             user && showProjects
               ? "w-[300px] opacity-100"
               : "w-0 opacity-0 border-r-0",
@@ -219,6 +223,7 @@ export default function SOPBuilder() {
 
         <LivePreview
           viewMode={viewMode}
+          setViewMode={setViewMode}
           scale={effectiveScale}
           zoom={zoom}
           setZoom={setZoom}
@@ -250,6 +255,7 @@ export default function SOPBuilder() {
         onLoadSop={loadSop}
         onRefresh={fetchAllSops}
       />
+      </div>
     </div>
   );
 }

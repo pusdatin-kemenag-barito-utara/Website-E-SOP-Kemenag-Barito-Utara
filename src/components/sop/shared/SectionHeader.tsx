@@ -11,19 +11,19 @@ interface SectionHeaderProps {
 export function SectionHeader({
   icon: Icon,
   title,
-  colorClass = "text-slate-400",
+  colorClass = "text-muted-foreground",
 }: SectionHeaderProps) {
   return (
-    <div className="flex items-center gap-3 px-5 py-4 border-b border-slate-100 bg-slate-50/30">
+    <div className="flex items-center gap-3 px-4 py-3 border-b border-border bg-muted">
       <div
         className={cn(
-          "p-2 rounded-xl bg-white shadow-sm border border-slate-100",
+          "p-1.5 rounded-lg bg-background border border-border",
           colorClass,
         )}
       >
-        <Icon className="w-4 h-4" />
+        <Icon className="w-3.5 h-3.5" />
       </div>
-      <h3 className="text-[11px] font-black uppercase tracking-[0.15em] text-slate-500">
+      <h3 className="text-[10px] font-semibold tracking-wide text-muted-foreground">
         {title}
       </h3>
     </div>

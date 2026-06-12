@@ -31,7 +31,7 @@ export function ActivityCard({
   SYMBOL_ICONS,
 }: ActivityCardProps) {
   return (
-    <div className="border border-slate-200 rounded-2xl bg-white shadow-sm overflow-hidden group hover:border-emerald-300 transition-all hover:shadow-md">
+    <div className="border border-border rounded-xl bg-card overflow-hidden group hover:border-primary/30 transition-all hover:shadow-sm">
       <ActivityCardHeader
         act={act}
         index={index}
@@ -43,14 +43,14 @@ export function ActivityCard({
 
       <div
         className={cn(
-          "grid transition-all duration-500 ease-in-out",
+          "grid transition-all duration-300 ease-in-out",
           isExpanded
-            ? "grid-rows-[1fr] opacity-100 mt-2"
+            ? "grid-rows-[1fr] opacity-100"
             : "grid-rows-[0fr] opacity-0 overflow-hidden",
         )}
       >
         <div className="overflow-hidden">
-          <div className="p-4 border-t border-slate-100 bg-white/50 backdrop-blur-sm">
+          <div className="p-4 border-t border-border bg-muted">
             <div className="flex flex-col lg:flex-row gap-6">
               <ActivityMainInfo
                 act={act}

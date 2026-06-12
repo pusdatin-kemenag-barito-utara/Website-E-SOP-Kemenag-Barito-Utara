@@ -1,6 +1,6 @@
 import React from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Settings, Users, FileText, ShieldCheck } from "lucide-react";
+import { Settings, Users, FileText } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { SOPHeaderEditor } from "@/components/sop/editor/header/SOPHeaderEditor";
 import { RoleManager } from "@/components/sop/editor/RoleManager";
@@ -44,9 +44,9 @@ export function EditorPanel({
   return (
     <aside
       className={cn(
-        "flex-1 lg:flex-none lg:w-[550px] xl:w-[700px] bg-white border-r border-slate-200 flex flex-col transition-all duration-300 print:hidden h-full overflow-hidden",
+        "flex-1 lg:flex-none lg:w-[550px] xl:w-[700px] bg-card border-r border-border flex flex-col transition-all duration-300 print:hidden h-full overflow-hidden",
         viewMode === "preview"
-          ? "hidden lg:flex opacity-50 pointer-events-none grayscale"
+          ? "hidden lg:flex opacity-50 pointer-events-none"
           : "flex",
       )}
     >
@@ -55,50 +55,38 @@ export function EditorPanel({
         onValueChange={setActiveSection}
         className="h-full flex flex-col overflow-hidden"
       >
-        <div className="px-4 md:px-6 py-4 border-b border-slate-100">
-          <TabsList className="grid w-full grid-cols-3 h-11 bg-slate-50 p-1 rounded-2xl">
+        <div className="px-4 md:px-6 border-b border-border bg-muted">
+          <TabsList variant="line" className="w-full h-11 gap-0">
             <TabsTrigger
               value="header"
-              className="rounded-xl data-[state=active]:bg-white data-[state=active]:text-amber-600 data-[state=active]:shadow-md font-bold text-[10px] transition-all"
+              className="text-xs font-medium h-full rounded-none px-4 data-[state=active]:text-primary data-[state=active]:font-semibold gap-2"
             >
-              <Settings className="w-3.5 h-3.5 mr-2 text-amber-600" /> Konfigurasi
+              <Settings className="w-3.5 h-3.5" /> Konfigurasi
             </TabsTrigger>
             <TabsTrigger
               value="roles"
-              className="rounded-xl data-[state=active]:bg-white data-[state=active]:text-blue-600 data-[state=active]:shadow-md font-bold text-[10px] transition-all"
+              className="text-xs font-medium h-full rounded-none px-4 data-[state=active]:text-primary data-[state=active]:font-semibold gap-2"
             >
-              <Users className="w-3.5 h-3.5 mr-2 text-blue-600" /> Pelaksana
+              <Users className="w-3.5 h-3.5" /> Pelaksana
             </TabsTrigger>
             <TabsTrigger
               value="activities"
-              className="rounded-xl data-[state=active]:bg-white data-[state=active]:text-emerald-600 data-[state=active]:shadow-md font-bold text-[10px] transition-all"
+              className="text-xs font-medium h-full rounded-none px-4 data-[state=active]:text-primary data-[state=active]:font-semibold gap-2"
             >
-              <FileText className="w-3.5 h-3.5 mr-2 text-emerald-600" /> Alur Kerja
+              <FileText className="w-3.5 h-3.5" /> Alur Kerja
             </TabsTrigger>
           </TabsList>
         </div>
 
-        <div className="flex-1 overflow-y-auto custom-scrollbar bg-[#FDFDFD] min-h-0 [scrollbar-gutter:stable]">
+        <div className="flex-1 overflow-y-auto custom-scrollbar min-h-0 [scrollbar-gutter:stable] bg-[radial-gradient(ellipse_at_top,_hsl(var(--primary)/0.02)_0%,_transparent_60%)]">
           <TabsContent value="header" className="mt-0 outline-none">
-            <div className="px-6 py-4">
-              <div className="flex items-center gap-2 mb-6">
-                <ShieldCheck className="w-5 h-5 text-amber-600" />
-                <h2 className="text-sm font-black text-slate-800 uppercase tracking-wider leading-none">
-                  Identitas & Legalitas
-                </h2>
-              </div>
+            <div className="px-5 py-4">
               <SOPHeaderEditor header={header} setHeader={setHeader} />
             </div>
           </TabsContent>
 
           <TabsContent value="roles" className="mt-0 outline-none">
-            <div className="px-6 py-4">
-              <div className="flex items-center gap-2 mb-6">
-                <Users className="w-5 h-5 text-blue-600" />
-                <h2 className="text-sm font-black text-slate-800 uppercase tracking-wider leading-none">
-                  Manajemen Pelaksana
-                </h2>
-              </div>
+            <div className="px-5 py-4">
               <RoleManager
                 roles={roles}
                 setRoles={setRoles}

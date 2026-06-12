@@ -19,77 +19,74 @@ export function HeaderIdentitySection({
   const isDefaultNomor = header.nomor === DEFAULT_HEADER.nomor;
 
   return (
-    <div className="group bg-white rounded-[2rem] border border-slate-200 shadow-xl shadow-slate-200/40 overflow-hidden transition-all duration-500 hover:shadow-2xl hover:shadow-emerald-100/50 hover:border-emerald-100">
+    <div className="bg-card border border-border rounded-xl overflow-hidden">
       <SectionHeader
         icon={Fingerprint}
         title="Identitas & Pengesahan"
         colorClass="text-emerald-500"
       />
 
-      <div className="p-5 space-y-4">
-        <div className="space-y-2 group/field">
-          <div className="flex items-center justify-between">
-            <label className="text-[11px] font-bold text-slate-500 ml-1 uppercase tracking-wider flex items-center gap-2">
-              <FileText className="w-3 h-3 text-emerald-500" /> Nama Prosedur
-              (SOP)
-            </label>
-          </div>
+      <div className="p-4 space-y-4">
+        <div className="space-y-1.5">
+          <label className="text-[10px] font-semibold text-muted-foreground ml-0.5 tracking-wide flex items-center gap-1.5">
+            <FileText className="w-3 h-3 text-emerald-500" /> Nama Prosedur (SOP)
+          </label>
           <Input
             value={header.namaSOP}
             onChange={(e) => updateHeader("namaSOP", e.target.value)}
             className={cn(
-              "h-10 bg-slate-50/50 border-slate-200 font-bold focus:bg-white focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all rounded-xl px-4",
-              isDefaultName ? "text-slate-400" : "text-slate-800",
+              "h-9 font-medium",
+              isDefaultName ? "text-muted-foreground" : "text-foreground",
             )}
             placeholder="Masukkan judul SOP..."
           />
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6">
-          <div className="space-y-2">
-            <label className="text-[11px] font-bold text-slate-500 ml-1 uppercase tracking-wider flex items-center gap-2">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="space-y-1.5">
+            <label className="text-[10px] font-semibold text-muted-foreground ml-0.5 tracking-wide flex items-center gap-1.5">
               <BadgeCheck className="w-3 h-3 text-blue-500" /> Nomor SOP
             </label>
             <Input
               value={header.nomor}
               onChange={(e) => updateHeader("nomor", e.target.value)}
               className={cn(
-                "h-10 bg-slate-50/50 border-slate-200 focus:bg-white focus:ring-4 focus:ring-blue-500/5 focus:border-blue-400 transition-all rounded-xl px-4 text-sm",
-                isDefaultNomor ? "text-slate-400" : "text-slate-700",
+                "h-9",
+                isDefaultNomor ? "text-muted-foreground" : "text-foreground",
               )}
             />
           </div>
-          <div className="space-y-2">
-            <label className="text-[11px] font-bold text-slate-500 ml-1 uppercase tracking-wider flex items-center gap-2">
+          <div className="space-y-1.5">
+            <label className="text-[10px] font-semibold text-muted-foreground ml-0.5 tracking-wide flex items-center gap-1.5">
               <UserCheck className="w-3 h-3 text-orange-500" /> Jabatan Pengesah
             </label>
             <Input
               value={header.disahkanOleh}
               onChange={(e) => updateHeader("disahkanOleh", e.target.value)}
-              className="h-10 bg-slate-50/50 border-slate-200 focus:bg-white focus:ring-4 focus:ring-orange-500/5 focus:border-orange-400 transition-all rounded-xl px-4 text-sm font-medium"
+              className="h-9"
             />
           </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6 pt-2 border-t border-slate-50">
-          <div className="space-y-2">
-            <label className="text-[11px] font-bold text-slate-500 ml-1 uppercase tracking-wider">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-3 border-t border-border">
+          <div className="space-y-1.5">
+            <label className="text-[10px] font-semibold text-muted-foreground ml-0.5 tracking-wide">
               Nama Pejabat
             </label>
             <Input
               value={header.pejabatNama}
               onChange={(e) => updateHeader("pejabatNama", e.target.value)}
-              className="h-10 bg-slate-50/50 border-slate-200 focus:bg-white transition-all rounded-xl px-4 text-sm font-semibold"
+              className="h-9"
             />
           </div>
-          <div className="space-y-2">
-            <label className="text-[11px] font-bold text-slate-500 ml-1 uppercase tracking-wider">
+          <div className="space-y-1.5">
+            <label className="text-[10px] font-semibold text-muted-foreground ml-0.5 tracking-wide">
               NIP Pejabat
             </label>
             <Input
               value={header.pejabatNip}
               onChange={(e) => updateHeader("pejabatNip", e.target.value)}
-              className="h-10 bg-slate-50/50 border-slate-200 focus:bg-white transition-all rounded-xl px-4 text-sm font-mono"
+              className="h-9 font-mono"
             />
           </div>
         </div>

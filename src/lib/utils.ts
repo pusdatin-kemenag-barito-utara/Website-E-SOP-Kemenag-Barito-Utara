@@ -1,5 +1,7 @@
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
+import { format, parseISO } from "date-fns"
+import { id } from "date-fns/locale"
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -7,19 +9,12 @@ export function cn(...inputs: ClassValue[]) {
 
 export function formatIndonesianDate(dateString: string): string {
   if (!dateString || dateString === "-") return "-";
-  
-  // Handle ISO format or YYYY-MM-DD
-  const date = new Date(dateString);
-  if (isNaN(date.getTime())) return dateString;
 
-  const months = [
-    "Januari", "Februari", "Maret", "April", "Mei", "Juni",
-    "Juli", "Agustus", "September", "Oktober", "November", "Desember"
-  ];
-
-  const day = String(date.getDate()).padStart(2, '0');
-  const month = months[date.getMonth()];
-  const year = date.getFullYear();
-
-  return `${day} ${month} ${year}`;
+  try {
+    const parsed = parseISO(dateString);
+    if (isNaN(parsed.getTime())) return "-";
+    return format(parsed, "dd MMMM yyyy", { locale: id });
+  } catch {
+    return "-";
+  }
 }
