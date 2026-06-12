@@ -102,7 +102,7 @@ export function DatePicker({
           <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
           <div
             className={cn(
-              "absolute left-0 top-full mt-1 z-50 bg-white dark:bg-slate-800 border border-border dark:border-slate-700 rounded-xl shadow-lg overflow-hidden",
+              "absolute left-0 top-full mt-1 w-full z-50 bg-white dark:bg-slate-800 border border-border dark:border-slate-700 rounded-xl shadow-lg overflow-hidden",
               "animate-in fade-in slide-in-from-top-2 duration-200",
             )}
           >
@@ -112,12 +112,12 @@ export function DatePicker({
               onSelect={handleSelect}
               locale={idLocale}
               showOutsideDays
-              className="p-2"
+              className="p-2 w-full"
               classNames={{
                 root: "w-full",
-                months: "flex flex-col",
+                months: "flex flex-col w-full",
                 month_grid: "w-full border-collapse",
-                month: "space-y-2",
+                month: "space-y-2 w-full",
                 month_caption: "flex items-center justify-between px-1 pt-1 pb-2",
                 caption_label: "text-xs font-semibold text-foreground",
                 nav: "flex items-center gap-1",

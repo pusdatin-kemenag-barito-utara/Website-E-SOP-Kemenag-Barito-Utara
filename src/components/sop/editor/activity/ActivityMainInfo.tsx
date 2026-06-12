@@ -71,7 +71,7 @@ export function ActivityMainInfo({
                   </div>
                 </SelectValue>
               </SelectTrigger>
-              <SelectContent className="min-w-[200px]">
+              <SelectContent alignItemWithTrigger={false} className="min-w-[200px] bg-white dark:bg-slate-900 z-50">
                 {SYMBOL_OPTIONS.filter((opt) => opt.value !== "offpage").map(
                   (opt) => (
                     <SelectItem
@@ -113,7 +113,7 @@ export function ActivityMainInfo({
                   </div>
                 </SelectValue>
               </SelectTrigger>
-              <SelectContent className="min-w-[200px]">
+              <SelectContent alignItemWithTrigger={false} className="min-w-[200px] bg-white dark:bg-slate-900 z-50">
                 {roles.map((role) => (
                   <SelectItem
                     key={role}
