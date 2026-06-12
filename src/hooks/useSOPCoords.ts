@@ -16,10 +16,14 @@ export function useSOPCoords(
   useEffect(() => {
     if (!isHydrated) return;
 
+    let lastCoordsString = "";
+
     const updateCoords = () => {
       const newCoords: Record<string, SymbolCoord> = {};
       const container = document.getElementById("sop-preview-container");
       if (!container) return;
+
+      let hasValidCoords = false;
 
       activities.forEach((act) => {
         const el = document.getElementById(`symbol-${act.id}`);
@@ -28,16 +32,32 @@ export function useSOPCoords(
           const pageEl = el.closest(".print-page");
           if (pageEl) {
             const pageRect = pageEl.getBoundingClientRect();
-            newCoords[act.id] = {
-              x: rect.left - pageRect.left + rect.width / 2,
-              y: rect.top - pageRect.top + rect.height / 2,
-              w: rect.width,
-              h: rect.height,
-            };
+            
+            // Hitung skala (karena di mobile ada transform: scale)
+            // pageRect.width adalah ukuran di layar (ter-scale), pageEl.offsetWidth adalah ukuran asli CSS (unscaled)
+            const scale = pageRect.width / (pageEl as HTMLElement).offsetWidth || 1;
+
+            // Hanya update jika elemen benar-benar terlihat (width > 0)
+            if (rect.width > 0 && rect.height > 0) {
+              newCoords[act.id] = {
+                x: (rect.left - pageRect.left) / scale + (el as HTMLElement).offsetWidth / 2,
+                y: (rect.top - pageRect.top) / scale + (el as HTMLElement).offsetHeight / 2,
+                w: (el as HTMLElement).offsetWidth,
+                h: (el as HTMLElement).offsetHeight,
+              };
+              hasValidCoords = true;
+            }
           }
         }
       });
-      setSymbolCoords(newCoords);
+
+      if (hasValidCoords) {
+        const newCoordsString = JSON.stringify(newCoords);
+        if (newCoordsString !== lastCoordsString) {
+          lastCoordsString = newCoordsString;
+          setSymbolCoords(newCoords);
+        }
+      }
     };
 
     const container = document.getElementById("sop-preview-container");
@@ -45,11 +65,11 @@ export function useSOPCoords(
     if (container) observer.observe(container);
 
     updateCoords();
-    const timer = setTimeout(updateCoords, 50);
+    const interval = setInterval(updateCoords, 100);
 
     return () => {
       observer.disconnect();
-      clearTimeout(timer);
+      clearInterval(interval);
     };
   }, [
     activities,

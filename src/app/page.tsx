@@ -160,6 +160,8 @@ export default function SOPBuilder() {
         authLoading={authLoading}
         lastSaved={lastSaved}
         onOpenAdmin={() => setShowAdmin(true)}
+        viewMode={viewMode}
+        setViewMode={setViewMode}
       />
 
       <main className="flex-1 flex overflow-hidden print:overflow-visible print:h-auto print:block">

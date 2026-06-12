@@ -17,7 +17,7 @@ export function ActivityMutuBaku({ act, onUpdate }: ActivityMutuBakuProps) {
           Mutu Baku
         </span>
       </div>
-      <div className="p-3 bg-muted rounded-lg border border-border space-y-3">
+      <div className="p-2 sm:p-3 bg-muted rounded-lg border border-border space-y-2 sm:space-y-3">
         <div className="space-y-1">
           <span className="text-[8px] font-medium text-muted-foreground ml-0.5">
             Persyaratan
@@ -26,7 +26,7 @@ export function ActivityMutuBaku({ act, onUpdate }: ActivityMutuBakuProps) {
             value={act.persyaratan}
             onChange={(e) => onUpdate(act.id, "persyaratan", e.target.value)}
             placeholder="Berkas yang dibutuhkan..."
-            className="min-h-[50px] text-sm"
+            className="min-h-[40px] sm:min-h-[50px] max-h-[80px] sm:max-h-none overflow-y-auto text-sm"
           />
         </div>
         <div className="space-y-1">
@@ -37,7 +37,7 @@ export function ActivityMutuBaku({ act, onUpdate }: ActivityMutuBakuProps) {
             value={act.waktu}
             onChange={(e) => onUpdate(act.id, "waktu", e.target.value)}
             placeholder="Misal: 10 Menit"
-            className="h-9 text-sm"
+            className="h-8 sm:h-9 text-sm"
           />
         </div>
         <div className="space-y-1">
@@ -48,7 +48,7 @@ export function ActivityMutuBaku({ act, onUpdate }: ActivityMutuBakuProps) {
             value={act.output}
             onChange={(e) => onUpdate(act.id, "output", e.target.value)}
             placeholder="Misal: Draft SK"
-            className="min-h-[50px] text-sm"
+            className="min-h-[40px] sm:min-h-[50px] max-h-[80px] sm:max-h-none overflow-y-auto text-sm"
           />
         </div>
         <div className="space-y-1">
@@ -59,7 +59,7 @@ export function ActivityMutuBaku({ act, onUpdate }: ActivityMutuBakuProps) {
             value={act.keterangan}
             onChange={(e) => onUpdate(act.id, "keterangan", e.target.value)}
             placeholder="Catatan tambahan..."
-            className="min-h-[50px] text-sm"
+            className="min-h-[40px] sm:min-h-[50px] max-h-[80px] sm:max-h-none overflow-y-auto text-sm"
           />
         </div>
       </div>

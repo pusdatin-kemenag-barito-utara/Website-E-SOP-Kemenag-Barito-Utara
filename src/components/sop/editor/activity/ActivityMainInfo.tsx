@@ -45,10 +45,10 @@ export function ActivityMainInfo({
             value={act.kegiatan}
             onChange={(e) => onUpdate(act.id, "kegiatan", e.target.value)}
             placeholder="Apa yang dilakukan pada tahap ini?"
-            className="min-h-[80px] text-sm leading-relaxed"
+            className="min-h-[80px] max-h-[120px] md:max-h-none overflow-y-auto text-sm leading-relaxed"
           />
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div className="grid grid-cols-2 gap-2 sm:gap-3">
           <div className="space-y-1">
             <span className="text-[8px] font-medium text-muted-foreground ml-0.5">
               Simbol Alur

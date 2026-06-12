@@ -11,6 +11,8 @@ import {
   List,
   LogIn,
   ShieldAlert,
+  Eye,
+  Edit3,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -31,6 +33,8 @@ interface BuilderHeaderProps {
   authLoading: boolean;
   lastSaved: Date | null;
   onOpenAdmin: () => void;
+  viewMode?: "edit" | "preview";
+  setViewMode?: (mode: "edit" | "preview") => void;
 }
 
 export function BuilderHeader({
@@ -47,6 +51,8 @@ export function BuilderHeader({
   authLoading,
   lastSaved,
   onOpenAdmin,
+  viewMode,
+  setViewMode,
 }: BuilderHeaderProps) {
   const isAdmin = user?.email === "kepegawaiankemenagbarut@gmail.com";
 
@@ -115,6 +121,29 @@ export function BuilderHeader({
               >
                 <ShieldAlert className="w-4 h-4 md:mr-1.5" />
                 <span className="hidden md:inline">Admin</span>
+              </Button>
+            )}
+
+            {/* Preview Toggle (Mobile Only) */}
+            {viewMode && setViewMode && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="lg:hidden font-medium text-xs px-2 text-primary border-primary/20 bg-primary/5 hover:bg-primary/10"
+                onClick={() => setViewMode(viewMode === "edit" ? "preview" : "edit")}
+                aria-label="Toggle Preview"
+              >
+                {viewMode === "edit" ? (
+                  <>
+                    <Eye className="w-4 h-4 mr-1.5" />
+                    Preview
+                  </>
+                ) : (
+                  <>
+                    <Edit3 className="w-4 h-4 mr-1.5" />
+                    Editor
+                  </>
+                )}
               </Button>
             )}
 
