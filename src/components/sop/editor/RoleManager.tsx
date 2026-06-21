@@ -59,34 +59,34 @@ function SortableRole({ role, index, onRemove }: SortableRoleProps) {
       ref={setNodeRef}
       style={style}
       className={cn(
-        "flex items-center gap-2 px-3 py-2 border-b border-border last:border-0 transition-colors",
-        isDragging ? "z-10 opacity-50 bg-accent shadow-sm rounded-lg" : "hover:bg-accent/50",
+        "flex items-center gap-3 px-4 py-3 border-b border-slate-100 dark:border-slate-800/60 last:border-0 bg-white dark:bg-slate-900 transition-colors",
+        isDragging ? "z-10 opacity-50 shadow-md" : "hover:bg-slate-50 dark:hover:bg-slate-800/50",
       )}
     >
       <button
-        className="flex items-center text-muted-foreground/40 cursor-grab active:cursor-grabbing touch-none"
+        className="flex items-center text-slate-400 hover:text-slate-800 cursor-grab active:cursor-grabbing touch-none transition-colors"
         {...attributes}
         {...listeners}
         aria-label="Seret untuk urutkan"
       >
-        <GripVertical className="w-3.5 h-3.5" />
+        <GripVertical className="w-4 h-4" />
       </button>
 
-      <span className="text-[9px] font-medium text-muted-foreground/60 w-4 text-right">
+      <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 w-5 text-right">
         {(index + 1).toString().padStart(2, "0")}
       </span>
 
-      <span className="flex-1 text-xs font-medium text-foreground">
+      <span className="flex-1 text-sm font-semibold text-slate-800 dark:text-slate-200 tracking-wide">
         {role}
       </span>
 
       <div className="flex items-center gap-1">
         <button
           onClick={() => onRemove(role)}
-          className="p-1 rounded-md text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-all"
+          className="p-1.5 rounded-md text-slate-600 hover:text-red-500 hover:bg-red-50 transition-all"
           aria-label="Hapus"
         >
-          <Trash2 className="w-3.5 h-3.5" />
+          <Trash2 className="w-4 h-4" />
         </button>
       </div>
     </div>
@@ -148,35 +148,35 @@ export function RoleManager({
   };
 
   return (
-    <div className="bg-card border border-border rounded-xl overflow-hidden">
-      <div className="p-4 space-y-4">
-        <div className="flex items-center gap-2 bg-muted p-1.5 rounded-lg border border-border focus-within:bg-background focus-within:ring-2 focus-within:ring-primary/20 transition-all">
-          <div className="ml-2 text-muted-foreground">
-            <Plus className="w-4 h-4" />
-          </div>
-          <Input
-            placeholder="Tambah pelaksana baru..."
-            className="h-8 border-none bg-transparent focus-visible:ring-0 text-xs font-medium"
-            value={newRole}
-            onChange={(e) => setNewRole(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && addRole()}
-          />
-          <Button
-            size="sm"
-            className="h-8 px-3 text-[10px] font-semibold"
-            onClick={addRole}
-          >
-            Tambah
-          </Button>
+    <div className="space-y-4">
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-2 flex items-center gap-2 shadow-sm">
+        <div className="pl-2 text-slate-800">
+          <Plus className="w-4 h-4" />
         </div>
+        <Input
+          placeholder="Tambah pelaksana baru..."
+          className="h-10 border-none bg-transparent focus-visible:ring-0 text-sm font-bold text-slate-700 px-2"
+          value={newRole}
+          onChange={(e) => setNewRole(e.target.value)}
+          onKeyDown={(e) => e.key === "Enter" && addRole()}
+        />
+        <Button
+          size="sm"
+          className="h-9 px-5 text-xs font-bold rounded-lg bg-[#015C3A] text-white hover:bg-[#014A2E]"
+          onClick={addRole}
+        >
+          Tambah
+        </Button>
+      </div>
 
-        <div className="border border-border rounded-lg overflow-hidden">
-          <div className="bg-muted px-3 py-2 flex items-center justify-between">
-            <div className="flex items-center gap-1.5 text-[9px] font-medium text-muted-foreground tracking-wide">
-              <List className="w-3 h-3" />
-              Daftar Pelaksana ({roles.length})
-            </div>
+      {/* Roles List */}
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-sm">
+        <div className="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-100 dark:border-slate-800/60 px-4 py-3 flex items-center justify-between">
+          <div className="flex items-center gap-2 text-xs font-bold text-slate-700 dark:text-slate-200 tracking-wide">
+            <List className="w-4 h-4 text-slate-500" />
+            Daftar Pelaksana ({roles.length})
           </div>
+        </div>
 
           <div className="max-h-[400px] overflow-y-auto custom-scrollbar">
             <DndContext
@@ -200,15 +200,14 @@ export function RoleManager({
             </DndContext>
 
             {roles.length === 0 && (
-              <div className="py-10 text-center">
-                <Users className="w-6 h-6 mx-auto mb-2 text-muted-foreground/20" />
-                <p className="text-[10px] font-medium text-muted-foreground/60 uppercase tracking-wider">
-                  Belum ada data
+              <div className="py-12 text-center">
+                <Users className="w-8 h-8 mx-auto mb-3 text-slate-300" />
+                <p className="text-xs font-bold text-slate-400 tracking-wider">
+                  Belum ada data pelaksana
                 </p>
               </div>
             )}
           </div>
-        </div>
       </div>
     </div>
   );

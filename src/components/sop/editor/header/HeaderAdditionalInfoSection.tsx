@@ -14,17 +14,17 @@ export function HeaderAdditionalInfoSection({
   updateHeader,
 }: HeaderAdditionalInfoSectionProps) {
   return (
-    <div className="bg-card border border-border rounded-xl overflow-hidden">
+    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-sm">
       <SectionHeader
         icon={Info}
         title="Informasi Tambahan"
-        colorClass="text-amber-500"
+        colorClass="text-amber-500 dark:text-amber-400"
       />
-      <div className="p-4 space-y-4">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div className="space-y-1.5">
-            <label className="text-[10px] font-semibold text-muted-foreground ml-0.5 tracking-wide flex items-center gap-1.5">
-              <Link2 className="w-3 h-3 text-sky-400" /> Keterkaitan
+      <div className="p-5 md:p-6 space-y-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+          <div className="space-y-2">
+            <label className="text-xs font-bold text-slate-700 dark:text-slate-200 ml-1 tracking-wide flex items-center gap-1.5 mb-1.5">
+              <Link2 className="w-4 h-4 text-sky-500" /> Keterkaitan
             </label>
             <SmartTextarea
               value={header.keterkaitan}
@@ -33,9 +33,9 @@ export function HeaderAdditionalInfoSection({
               placeholder="Contoh: 1. SOP Persuratan..."
             />
           </div>
-          <div className="space-y-1.5">
-            <label className="text-[10px] font-semibold text-muted-foreground ml-0.5 tracking-wide flex items-center gap-1.5">
-              <Wrench className="w-3 h-3" /> Peralatan
+          <div className="space-y-2">
+            <label className="text-xs font-bold text-slate-700 dark:text-slate-200 ml-1 tracking-wide flex items-center gap-1.5 mb-1.5">
+              <Wrench className="w-4 h-4 text-amber-500" /> Peralatan
             </label>
             <SmartTextarea
               value={header.peralatan}
@@ -46,10 +46,10 @@ export function HeaderAdditionalInfoSection({
           </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div className="space-y-1.5">
-            <label className="text-[10px] font-semibold text-destructive ml-0.5 tracking-wide flex items-center gap-1.5">
-              <ShieldAlert className="w-3 h-3" /> Peringatan
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+          <div className="space-y-2">
+            <label className="text-xs font-bold text-red-600 dark:text-red-400 ml-1 tracking-wide flex items-center gap-1.5 mb-1.5">
+              <ShieldAlert className="w-4 h-4" /> Peringatan
             </label>
             <SmartTextarea
               value={header.peringatan}
@@ -58,9 +58,9 @@ export function HeaderAdditionalInfoSection({
               placeholder="Contoh: 1. Berkas harus lengkap..."
             />
           </div>
-          <div className="space-y-1.5">
-            <label className="text-[10px] font-semibold text-muted-foreground ml-0.5 tracking-wide flex items-center gap-1.5">
-              <ClipboardList className="w-3 h-3" /> Pencatatan
+          <div className="space-y-2">
+            <label className="text-xs font-bold text-slate-700 dark:text-slate-200 ml-1 tracking-wide flex items-center gap-1.5 mb-1.5">
+              <ClipboardList className="w-4 h-4 text-slate-500 dark:text-slate-400" /> Pencatatan
             </label>
             <SmartTextarea
               value={header.pencatatan}

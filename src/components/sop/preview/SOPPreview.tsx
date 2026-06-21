@@ -61,7 +61,7 @@ export function SOPPreview({
       {/* VISIBLE PREVIEW */}
       <div
         id="sop-preview-container"
-        className="flex flex-col gap-0 w-fit mx-auto sop-preview-force-black"
+        className="flex flex-col gap-0 w-fit mx-auto sop-preview-force-black font-inter"
       >
         {activityPages.map((pageActs, pageIdx) => (
           <SOPPageWrapper

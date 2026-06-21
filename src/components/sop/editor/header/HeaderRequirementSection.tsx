@@ -14,16 +14,16 @@ export function HeaderRequirementSection({
   updateHeader,
 }: HeaderRequirementSectionProps) {
   return (
-    <div className="bg-card border border-border rounded-xl overflow-hidden">
+    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-sm">
       <SectionHeader
         icon={Gavel}
         title="Dasar Hukum & Kualifikasi"
-        colorClass="text-purple-500"
+        colorClass="text-purple-500 dark:text-purple-400"
       />
-      <div className="p-4 space-y-4">
-        <div className="space-y-1.5">
-          <label className="text-[10px] font-semibold text-muted-foreground ml-0.5 tracking-wide flex items-center gap-1.5">
-            <Gavel className="w-3 h-3 text-purple-400" /> Dasar Hukum
+      <div className="p-5 md:p-6 space-y-6">
+        <div className="space-y-2">
+          <label className="text-xs font-bold text-slate-700 dark:text-slate-200 ml-1 tracking-wide flex items-center gap-1.5 mb-1.5">
+            <Gavel className="w-4 h-4 text-purple-500" /> Dasar Hukum
           </label>
           <SmartTextarea
             value={header.dasarHukum}
@@ -32,9 +32,9 @@ export function HeaderRequirementSection({
             placeholder="Contoh: 1. Undang-undang No. 25 Tahun 2009..."
           />
         </div>
-        <div className="space-y-1.5">
-          <label className="text-[10px] font-semibold text-muted-foreground ml-0.5 tracking-wide flex items-center gap-1.5">
-            <ClipboardList className="w-3 h-3 text-indigo-400" /> Kualifikasi Pelaksana
+        <div className="space-y-2">
+          <label className="text-xs font-bold text-slate-700 dark:text-slate-200 ml-1 tracking-wide flex items-center gap-1.5 mb-1.5">
+            <ClipboardList className="w-4 h-4 text-indigo-500" /> Kualifikasi Pelaksana
           </label>
           <SmartTextarea
             value={header.kualifikasi}

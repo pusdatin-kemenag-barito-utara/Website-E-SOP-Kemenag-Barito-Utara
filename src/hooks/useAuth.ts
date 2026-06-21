@@ -35,19 +35,21 @@ export function useAuth() {
     return () => subscription.unsubscribe();
   }, [router]);
 
-  const signInWithGoogle = async () => {
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: "google",
-      options: {
-        redirectTo: window.location.origin,
-      },
+  const signInWithEmail = async (email: string, password: string) => {
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
     });
-    if (error) console.error("Login error:", error.message);
+    if (error) {
+      console.error("Login error:", error.message);
+      return { success: false, error: error.message };
+    }
+    return { success: true };
   };
 
   const signOut = async () => {
     await supabase.auth.signOut();
   };
 
-  return { user, loading, signInWithGoogle, signOut };
+  return { user, loading, signInWithEmail, signOut };
 }

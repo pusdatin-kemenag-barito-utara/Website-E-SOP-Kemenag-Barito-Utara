@@ -89,27 +89,27 @@ export function ActivityEditor({
   };
 
   return (
-    <div className="p-4 space-y-4">
-      <div className="flex justify-between items-center bg-primary/5 border border-primary/10 rounded-xl p-4">
-        <div>
-          <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
-            <MoveVertical className="w-4 h-4 text-primary" />
-            Tahapan Kegiatan
-          </h3>
-          <p className="text-[9px] text-muted-foreground font-medium ml-6 mt-0.5">
-            {activities.length} langkah
-          </p>
+    <div className="p-4 md:p-6 space-y-4">
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl px-5 py-4 flex items-center justify-between shadow-sm">
+        <div className="flex items-center gap-3">
+          <MoveVertical className="w-5 h-5 text-slate-800 dark:text-slate-200" />
+          <div>
+            <h3 className="text-sm font-bold text-slate-800 dark:text-slate-100 tracking-wide">Tahapan Kegiatan</h3>
+            <p className="text-xs text-slate-500 font-medium leading-none mt-1.5">
+              {activities.length} langkah
+            </p>
+          </div>
         </div>
         <Button
           onClick={addActivity}
           size="sm"
-          variant="gradient"
+          className="h-9 px-5 text-xs font-bold rounded-lg bg-[#015C3A] text-white hover:bg-[#014A2E]"
         >
           <Plus className="w-4 h-4 mr-1.5" /> Tambah
         </Button>
       </div>
 
-      <div className="space-y-3">
+      <div className="space-y-4">
         {activities.map((act, index) => (
           <ActivityCard
             key={act.id}
@@ -126,8 +126,8 @@ export function ActivityEditor({
       </div>
 
       {activities.length === 0 && (
-        <div className="text-center py-16 border-2 border-dashed border-border rounded-xl bg-muted/20">
-          <p className="text-xs font-medium text-muted-foreground">
+        <div className="text-center py-20 border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-2xl bg-white/50 dark:bg-slate-900/50">
+          <p className="text-sm font-bold text-slate-500 dark:text-slate-400">
             Klik Tambah untuk memulai tahapan
           </p>
         </div>

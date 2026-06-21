@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils";
 interface DatePickerProps {
   value: string;
   onChange: (value: string) => void;
-  label: string;
+  label?: string;
   className?: string;
 }
 
@@ -77,22 +77,24 @@ export function DatePicker({
   const displayValue = parsed ? safeFormat(parsed, "dd MMMM yyyy") : "-";
 
   return (
-    <div className="space-y-1.5 group relative">
-      <label className="text-[10px] font-semibold text-muted-foreground ml-0.5 tracking-wide group-focus-within:text-primary transition-colors">
-        {label}
-      </label>
+    <div className="space-y-2 group relative w-full">
+      {label && (
+        <label className="text-xs font-bold text-slate-700 dark:text-slate-200 ml-1 tracking-wide mb-1.5 block group-focus-within:text-[#015C3A] transition-colors">
+          {label}
+        </label>
+      )}
 
       <button
         type="button"
         onClick={() => setOpen(!open)}
         className={cn(
-          "relative h-9 w-full flex items-center bg-background border border-border rounded-lg px-3 cursor-pointer hover:border-primary/50 transition-all group-focus-within:ring-2 group-focus-within:ring-primary/20 group-focus-within:border-primary",
-          open && "ring-2 ring-primary/20 border-primary",
+          "relative h-12 w-full flex items-center bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl px-4 cursor-pointer transition-all group-focus-within:ring-2 group-focus-within:ring-[#015C3A]/20 group-focus-within:bg-white group-focus-within:border-[#015C3A] shadow-inner",
+          open && "ring-2 ring-[#015C3A]/20 bg-white border-[#015C3A]",
           className,
         )}
       >
-        <CalendarIcon className="w-3.5 h-3.5 text-muted-foreground mr-2 group-hover:text-primary transition-colors flex-shrink-0" />
-        <span className="text-xs font-medium text-foreground">
+        <CalendarIcon className="w-4 h-4 text-[#015C3A] mr-2 flex-shrink-0" />
+        <span className="text-sm font-semibold text-slate-800 dark:text-slate-100">
           {displayValue}
         </span>
       </button>

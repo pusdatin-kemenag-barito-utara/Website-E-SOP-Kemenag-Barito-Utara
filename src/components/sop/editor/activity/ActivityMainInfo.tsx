@@ -30,27 +30,27 @@ export function ActivityMainInfo({
 }: ActivityMainInfoProps) {
   return (
     <div className="flex-1 space-y-3">
-      <div className="flex items-center gap-1.5">
-        <div className="w-1 h-3.5 bg-primary rounded-full" />
-        <span className="text-[9px] font-semibold text-muted-foreground tracking-wide">
+      <div className="flex items-center gap-2">
+        <div className="w-1 h-3.5 bg-[#015C3A] dark:bg-[#015C3A]/80 rounded-full" />
+        <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 tracking-wider uppercase">
           Informasi Utama
         </span>
       </div>
-      <div className="space-y-3">
-        <div className="space-y-1">
-          <span className="text-[8px] font-medium text-muted-foreground ml-0.5">
+      <div className="space-y-4">
+        <div className="space-y-1.5">
+          <span className="text-xs font-bold text-slate-700 dark:text-slate-200 ml-0.5">
             Deskripsi Aktivitas
           </span>
           <Textarea
             value={act.kegiatan}
             onChange={(e) => onUpdate(act.id, "kegiatan", e.target.value)}
             placeholder="Apa yang dilakukan pada tahap ini?"
-            className="min-h-[80px] max-h-[120px] md:max-h-none overflow-y-auto text-sm leading-relaxed"
+            className="min-h-[80px] max-h-[120px] md:max-h-none overflow-y-auto text-sm leading-relaxed bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 rounded-xl focus-visible:ring-[#015C3A] focus-visible:border-[#015C3A] shadow-inner"
           />
         </div>
-        <div className="grid grid-cols-2 gap-2 sm:gap-3">
-          <div className="space-y-1">
-            <span className="text-[8px] font-medium text-muted-foreground ml-0.5">
+        <div className="grid grid-cols-2 gap-3 sm:gap-4">
+          <div className="space-y-1.5">
+            <span className="text-xs font-bold text-slate-700 dark:text-slate-200 ml-0.5">
               Simbol Alur
             </span>
             <Select
@@ -59,11 +59,11 @@ export function ActivityMainInfo({
                 if (val) onUpdate(act.id, "symbol", val);
               }}
             >
-              <SelectTrigger className="h-9">
+              <SelectTrigger className="h-10 bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 rounded-xl focus:ring-[#015C3A]">
                 <SelectValue>
                   <div className="flex items-center gap-2">
                     {React.createElement(SYMBOL_ICONS[act.symbol] || Square, {
-                      className: "w-3.5 h-3.5 text-primary",
+                      className: "w-4 h-4 text-[#015C3A] dark:text-emerald-400",
                     })}
                     <span className="font-medium text-sm text-foreground">
                       {SYMBOL_OPTIONS.find((o) => o.value === act.symbol)?.label}
@@ -71,21 +71,21 @@ export function ActivityMainInfo({
                   </div>
                 </SelectValue>
               </SelectTrigger>
-              <SelectContent alignItemWithTrigger={false} className="min-w-[200px] bg-white dark:bg-slate-900 z-50">
+              <SelectContent alignItemWithTrigger={false} className="min-w-[200px] bg-white/95 dark:bg-slate-900/95 backdrop-blur-md z-50 border-slate-200/60 dark:border-slate-700/60 rounded-2xl shadow-xl overflow-hidden p-2">
                 {SYMBOL_OPTIONS.filter((opt) => opt.value !== "offpage").map(
                   (opt) => (
                     <SelectItem
                       key={opt.value}
                       value={opt.value}
-                      className="py-2.5 px-3 focus:bg-primary/10 cursor-pointer"
+                      className="py-2.5 px-3 focus:bg-[#015C3A]/5 dark:focus:bg-[#015C3A]/20 cursor-pointer rounded-xl transition-colors"
                     >
-                      <div className="flex items-center gap-2.5">
-                        <div className="p-1.5 rounded-md bg-muted border border-border">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 shadow-sm">
                           {React.createElement(SYMBOL_ICONS[opt.value], {
-                            className: "w-3.5 h-3.5 text-muted-foreground",
+                            className: "w-4 h-4 text-[#015C3A] dark:text-emerald-400",
                           })}
                         </div>
-                        <span className="font-medium text-sm">{opt.label}</span>
+                        <span className="font-semibold text-sm text-slate-700 dark:text-slate-200 tracking-wide">{opt.label}</span>
                       </div>
                     </SelectItem>
                   ),
@@ -93,8 +93,8 @@ export function ActivityMainInfo({
               </SelectContent>
             </Select>
           </div>
-          <div className="space-y-1">
-            <span className="text-[8px] font-medium text-muted-foreground ml-0.5">
+          <div className="space-y-1.5">
+            <span className="text-xs font-bold text-slate-700 dark:text-slate-200 ml-0.5">
               Pelaksana Utama
             </span>
             <Select
@@ -103,7 +103,7 @@ export function ActivityMainInfo({
                 if (val) onUpdate(act.id, "roleForSymbol", val);
               }}
             >
-              <SelectTrigger className="h-9">
+              <SelectTrigger className="h-10 bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 rounded-xl focus:ring-[#015C3A]">
                 <SelectValue placeholder="Pilih Pelaksana">
                   <div className="flex items-center gap-2">
                     <Users className="w-3.5 h-3.5 text-blue-500" />
@@ -113,18 +113,18 @@ export function ActivityMainInfo({
                   </div>
                 </SelectValue>
               </SelectTrigger>
-              <SelectContent alignItemWithTrigger={false} className="min-w-[200px] bg-white dark:bg-slate-900 z-50">
+              <SelectContent alignItemWithTrigger={false} className="min-w-[200px] bg-white/95 dark:bg-slate-900/95 backdrop-blur-md z-50 border-slate-200/60 dark:border-slate-700/60 rounded-2xl shadow-xl overflow-hidden p-2">
                 {roles.map((role) => (
                   <SelectItem
                     key={role}
                     value={role}
-                    className="py-2.5 px-3 focus:bg-primary/10 cursor-pointer"
+                    className="py-2.5 px-3 focus:bg-blue-50 dark:focus:bg-blue-900/20 cursor-pointer rounded-xl transition-colors"
                   >
-                    <div className="flex items-center gap-2.5">
-                      <div className="p-1.5 rounded-md bg-muted border border-border">
-                        <Users className="w-3.5 h-3.5 text-blue-500" />
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 shadow-sm">
+                        <Users className="w-4 h-4 text-blue-500" />
                       </div>
-                      <span className="font-medium text-sm">{role}</span>
+                      <span className="font-semibold text-sm text-slate-700 dark:text-slate-200 tracking-wide">{role}</span>
                     </div>
                   </SelectItem>
                 ))}

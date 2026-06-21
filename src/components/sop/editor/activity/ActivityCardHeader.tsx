@@ -24,12 +24,12 @@ export function ActivityCardHeader({
   return (
     <div
       className={cn(
-        "flex items-center gap-3 p-3 cursor-pointer transition-colors",
-        isExpanded ? "bg-muted" : "hover:bg-muted",
+        "flex items-center gap-3 p-3 md:p-4 cursor-pointer transition-colors",
+        isExpanded ? "bg-slate-50/80 dark:bg-slate-800/50" : "hover:bg-slate-50/50 dark:hover:bg-slate-800/30",
       )}
       onClick={() => onToggleExpand(act.id)}
     >
-      <div className="w-8 h-8 flex items-center justify-center bg-primary text-primary-foreground rounded-lg font-bold text-xs shrink-0">
+      <div className="w-8 h-8 flex items-center justify-center bg-[#015C3A]/10 dark:bg-[#015C3A]/20 text-[#015C3A] dark:text-emerald-400 rounded-lg font-bold text-xs shrink-0">
         {index + 1}
       </div>
       <div className="flex-1 min-w-0">

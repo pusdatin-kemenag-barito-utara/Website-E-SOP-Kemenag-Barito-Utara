@@ -31,7 +31,7 @@ export function ActivityCard({
   SYMBOL_ICONS,
 }: ActivityCardProps) {
   return (
-    <div className="border border-border rounded-xl bg-card overflow-hidden group hover:border-primary/30 transition-all hover:shadow-sm">
+    <div className="border border-slate-200 dark:border-slate-800 rounded-2xl bg-white dark:bg-slate-900 overflow-hidden group transition-all hover:shadow-sm">
       <ActivityCardHeader
         act={act}
         index={index}
@@ -50,7 +50,7 @@ export function ActivityCard({
         )}
       >
         <div className="overflow-hidden">
-          <div className="p-4 border-t border-border bg-muted">
+          <div className="p-4 md:p-6 border-t border-slate-100 dark:border-slate-800/60 bg-slate-50/50 dark:bg-slate-800/20">
             <div className="flex flex-col lg:flex-row gap-6">
               <ActivityMainInfo
                 act={act}

@@ -55,7 +55,7 @@ export function SmartTextarea({
         onKeyDown={handleKeyDown}
         onChange={(e) => onValueChange(e.target.value)}
         className={cn(
-          "min-h-[80px] bg-background border-border rounded-lg text-sm leading-relaxed resize-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20 pr-10",
+          "min-h-[80px] bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl text-sm font-semibold text-slate-800 dark:text-slate-100 leading-relaxed resize-none transition-all focus:border-[#015C3A] focus:bg-white focus:ring-2 focus:ring-[#015C3A]/20 pr-10 shadow-inner px-4 py-3",
           className,
         )}
       />

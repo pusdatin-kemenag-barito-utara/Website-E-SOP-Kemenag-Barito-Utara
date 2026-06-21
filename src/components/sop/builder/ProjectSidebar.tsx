@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { FileText, Plus, Trash2, Search, FolderOpen } from "lucide-react";
+import { Plus, Trash2, Search, FolderOpen, FileText } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 import { SOPListItem } from "@/types/sop";
@@ -27,50 +27,52 @@ export function ProjectSidebar({
   );
 
   return (
-    <aside className="bg-card flex flex-col h-full print:hidden border-r border-border shadow-sm">
-      <div className="p-3 border-b border-border space-y-2">
+    <aside className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md flex flex-col h-full print:hidden border-r border-slate-200 dark:border-slate-800 shadow-[2px_0_15px_-3px_rgba(0,0,0,0.05)] relative z-20">
+      <div className="p-4 border-b border-slate-100 dark:border-slate-800 space-y-4 bg-white dark:bg-slate-900">
         <div className="flex items-center justify-between">
-          <h2 className="text-xs font-semibold text-foreground tracking-wide">
+          <h2 className="text-sm font-bold text-slate-800 dark:text-slate-100 tracking-wide flex items-center gap-2">
+            <FolderOpen className="w-4 h-4 text-[#015C3A] dark:text-emerald-400" />
             Proyek Saya
           </h2>
           <Button
             variant="ghost"
             size="icon"
-            className="h-7 w-7 text-primary hover:bg-primary/10"
+            className="h-8 w-8 text-[#015C3A] hover:bg-[#015C3A]/10 hover:text-[#014A2E] dark:text-emerald-400 dark:hover:bg-emerald-950 transition-colors rounded-full"
             onClick={onNew}
             aria-label="Buat Proyek Baru"
+            title="Buat Proyek Baru"
           >
-            <Plus className="w-4 h-4" />
+            <Plus className="w-4 h-4 stroke-[2.5]" />
           </Button>
         </div>
-        <div className="relative">
-          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
+        <div className="relative group">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-[#015C3A] transition-colors" />
           <input
             type="text"
             placeholder="Cari proyek..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full h-8 pl-8 pr-3 rounded-lg bg-background border border-border text-xs font-medium placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+            className="w-full h-9 pl-9 pr-4 rounded-xl bg-slate-50 dark:bg-slate-800 border-none text-sm font-medium placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#015C3A]/30 focus:bg-white dark:focus:bg-slate-900 transition-all shadow-inner"
           />
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-2 space-y-1 custom-scrollbar">
+      <div className="flex-1 overflow-y-auto p-3 space-y-1.5 custom-scrollbar bg-slate-50/50 dark:bg-slate-900/50">
         {filtered.length === 0 ? (
-          <div className="p-8 text-center">
-            <div className="w-10 h-10 mx-auto mb-3 rounded-xl bg-muted flex items-center justify-center">
+          <div className="p-8 text-center flex flex-col items-center justify-center h-full opacity-70">
+            <div className="w-12 h-12 mb-3 rounded-2xl bg-white dark:bg-slate-800 flex items-center justify-center shadow-sm border border-slate-100 dark:border-slate-700">
               {searchQuery ? (
-                <Search className="w-5 h-5 text-muted-foreground/40" />
+                <Search className="w-5 h-5 text-slate-400" />
               ) : (
-                <FolderOpen className="w-5 h-5 text-muted-foreground/40" />
+                <FileText className="w-5 h-5 text-slate-400" />
               )}
             </div>
-            <p className="text-[10px] font-medium text-muted-foreground">
-              {searchQuery ? "Tidak ditemukan" : "Belum ada proyek"}
+            <p className="text-xs font-semibold text-slate-500 dark:text-slate-400">
+              {searchQuery ? "Proyek tidak ditemukan" : "Belum ada proyek"}
             </p>
             {!searchQuery && (
-              <p className="text-[8px] text-muted-foreground/60 mt-1">
-                Klik + untuk membuat baru
+              <p className="text-[10px] font-medium text-slate-400/80 mt-1.5 px-4">
+                Klik tombol + di atas untuk membuat SOP baru
               </p>
             )}
           </div>
@@ -80,39 +82,49 @@ export function ProjectSidebar({
               <button
                 onClick={() => onLoad(sop.id)}
                 className={cn(
-                  "w-full p-2.5 rounded-lg text-left transition-all border flex flex-col pr-9",
+                  "w-full p-3 rounded-xl text-left transition-all flex flex-col pr-10 border",
                   currentId === sop.id
-                    ? "bg-card border-primary/20 shadow-sm"
-                    : "border-transparent hover:bg-card hover:border-border",
+                    ? "bg-white dark:bg-slate-800 border-[#015C3A]/30 shadow-md ring-1 ring-[#015C3A]/10"
+                    : "bg-transparent border-transparent hover:bg-white dark:hover:bg-slate-800 hover:border-slate-200 dark:hover:border-slate-700 hover:shadow-sm",
                 )}
               >
-                <p
-                  className={cn(
-                    "text-xs font-medium truncate leading-snug",
-                    currentId === sop.id
-                      ? "text-primary"
-                      : "text-foreground",
-                  )}
-                >
-                  {sop.title}
-                </p>
-                <p className="text-[8px] text-muted-foreground/70 mt-0.5 font-medium">
-                  {new Date(sop.updated_at).toLocaleDateString("id-ID", {
-                    day: "numeric",
-                    month: "short",
-                    year: "numeric",
-                  })}
-                </p>
+                <div className="flex items-start gap-2.5">
+                  <div className={cn(
+                    "w-1.5 h-1.5 rounded-full mt-1.5 flex-shrink-0 transition-colors",
+                    currentId === sop.id ? "bg-[#015C3A]" : "bg-slate-300 dark:bg-slate-600 group-hover/item:bg-slate-400"
+                  )} />
+                  <div className="min-w-0">
+                    <p
+                      className={cn(
+                        "text-sm font-semibold truncate leading-tight",
+                        currentId === sop.id
+                          ? "text-[#015C3A] dark:text-emerald-400"
+                          : "text-slate-700 dark:text-slate-200",
+                      )}
+                    >
+                      {sop.title}
+                    </p>
+                    <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-1 font-medium flex items-center gap-1">
+                      Diperbarui: {new Date(sop.updated_at).toLocaleDateString("id-ID", {
+                        day: "numeric",
+                        month: "short",
+                        year: "numeric",
+                      })}
+                    </p>
+                  </div>
+                </div>
               </button>
+              
               <button
                 onClick={(e) => {
                   e.stopPropagation();
                   onDelete(sop);
                 }}
-                className="absolute right-1.5 top-1/2 -translate-y-1/2 h-7 w-7 rounded-md flex items-center justify-center text-muted-foreground hover:text-destructive hover:bg-destructive/10 opacity-0 group-hover/item:opacity-100 transition-all"
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 h-8 w-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30 opacity-0 group-hover/item:opacity-100 transition-all"
                 aria-label="Hapus"
+                title="Hapus Proyek"
               >
-                <Trash2 className="w-3.5 h-3.5" />
+                <Trash2 className="w-4 h-4" />
               </button>
             </div>
           ))

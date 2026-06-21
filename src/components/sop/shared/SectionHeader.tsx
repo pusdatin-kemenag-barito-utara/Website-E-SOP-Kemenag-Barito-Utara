@@ -14,16 +14,16 @@ export function SectionHeader({
   colorClass = "text-muted-foreground",
 }: SectionHeaderProps) {
   return (
-    <div className="flex items-center gap-3 px-4 py-3 border-b border-border bg-muted">
+    <div className="flex items-center gap-3 px-5 md:px-6 py-4 border-b border-slate-100 dark:border-slate-800/60 bg-transparent">
       <div
         className={cn(
-          "p-1.5 rounded-lg bg-background border border-border",
+          "p-1.5 rounded-lg bg-white dark:bg-slate-800 border border-current shadow-sm",
           colorClass,
         )}
       >
-        <Icon className="w-3.5 h-3.5" />
+        <Icon className="w-4 h-4" />
       </div>
-      <h3 className="text-[10px] font-semibold tracking-wide text-muted-foreground">
+      <h3 className="text-sm font-bold text-slate-800 dark:text-slate-100 tracking-wide">
         {title}
       </h3>
     </div>
