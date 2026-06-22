@@ -16,8 +16,8 @@ const plusJakartaSans = Plus_Jakarta_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "SOP Builder Digital",
-  description: "Standard Operating Procedure Builder for Kemenag",
+  title: "E-SOP Digital | Kemenag Barito Utara",
+  description: "Sistem Penyusunan Standar Operasional Prosedur Digital",
   icons: {
     icon: "/kemenag-512.png",
   },
@@ -29,7 +29,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${inter.variable} ${plusJakartaSans.variable} h-full`} suppressHydrationWarning>
+    <html
+      lang="en"
+      className={`${inter.variable} ${plusJakartaSans.variable} h-full`}
+      suppressHydrationWarning
+    >
       <head>
         <script
           dangerouslySetInnerHTML={{
