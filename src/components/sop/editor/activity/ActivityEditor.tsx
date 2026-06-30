@@ -84,6 +84,23 @@ export function ActivityEditor({
     });
   };
 
+  const copyActivity = (id: string) => {
+    const actIndex = activities.findIndex((a) => a.id === id);
+    if (actIndex === -1) return;
+    const actToCopy = activities[actIndex];
+    const newAct: Activity = {
+      ...actToCopy,
+      id: Math.random().toString(36).substring(7),
+    };
+    
+    setActivities((prev) => {
+      const updated = [...prev];
+      updated.splice(actIndex + 1, 0, newAct);
+      return updated.map((act, i) => ({ ...act, no: (i + 1).toString() }));
+    });
+    setExpandedActivities([newAct.id]);
+  };
+
   const toggleExpand = (id: string) => {
     setExpandedActivities((prev) => (prev.includes(id) ? [] : [id]));
   };
@@ -120,6 +137,7 @@ export function ActivityEditor({
             onToggleExpand={toggleExpand}
             onUpdate={updateActivity}
             onRemove={removeActivity}
+            onCopy={copyActivity}
             SYMBOL_ICONS={SYMBOL_ICONS}
           />
         ))}

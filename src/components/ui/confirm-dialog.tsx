@@ -30,7 +30,7 @@ export function ConfirmDialog({
 }: ConfirmDialogProps) {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[380px] rounded-xl border-border shadow-2xl p-6 bg-card overflow-hidden">
+      <DialogContent className="sm:max-w-[380px] rounded-xl border-border shadow-2xl p-6 bg-white dark:bg-slate-900 overflow-hidden !opacity-100">
         <DialogHeader className="items-center text-center">
           <div className="w-12 h-12 bg-destructive/10 rounded-xl flex items-center justify-center mb-3">
             <AlertTriangle className="w-6 h-6 text-destructive" />

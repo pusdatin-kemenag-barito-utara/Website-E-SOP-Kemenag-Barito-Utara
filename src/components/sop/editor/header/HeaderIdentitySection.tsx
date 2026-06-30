@@ -38,7 +38,7 @@ export function HeaderIdentitySection({
               "h-12 text-sm bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl focus-visible:ring-2 focus-visible:ring-[#015C3A]/20 focus-visible:bg-white focus-visible:border-[#015C3A] transition-all font-semibold text-slate-800 dark:text-slate-100 px-4 shadow-inner",
               isDefaultName && "text-slate-400 italic font-medium",
             )}
-            placeholder="Masukkan judul SOP..."
+            placeholder="Masukan judul SOP ..."
           />
         </div>
 
@@ -54,6 +54,7 @@ export function HeaderIdentitySection({
                 "h-12 text-sm bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl focus-visible:ring-2 focus-visible:ring-[#015C3A]/20 focus-visible:bg-white focus-visible:border-[#015C3A] transition-all font-semibold text-slate-800 dark:text-slate-100 px-4 shadow-inner",
                 isDefaultNomor && "text-slate-400 italic font-medium",
               )}
+              placeholder="Masukan Nomor Surat .."
             />
           </div>
           <div className="space-y-2">

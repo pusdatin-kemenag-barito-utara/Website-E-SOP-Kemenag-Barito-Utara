@@ -10,8 +10,8 @@ interface WelcomeScreenProps {
 }
 
 export function WelcomeScreen({ onLogin, isLoading }: WelcomeScreenProps) {
-  const [email, setEmail] = useState("baritoutara@kemenag.go.id");
-  const [password, setPassword] = useState("@Kemenag_126");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
   const [isLoggingIn, setIsLoggingIn] = useState(false);
@@ -89,6 +89,7 @@ export function WelcomeScreen({ onLogin, isLoading }: WelcomeScreenProps) {
                   onChange={(e) => setEmail(e.target.value)}
                   className="w-full h-full pr-4 bg-transparent text-sm font-medium text-slate-900 outline-none placeholder:text-slate-400"
                   placeholder="admin@kemenag.go.id"
+                  autoComplete="username"
                   required
                 />
               </div>
@@ -108,6 +109,7 @@ export function WelcomeScreen({ onLogin, isLoading }: WelcomeScreenProps) {
                   onChange={(e) => setPassword(e.target.value)}
                   className="w-full h-full pr-12 bg-transparent text-sm font-medium text-slate-900 outline-none placeholder:text-slate-400 tracking-wider"
                   placeholder="••••••••••••"
+                  autoComplete="current-password"
                   required
                 />
                 <button

@@ -1,6 +1,6 @@
 import React from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Settings, Users, FileText } from "lucide-react";
+import { Settings, Users, FileText, Eye, Edit3 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { SOPHeaderEditor } from "@/components/sop/editor/header/SOPHeaderEditor";
 import { RoleManager } from "@/components/sop/editor/RoleManager";
@@ -9,6 +9,7 @@ import { SOPHeader, Activity } from "@/types/sop";
 
 interface EditorPanelProps {
   viewMode: "edit" | "preview";
+  setViewMode?: (mode: "edit" | "preview") => void;
   activeSection: string;
   setActiveSection: (section: string) => void;
   header: SOPHeader;
@@ -29,6 +30,7 @@ interface EditorPanelProps {
 
 export function EditorPanel({
   viewMode,
+  setViewMode,
   activeSection,
   setActiveSection,
   header,
@@ -56,10 +58,41 @@ export function EditorPanel({
         className="h-full flex flex-col overflow-hidden"
       >
         {/* Navigation Tabs Header */}
-        <div className="px-4 md:px-8 py-4 border-b border-slate-200/60 dark:border-slate-800/60 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md flex justify-center sticky top-0 z-20 shadow-sm">
+        <div className="px-4 md:px-8 py-4 border-b border-slate-200/60 dark:border-slate-800/60 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md flex flex-col items-center gap-3 sticky top-0 z-20 shadow-sm">
+          
+          {/* Mobile View Toggle */}
+          {setViewMode && (
+            <div className="lg:hidden flex items-center bg-slate-100/80 dark:bg-slate-800/80 p-1 rounded-xl shadow-sm border border-slate-200/60 dark:border-slate-700 w-full max-w-[500px]">
+              <button
+                onClick={() => setViewMode("edit")}
+                className={cn(
+                  "flex-1 px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1.5",
+                  viewMode === "edit"
+                    ? "bg-[#015C3A] text-white shadow-md"
+                    : "text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300",
+                )}
+              >
+                <Edit3 className="w-3.5 h-3.5" />
+                <span>Editor</span>
+              </button>
+              <button
+                onClick={() => setViewMode("preview")}
+                className={cn(
+                  "flex-1 px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1.5",
+                  viewMode === "preview"
+                    ? "bg-[#015C3A] text-white shadow-md"
+                    : "text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-300",
+                )}
+              >
+                <Eye className="w-3.5 h-3.5" />
+                <span>Preview</span>
+              </button>
+            </div>
+          )}
+
           <TabsList className="bg-slate-100/80 dark:bg-slate-800/80 p-1.5 rounded-2xl h-14 w-full max-w-[500px] shadow-inner grid grid-cols-3 relative isolate">
             <div 
-              className="absolute top-1.5 bottom-1.5 w-[calc((100%-12px)/3)] bg-white dark:bg-slate-700 rounded-xl shadow-sm border border-slate-200/50 dark:border-slate-600 transition-transform duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] -z-10"
+              className="absolute top-1.5 bottom-1.5 left-1.5 w-[calc((100%-12px)/3)] bg-white dark:bg-slate-700 rounded-xl shadow-sm border border-slate-200/50 dark:border-slate-600 transition-transform duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] -z-10"
               style={{
                 transform: `translateX(calc(${
                   activeSection === "header" ? 0 :
@@ -70,7 +103,7 @@ export function EditorPanel({
             />
             <TabsTrigger
               value="header"
-              className="text-xs md:text-sm font-bold h-full rounded-xl data-[state=active]:text-[#015C3A] data-[state=active]:dark:text-emerald-400 text-slate-500 hover:text-slate-700 transition-colors gap-1.5 md:gap-2 bg-transparent border-transparent shadow-none data-[state=active]:shadow-none data-[state=active]:bg-transparent"
+              className="text-[10px] sm:text-xs md:text-sm font-bold h-full rounded-xl data-[state=active]:text-[#015C3A] data-[state=active]:dark:text-emerald-400 text-slate-500 hover:text-slate-700 transition-colors gap-1 sm:gap-1.5 md:gap-2 bg-transparent border-transparent shadow-none data-[state=active]:shadow-none data-[state=active]:bg-transparent flex flex-col sm:flex-row items-center justify-center"
             >
               <Settings className="w-4 h-4 md:w-5 md:h-5" />
               <span className="hidden sm:inline">Konfigurasi</span>
@@ -78,15 +111,17 @@ export function EditorPanel({
             </TabsTrigger>
             <TabsTrigger
               value="roles"
-              className="text-xs md:text-sm font-bold h-full rounded-xl data-[state=active]:text-[#015C3A] data-[state=active]:dark:text-emerald-400 text-slate-500 hover:text-slate-700 transition-colors gap-1.5 md:gap-2 bg-transparent border-transparent shadow-none data-[state=active]:shadow-none data-[state=active]:bg-transparent"
+              className="text-[10px] sm:text-xs md:text-sm font-bold h-full rounded-xl data-[state=active]:text-[#015C3A] data-[state=active]:dark:text-emerald-400 text-slate-500 hover:text-slate-700 transition-colors gap-1 sm:gap-1.5 md:gap-2 bg-transparent border-transparent shadow-none data-[state=active]:shadow-none data-[state=active]:bg-transparent flex flex-col sm:flex-row items-center justify-center"
             >
-              <Users className="w-4 h-4 md:w-5 md:h-5" /> Pelaksana
+              <Users className="w-4 h-4 md:w-5 md:h-5" />
+              <span>Pelaksana</span>
             </TabsTrigger>
             <TabsTrigger
               value="activities"
-              className="text-xs md:text-sm font-bold h-full rounded-xl data-[state=active]:text-[#015C3A] data-[state=active]:dark:text-emerald-400 text-slate-500 hover:text-slate-700 transition-colors gap-1.5 md:gap-2 bg-transparent border-transparent shadow-none data-[state=active]:shadow-none data-[state=active]:bg-transparent"
+              className="text-[10px] sm:text-xs md:text-sm font-bold h-full rounded-xl data-[state=active]:text-[#015C3A] data-[state=active]:dark:text-emerald-400 text-slate-500 hover:text-slate-700 transition-colors gap-1 sm:gap-1.5 md:gap-2 bg-transparent border-transparent shadow-none data-[state=active]:shadow-none data-[state=active]:bg-transparent flex flex-col sm:flex-row items-center justify-center"
             >
-              <FileText className="w-4 h-4 md:w-5 md:h-5" /> Alur Kerja
+              <FileText className="w-4 h-4 md:w-5 md:h-5" />
+              <span>Alur Kerja</span>
             </TabsTrigger>
           </TabsList>
         </div>

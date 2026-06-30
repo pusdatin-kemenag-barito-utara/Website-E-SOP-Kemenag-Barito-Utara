@@ -1,7 +1,7 @@
 import React from "react";
 import { SOPHeader as SOPHeaderType } from "@/types/sop";
 import { Calendar } from "lucide-react";
-import { DatePicker } from "./DatePicker";
+import { ModernDatePicker } from "@/components/ui/modern-date-picker";
 import { SectionHeader } from "../../shared/SectionHeader";
 
 interface HeaderTimelineSectionProps {
@@ -26,34 +26,28 @@ export function HeaderTimelineSection({
           <label className="text-xs font-bold text-slate-700 dark:text-slate-200 ml-1 tracking-wide block mb-1.5">
             Tgl Buat
           </label>
-          <div className="bg-slate-50 dark:bg-slate-800/50 rounded-xl p-0.5 border border-slate-200 dark:border-slate-700 shadow-inner hover:border-[#015C3A]/50 transition-colors">
-            <DatePicker
-              value={header.tglBuat}
-              onChange={(date: string) => updateHeader("tglBuat", date)}
-            />
-          </div>
+          <ModernDatePicker
+            value={header.tglBuat || ""}
+            onChange={(date: string) => updateHeader("tglBuat", date)}
+          />
         </div>
         <div className="space-y-2">
           <label className="text-xs font-bold text-slate-700 dark:text-slate-200 ml-1 tracking-wide block mb-1.5">
             Tgl Revisi
           </label>
-          <div className="bg-slate-50 dark:bg-slate-800/50 rounded-xl p-0.5 border border-slate-200 dark:border-slate-700 shadow-inner hover:border-[#015C3A]/50 transition-colors">
-            <DatePicker
-              value={header.tglRevisi}
-              onChange={(date: string) => updateHeader("tglRevisi", date)}
-            />
-          </div>
+          <ModernDatePicker
+            value={header.tglRevisi || ""}
+            onChange={(date: string) => updateHeader("tglRevisi", date)}
+          />
         </div>
         <div className="space-y-2">
           <label className="text-xs font-bold text-slate-700 dark:text-slate-200 ml-1 tracking-wide block mb-1.5">
             Tgl Efektif
           </label>
-          <div className="bg-slate-50 dark:bg-slate-800/50 rounded-xl p-0.5 border border-slate-200 dark:border-slate-700 shadow-inner hover:border-[#015C3A]/50 transition-colors">
-            <DatePicker
-              value={header.tglEfektif}
-              onChange={(date: string) => updateHeader("tglEfektif", date)}
-            />
-          </div>
+          <ModernDatePicker
+            value={header.tglEfektif || ""}
+            onChange={(date: string) => updateHeader("tglEfektif", date)}
+          />
         </div>
       </div>
     </div>

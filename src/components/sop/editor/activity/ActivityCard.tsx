@@ -17,6 +17,7 @@ interface ActivityCardProps {
     value: string | string[] | SymbolType,
   ) => void;
   onRemove: (id: string) => void;
+  onCopy: (id: string) => void;
   SYMBOL_ICONS: Record<SymbolType, React.ElementType>;
 }
 
@@ -28,6 +29,7 @@ export function ActivityCard({
   onToggleExpand,
   onUpdate,
   onRemove,
+  onCopy,
   SYMBOL_ICONS,
 }: ActivityCardProps) {
   return (
@@ -38,6 +40,7 @@ export function ActivityCard({
         isExpanded={isExpanded}
         onToggleExpand={onToggleExpand}
         onRemove={onRemove}
+        onCopy={onCopy}
         SYMBOL_ICONS={SYMBOL_ICONS}
       />
 

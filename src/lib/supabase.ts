@@ -10,9 +10,7 @@ if (!supabaseUrl || !supabaseAnonKey) {
 // Mencegah multiple instance saat Hot Module Replacement (HMR) di Next.js
 const createKemenagClient = () => 
   createClient(supabaseUrl, supabaseAnonKey, {
-    db: {
-      schema: "kemenag_sop",
-    },
+    db: { schema: "kemenag_sop" }
   });
 
 const globalForSupabase = globalThis as unknown as {

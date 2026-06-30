@@ -11,6 +11,7 @@ import { ProjectSidebar } from "@/components/sop/builder/ProjectSidebar";
 import { EditorPanel } from "@/components/sop/builder/EditorPanel";
 import { LivePreview } from "@/components/sop/builder/LivePreview";
 import { AdminPanel } from "@/components/sop/builder/AdminPanel";
+import { UserManagementModal } from "@/components/sop/builder/UserManagementModal";
 
 // UI Components
 import { ToastCustom, ToastType } from "@/components/ui/toast-custom";
@@ -19,6 +20,7 @@ import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 // Hooks & Utilities
 import { useSOPData } from "@/hooks/useSOPData";
 import { useAuth } from "@/hooks/useAuth";
+import { useSOPPresence } from "@/hooks/useSOPPresence";
 
 export default function SOPBuilder() {
   // 1. Authentication State
@@ -42,12 +44,17 @@ export default function SOPBuilder() {
     userSops,
     fetchAllSops,
     allSops,
+    lastSaved,
   } = useSOPData(user?.id, user?.email);
+
+  // 2.5 Realtime Presence for SOP Locking
+  const lockedSopIds = useSOPPresence(user?.id || null, currentId);
 
   // 3. UI State
   const [activeSection, setActiveSection] = useState("header");
   const [showProjects, setShowProjects] = useState(false);
   const [showAdmin, setShowAdmin] = useState(false);
+  const [showUserManagement, setShowUserManagement] = useState(false);
   const [expandedActivities, setExpandedActivities] = useState<string[]>([]);
   const [viewMode, setViewMode] = useState<"edit" | "preview">("edit");
   const [scale, setScale] = useState(1);
@@ -74,8 +81,6 @@ export default function SOPBuilder() {
     onConfirm: () => {},
   });
 
-  const [lastSaved, setLastSaved] = useState<Date | null>(null);
-
   // 4. Effects (Auto-save handled by useSOPData)
 
   React.useEffect(() => {
@@ -96,15 +101,14 @@ export default function SOPBuilder() {
   }, [viewMode, showProjects]);
 
   // 5. Handlers
-  const showToast = (message: string, type: ToastType = "success") => {
+  const showToast = React.useCallback((message: string, type: ToastType = "success") => {
     setToast({ visible: true, message, type });
-  };
+  }, []);
 
   const handleSave = async () => {
     const res = await saveToCloud();
     if (res?.success) {
       showToast(res.message);
-      setLastSaved(new Date());
     } else if (res?.message) {
       showToast(res.message, "error");
     }
@@ -160,21 +164,22 @@ export default function SOPBuilder() {
         authLoading={authLoading}
         lastSaved={lastSaved}
         onOpenAdmin={() => setShowAdmin(true)}
+        onOpenUserManagement={() => setShowUserManagement(true)}
         viewMode={viewMode}
         setViewMode={setViewMode}
       />
 
-      <main className="flex-1 flex overflow-hidden print:overflow-visible print:h-auto print:block">
+      <main className="flex-1 flex overflow-hidden print:overflow-visible print:h-auto print:block relative">
         {/* Animated Sidebar Wrapper */}
         <div
           className={cn(
-            "h-full overflow-hidden transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] z-20",
+            "h-full overflow-hidden transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] z-30 bg-background absolute inset-y-0 left-0 lg:relative lg:inset-auto",
             user && showProjects
-              ? "w-[300px] opacity-100"
+              ? "w-full lg:w-[300px] opacity-100"
               : "w-0 opacity-0",
           )}
         >
-          <div className="w-[300px] h-full">
+          <div className="w-full lg:w-[300px] h-full">
             <ProjectSidebar
               userSops={userSops}
               currentId={currentId}
@@ -210,6 +215,7 @@ export default function SOPBuilder() {
 
         <EditorPanel
           viewMode={viewMode}
+          setViewMode={setViewMode}
           activeSection={activeSection}
           setActiveSection={setActiveSection}
           header={header}
@@ -256,6 +262,18 @@ export default function SOPBuilder() {
         allSops={allSops}
         onLoadSop={loadSop}
         onRefresh={fetchAllSops}
+        onCreateNew={() => {
+          resetData();
+          setShowAdmin(false);
+        }}
+        lockedSopIds={lockedSopIds}
+        currentUserEmail={user?.email}
+      />
+      <UserManagementModal
+        isOpen={showUserManagement}
+        onClose={() => setShowUserManagement(false)}
+        showToast={showToast}
+        setConfirm={setConfirm}
       />
       </div>
     </div>

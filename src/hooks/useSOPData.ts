@@ -46,6 +46,7 @@ export function useSOPData(userId?: string, userEmail?: string | null) {
   const [roles, setRoles] = useState<string[]>(INITIAL_ROLES);
   const [activities, setActivities] = useState<Activity[]>([]);
   const [header, setHeader] = useState<SOPHeader>(DEFAULT_HEADER);
+  const [lastSaved, setLastSaved] = useState<Date | null>(null);
 
   // Query: User SOPs list
   const {
@@ -71,13 +72,11 @@ export function useSOPData(userId?: string, userEmail?: string | null) {
     mutationFn: async () => {
       if (!isHydrated) throw new Error("Not hydrated");
 
-      const payload = {
+      const basePayload = {
         title: header.namaSOP || "Untitled SOP",
         header,
         activities,
         roles,
-        user_id: userId || null,
-        user_email: userEmail || null,
         updated_at: new Date().toISOString(),
       };
 
@@ -85,12 +84,17 @@ export function useSOPData(userId?: string, userEmail?: string | null) {
       if (currentId) {
         result = await supabase
           .from("sops")
-          .update(payload)
+          .update(basePayload)
           .eq("id", currentId)
           .select()
           .single();
       } else {
-        result = await supabase.from("sops").insert(payload).select().single();
+        const insertPayload = {
+          ...basePayload,
+          user_id: userId || null,
+          user_email: userEmail || null,
+        };
+        result = await supabase.from("sops").insert(insertPayload).select().single();
       }
 
       if (result.error) throw new Error(result.error.message);
@@ -98,9 +102,12 @@ export function useSOPData(userId?: string, userEmail?: string | null) {
     },
     onSuccess: (data) => {
       if (data) {
-        setCurrentId(data.id);
-        const newUrl = `${window.location.origin}${window.location.pathname}?id=${data.id}`;
-        window.history.pushState({ path: newUrl }, "", newUrl);
+        if (!currentId) {
+          setCurrentId(data.id);
+          const newUrl = `${window.location.origin}${window.location.pathname}?id=${data.id}`;
+          window.history.pushState({ path: newUrl }, "", newUrl);
+        }
+        setLastSaved(new Date());
       }
       queryClient.invalidateQueries({ queryKey: ["userSops"] });
       queryClient.invalidateQueries({ queryKey: ["allSops"] });
@@ -120,6 +127,7 @@ export function useSOPData(userId?: string, userEmail?: string | null) {
         setActivities([]);
         setRoles(INITIAL_ROLES);
         setHeader(DEFAULT_HEADER);
+        setLastSaved(null);
         const cleanUrl = `${window.location.origin}${window.location.pathname}`;
         window.history.pushState({ path: cleanUrl }, "", cleanUrl);
       }
@@ -142,6 +150,7 @@ export function useSOPData(userId?: string, userEmail?: string | null) {
             setActivities(data.activities);
             setRoles(data.roles);
             setCurrentId(data.id);
+            setLastSaved(new Date(data.updated_at));
             setIsHydrated(true);
             return;
           }
@@ -173,13 +182,29 @@ export function useSOPData(userId?: string, userEmail?: string | null) {
     }
   }, [header, activities, roles, isHydrated]);
 
+  // Prevent initial autosave on load if not changed
+  const isInitialMount = useRef(true);
+
   // Auto-save to Cloud (Debounced)
   useEffect(() => {
-    if (!isHydrated || !userId || !currentId) return;
+    if (!isHydrated || !userId) return;
+
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      return; // Skip autosave on the very first render after hydration
+    }
+
+    const isDefault = 
+      JSON.stringify(header) === JSON.stringify(DEFAULT_HEADER) && 
+      JSON.stringify(activities) === JSON.stringify([]) && 
+      JSON.stringify(roles) === JSON.stringify(INITIAL_ROLES);
+
+    // Only skip if it's completely new and empty
+    if (!currentId && isDefault) return;
 
     const timer = setTimeout(() => {
       saveMutation.mutate();
-    }, 1000);
+    }, 5000); // 5 seconds debounce for autosave
 
     return () => clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -208,6 +233,7 @@ export function useSOPData(userId?: string, userEmail?: string | null) {
           setActivities(data.activities);
           setRoles(data.roles);
           setCurrentId(data.id);
+          setLastSaved(new Date(data.updated_at));
           const newUrl = `${window.location.origin}${window.location.pathname}?id=${id}`;
           window.history.pushState({ path: newUrl }, "", newUrl);
           return { success: true };
@@ -239,6 +265,7 @@ export function useSOPData(userId?: string, userEmail?: string | null) {
     setRoles(INITIAL_ROLES);
     setHeader(DEFAULT_HEADER);
     setCurrentId(null);
+    setLastSaved(null);
     localStorage.removeItem("sop-builder-data");
     const cleanUrl = `${window.location.origin}${window.location.pathname}`;
     window.history.pushState({ path: cleanUrl }, "", cleanUrl);
@@ -278,5 +305,6 @@ export function useSOPData(userId?: string, userEmail?: string | null) {
     fetchAllSops,
     allSops,
     validateCurrent,
+    lastSaved,
   };
 }

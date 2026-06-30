@@ -1,5 +1,5 @@
 import React from "react";
-import { Trash2, ChevronDown, ChevronUp } from "lucide-react";
+import { Trash2, ChevronDown, ChevronUp, Copy } from "lucide-react";
 import { Activity, SymbolType } from "@/types/sop";
 import { SYMBOL_OPTIONS } from "@/lib/constants";
 import { cn } from "@/lib/utils";
@@ -10,6 +10,7 @@ interface ActivityCardHeaderProps {
   isExpanded: boolean;
   onToggleExpand: (id: string) => void;
   onRemove: (id: string) => void;
+  onCopy: (id: string) => void;
   SYMBOL_ICONS: Record<SymbolType, React.ElementType>;
 }
 
@@ -19,6 +20,7 @@ export function ActivityCardHeader({
   isExpanded,
   onToggleExpand,
   onRemove,
+  onCopy,
   SYMBOL_ICONS,
 }: ActivityCardHeaderProps) {
   return (
@@ -55,10 +57,20 @@ export function ActivityCardHeader({
         <button
           onClick={(e) => {
             e.stopPropagation();
+            onCopy(act.id);
+          }}
+          className="h-7 w-7 rounded-md flex items-center justify-center text-muted-foreground hover:text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-950/30 transition-all"
+          title="Duplikat langkah"
+        >
+          <Copy className="w-3.5 h-3.5" />
+        </button>
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
             onRemove(act.id);
           }}
           className="h-7 w-7 rounded-md flex items-center justify-center text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-all"
-          aria-label="Hapus langkah"
+          title="Hapus langkah"
         >
           <Trash2 className="w-3.5 h-3.5" />
         </button>

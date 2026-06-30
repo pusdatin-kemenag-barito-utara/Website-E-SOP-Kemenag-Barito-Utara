@@ -105,10 +105,12 @@ export function ProjectSidebar({
                       {sop.title}
                     </p>
                     <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-1 font-medium flex items-center gap-1">
-                      Diperbarui: {new Date(sop.updated_at).toLocaleDateString("id-ID", {
+                      Diperbarui: {new Date(sop.updated_at).toLocaleString("id-ID", {
                         day: "numeric",
                         month: "short",
                         year: "numeric",
+                        hour: "2-digit",
+                        minute: "2-digit",
                       })}
                     </p>
                   </div>
