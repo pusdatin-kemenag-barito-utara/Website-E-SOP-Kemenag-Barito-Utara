@@ -60,22 +60,22 @@ export function SOPTableRow({
           )}
         </td>
       ))}
-      <td className="border border-[#000] p-1 text-[7.5pt] leading-tight">
+      <td className="border border-[#000] p-1 text-[7.5pt] leading-tight text-left">
         <RenderList
           text={act.persyaratan}
-          className="ml-1 space-y-0"
-          itemClassName="text-[7.5pt]"
+          className="ml-1 space-y-0 text-left"
+          itemClassName="text-[7.5pt] text-left"
           variant="plain"
         />
       </td>
       <td className="border border-[#000] p-1 text-[7.5pt] font-medium text-black text-center w-[15mm] min-w-[15mm]">
         {act.waktu}
       </td>
-      <td className="border border-[#000] p-1 text-[7.5pt] leading-tight">
+      <td className="border border-[#000] p-1 text-[7.5pt] leading-tight text-left">
         <RenderList
           text={act.output}
-          className="ml-1 space-y-0"
-          itemClassName="text-[7.5pt]"
+          className="ml-1 space-y-0 text-left"
+          itemClassName="text-[7.5pt] text-left"
           variant="plain"
         />
       </td>

@@ -10,6 +10,21 @@ import {
 } from "lucide-react";
 import { Activity, SymbolType } from "@/types/sop";
 import { ActivityCard } from "./ActivityCard";
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  SortableContext,
+  arrayMove,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
 
 const SYMBOL_ICONS: Record<SymbolType, React.ElementType> = {
   terminator: CirclePlay,
@@ -105,6 +120,35 @@ export function ActivityEditor({
     setExpandedActivities((prev) => (prev.includes(id) ? [] : [id]));
   };
 
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 5, // Requires 5px movement before dragging starts
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    }),
+  );
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (over && active.id !== over.id) {
+      setActivities((items) => {
+        const oldIndex = items.findIndex((item) => item.id === active.id);
+        const newIndex = items.findIndex((item) => item.id === over.id);
+
+        const newItems = arrayMove(items, oldIndex, newIndex);
+        // Reassign the 'no' property to maintain order
+        return newItems.map((act, idx) => ({
+          ...act,
+          no: (idx + 1).toString(),
+        }));
+      });
+    }
+  };
+
   return (
     <div className="p-4 md:p-6 space-y-4">
       <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl px-5 py-4 flex items-center justify-between shadow-sm">
@@ -127,20 +171,31 @@ export function ActivityEditor({
       </div>
 
       <div className="space-y-4">
-        {activities.map((act, index) => (
-          <ActivityCard
-            key={act.id}
-            act={act}
-            index={index}
-            roles={roles}
-            isExpanded={expandedActivities.includes(act.id)}
-            onToggleExpand={toggleExpand}
-            onUpdate={updateActivity}
-            onRemove={removeActivity}
-            onCopy={copyActivity}
-            SYMBOL_ICONS={SYMBOL_ICONS}
-          />
-        ))}
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragEnd={handleDragEnd}
+        >
+          <SortableContext
+            items={activities.map((a) => a.id)}
+            strategy={verticalListSortingStrategy}
+          >
+            {activities.map((act, index) => (
+              <ActivityCard
+                key={act.id}
+                act={act}
+                index={index}
+                roles={roles}
+                isExpanded={expandedActivities.includes(act.id)}
+                onToggleExpand={toggleExpand}
+                onUpdate={updateActivity}
+                onRemove={removeActivity}
+                onCopy={copyActivity}
+                SYMBOL_ICONS={SYMBOL_ICONS}
+              />
+            ))}
+          </SortableContext>
+        </DndContext>
       </div>
 
       {activities.length === 0 && (

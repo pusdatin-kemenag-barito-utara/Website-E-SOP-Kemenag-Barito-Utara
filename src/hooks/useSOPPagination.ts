@@ -20,11 +20,11 @@ export function useSOPPagination(
       if (rows.length === 0) return;
 
       const headerArea = container.querySelector(".sop-header-area");
-      const headerHeight = headerArea?.getBoundingClientRect().height || 0;
+      const headerHeight = (headerArea as HTMLElement)?.offsetHeight || 0;
 
       const firstTableHeader = container.querySelector("thead");
       const tableHeaderHeight =
-        firstTableHeader?.getBoundingClientRect().height || 60;
+        (firstTableHeader as HTMLElement)?.offsetHeight || 60;
 
       const A4_HEIGHT_PX = 297 * 3.7795;
       const PADDING_TOP_PX = 10 * 3.7795;
@@ -37,7 +37,7 @@ export function useSOPPagination(
       let currentAccHeight = headerHeight + tableHeaderHeight;
 
       for (let i = 0; i < rows.length; i++) {
-        const rowHeight = rows[i].getBoundingClientRect().height || 30; // Fallback to 8mm
+        const rowHeight = (rows[i] as HTMLElement).offsetHeight || 30; // Fallback to 8mm
 
         if (currentAccHeight + rowHeight > USABLE_PAGE_HEIGHT) {
           newSplits.push(i);

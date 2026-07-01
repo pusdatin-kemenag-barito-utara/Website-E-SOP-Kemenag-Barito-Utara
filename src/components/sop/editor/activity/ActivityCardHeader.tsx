@@ -1,5 +1,5 @@
 import React from "react";
-import { Trash2, ChevronDown, ChevronUp, Copy } from "lucide-react";
+import { Trash2, ChevronDown, ChevronUp, Copy, GripVertical } from "lucide-react";
 import { Activity, SymbolType } from "@/types/sop";
 import { SYMBOL_OPTIONS } from "@/lib/constants";
 import { cn } from "@/lib/utils";
@@ -12,6 +12,7 @@ interface ActivityCardHeaderProps {
   onRemove: (id: string) => void;
   onCopy: (id: string) => void;
   SYMBOL_ICONS: Record<SymbolType, React.ElementType>;
+  dragHandleProps?: Record<string, unknown>;
 }
 
 export function ActivityCardHeader({
@@ -22,6 +23,7 @@ export function ActivityCardHeader({
   onRemove,
   onCopy,
   SYMBOL_ICONS,
+  dragHandleProps,
 }: ActivityCardHeaderProps) {
   return (
     <div
@@ -31,6 +33,13 @@ export function ActivityCardHeader({
       )}
       onClick={() => onToggleExpand(act.id)}
     >
+      <div
+        className="cursor-grab active:cursor-grabbing p-1 text-slate-400 hover:text-slate-600 transition-colors"
+        {...dragHandleProps}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <GripVertical className="w-5 h-5" />
+      </div>
       <div className="w-8 h-8 flex items-center justify-center bg-[#015C3A]/10 dark:bg-[#015C3A]/20 text-[#015C3A] dark:text-emerald-400 rounded-lg font-bold text-xs shrink-0">
         {index + 1}
       </div>

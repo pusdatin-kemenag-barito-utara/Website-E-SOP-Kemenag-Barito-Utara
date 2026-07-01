@@ -192,6 +192,7 @@ input:-webkit-autofill:active {
     padding: 0 !important;
     display: block !important;
     background: white !important;
+    min-width: 210mm !important;
   }
 
   .print-hide,

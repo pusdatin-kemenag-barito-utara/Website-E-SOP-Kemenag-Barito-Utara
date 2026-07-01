@@ -7,7 +7,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Users, Square } from "lucide-react";
+import { Users, Square, AlertTriangle } from "lucide-react";
 import { Activity, SymbolType } from "@/types/sop";
 import { SYMBOL_OPTIONS } from "@/lib/constants";
 
@@ -47,6 +47,16 @@ export function ActivityMainInfo({
             placeholder="Apa yang dilakukan pada tahap ini?"
             className="min-h-[80px] max-h-[120px] md:max-h-none overflow-y-auto text-sm leading-relaxed bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 rounded-xl focus-visible:ring-[#015C3A] focus-visible:border-[#015C3A] shadow-inner"
           />
+          {act.symbol === "decision" &&
+            !act.kegiatan.toLowerCase().includes("ya") &&
+            !act.kegiatan.toLowerCase().includes("tidak") && (
+              <div className="mt-2 flex gap-2 items-start bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-400 p-2.5 rounded-lg border border-amber-200 dark:border-amber-900/50">
+                <AlertTriangle className="w-4 h-4 mt-0.5 shrink-0" />
+                <p className="text-[11px] leading-tight">
+                  <strong className="font-bold">Perhatian:</strong> Simbol Keputusan membutuhkan alur bercabang. Pastikan Anda menyebutkan (Ya/Tidak) di dalam deskripsi atau ada cabang di alur aslinya.
+                </p>
+              </div>
+            )}
         </div>
         <div className="grid grid-cols-2 gap-3 sm:gap-4">
           <div className="space-y-1.5">

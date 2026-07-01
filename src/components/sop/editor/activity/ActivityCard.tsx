@@ -4,6 +4,8 @@ import { cn } from "@/lib/utils";
 import { ActivityCardHeader } from "./ActivityCardHeader";
 import { ActivityMainInfo } from "./ActivityMainInfo";
 import { ActivityMutuBaku } from "./ActivityMutuBaku";
+import { useSortable } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 
 interface ActivityCardProps {
   act: Activity;
@@ -32,8 +34,31 @@ export function ActivityCard({
   onCopy,
   SYMBOL_ICONS,
 }: ActivityCardProps) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: act.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    zIndex: isDragging ? 50 : 1,
+    position: "relative" as const,
+  };
+
   return (
-    <div className="border border-slate-200 dark:border-slate-800 rounded-2xl bg-white dark:bg-slate-900 overflow-hidden group transition-all hover:shadow-sm">
+    <div
+      ref={setNodeRef}
+      style={style}
+      className={cn(
+        "border border-slate-200 dark:border-slate-800 rounded-2xl bg-white dark:bg-slate-900 overflow-hidden group transition-all hover:shadow-sm",
+        isDragging && "opacity-50 ring-2 ring-[#015C3A] ring-offset-2",
+      )}
+    >
       <ActivityCardHeader
         act={act}
         index={index}
@@ -42,6 +67,7 @@ export function ActivityCard({
         onRemove={onRemove}
         onCopy={onCopy}
         SYMBOL_ICONS={SYMBOL_ICONS}
+        dragHandleProps={{ ...attributes, ...listeners }}
       />
 
       <div
