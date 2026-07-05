@@ -21,7 +21,7 @@ import { cn } from "@/lib/utils";
 
 import { User } from "@supabase/supabase-js";
 import { UserMenu } from "@/components/sop/builder/UserMenu";
-import { supabase } from "@/lib/supabase";
+import { getUserRole } from "@/app/auth-actions";
 
 interface BuilderHeaderProps {
   user: User | null;
@@ -37,7 +37,6 @@ interface BuilderHeaderProps {
   authLoading: boolean;
   lastSaved: Date | null;
   onOpenAdmin: () => void;
-  onOpenUserManagement?: () => void;
   viewMode?: "edit" | "preview";
   setViewMode?: (mode: "edit" | "preview") => void;
 }
@@ -56,7 +55,6 @@ export function BuilderHeader({
   authLoading,
   lastSaved,
   onOpenAdmin,
-  onOpenUserManagement,
   viewMode,
   setViewMode,
 }: BuilderHeaderProps) {
@@ -67,20 +65,15 @@ export function BuilderHeader({
     let isMounted = true;
 
     const checkAdmin = async () => {
-      if (!user) {
+      if (!user?.email) {
         if (isMounted) setIsAdmin(false);
         return;
       }
 
       try {
-        const { data } = await supabase
-          .from("profiles")
-          .select("role")
-          .eq("id", user.id)
-          .single();
-
+        const role = await getUserRole(user.email);
         if (isMounted) {
-          setIsAdmin(data?.role === "super_admin");
+          setIsAdmin(role === "super_admin");
         }
       } catch (error) {
         console.error("Error checking role:", error);
@@ -260,7 +253,7 @@ export function BuilderHeader({
 
               {/* User Menu */}
               <div className="pl-2 border-l border-white/10 ml-1">
-                <UserMenu user={user} onLogout={onLogout} onOpenUserManagement={onOpenUserManagement} />
+                <UserMenu user={user} onLogout={onLogout} />
               </div>
             </div>
 
@@ -295,7 +288,7 @@ export function BuilderHeader({
               </Button>
               
               <div className="pl-1">
-                <UserMenu user={user} onLogout={onLogout} onOpenUserManagement={onOpenUserManagement} />
+                <UserMenu user={user} onLogout={onLogout} />
               </div>
             </div>
 

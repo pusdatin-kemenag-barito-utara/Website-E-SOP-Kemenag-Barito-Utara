@@ -11,7 +11,6 @@ import { ProjectSidebar } from "@/components/sop/builder/ProjectSidebar";
 import { EditorPanel } from "@/components/sop/builder/EditorPanel";
 import { LivePreview } from "@/components/sop/builder/LivePreview";
 import { AdminPanel } from "@/components/sop/builder/AdminPanel";
-import { UserManagementModal } from "@/components/sop/builder/UserManagementModal";
 
 // UI Components
 import { ToastCustom, ToastType } from "@/components/ui/toast-custom";
@@ -54,7 +53,6 @@ export default function SOPBuilder() {
   const [activeSection, setActiveSection] = useState("header");
   const [showProjects, setShowProjects] = useState(false);
   const [showAdmin, setShowAdmin] = useState(false);
-  const [showUserManagement, setShowUserManagement] = useState(false);
   const [expandedActivities, setExpandedActivities] = useState<string[]>([]);
   const [viewMode, setViewMode] = useState<"edit" | "preview">("edit");
   const [scale, setScale] = useState(1);
@@ -164,7 +162,6 @@ export default function SOPBuilder() {
         authLoading={authLoading}
         lastSaved={lastSaved}
         onOpenAdmin={() => setShowAdmin(true)}
-        onOpenUserManagement={() => setShowUserManagement(true)}
         viewMode={viewMode}
         setViewMode={setViewMode}
       />
@@ -268,12 +265,6 @@ export default function SOPBuilder() {
         }}
         lockedSopIds={lockedSopIds}
         currentUserEmail={user?.email}
-      />
-      <UserManagementModal
-        isOpen={showUserManagement}
-        onClose={() => setShowUserManagement(false)}
-        showToast={showToast}
-        setConfirm={setConfirm}
       />
       </div>
     </div>

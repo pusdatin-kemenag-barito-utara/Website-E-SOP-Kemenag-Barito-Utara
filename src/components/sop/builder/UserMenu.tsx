@@ -2,17 +2,16 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import Image from "next/image";
-import { Sun, Moon, LogOut, UserCog } from "lucide-react";
+import { Sun, Moon, LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { User as SupabaseUser } from "@supabase/supabase-js";
 
 interface UserMenuProps {
   user: SupabaseUser;
   onLogout: () => void;
-  onOpenUserManagement?: () => void;
 }
 
-export function UserMenu({ user, onLogout, onOpenUserManagement }: UserMenuProps) {
+export function UserMenu({ user, onLogout }: UserMenuProps) {
   const [open, setOpen] = useState(false);
   const [isDark, setIsDark] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -126,20 +125,6 @@ export function UserMenu({ user, onLogout, onOpenUserManagement }: UserMenuProps
           </div>
 
           <div className="p-2 space-y-1 bg-white dark:bg-slate-900">
-            {/* Super Admin Only Menu */}
-            {user.email === "baritoutara@kemenag.go.id" && onOpenUserManagement && (
-              <button
-                onClick={() => {
-                  setOpen(false);
-                  onOpenUserManagement();
-                }}
-                className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-emerald-700 dark:hover:text-emerald-300 hover:bg-emerald-50 dark:hover:bg-emerald-950/50 transition-colors"
-              >
-                <UserCog className="w-4 h-4 text-emerald-500/70" />
-                Kelola Pengguna
-              </button>
-            )}
-
             {/* Menu Items */}
             <button
               onClick={toggleDark}
