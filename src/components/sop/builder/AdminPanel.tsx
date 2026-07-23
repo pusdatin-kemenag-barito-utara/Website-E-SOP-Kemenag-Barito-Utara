@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useMemo } from "react";
+import Image from "next/image";
 import {
   X,
   Search,
@@ -141,8 +142,14 @@ export function AdminPanel({
                 <ArrowLeft className="w-5 h-5" />
               </Button>
             ) : (
-              <div className="w-12 h-12 bg-gradient-to-br from-amber-400 to-amber-600 rounded-2xl flex items-center justify-center shadow-lg shadow-amber-500/20 shrink-0">
-                <ShieldAlert className="w-6 h-6 text-white" />
+              <div className="w-12 h-12 bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 p-2 flex items-center justify-center shadow-lg shrink-0">
+                <Image
+                  src="/sop.png"
+                  alt="Logo SOP"
+                  width={512}
+                  height={512}
+                  className="w-full h-full object-contain"
+                />
               </div>
             )}
             

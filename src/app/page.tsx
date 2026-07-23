@@ -58,6 +58,11 @@ export default function SOPBuilder() {
   const [scale, setScale] = useState(1);
   const [zoom, setZoom] = useState(1);
   const effectiveScale = scale * zoom;
+
+  // Editor Resizing State
+  const [editorWidth, setEditorWidth] = useState<number>(650);
+  const [isResizing, setIsResizing] = useState<boolean>(false);
+
   const [toast, setToast] = useState<{
     visible: boolean;
     message: string;
@@ -67,6 +72,7 @@ export default function SOPBuilder() {
     message: "",
     type: "success",
   });
+
   const [confirm, setConfirm] = useState<{
     open: boolean;
     title: string;
@@ -79,7 +85,38 @@ export default function SOPBuilder() {
     onConfirm: () => {},
   });
 
-  // 4. Effects (Auto-save handled by useSOPData)
+  // 4. Handlers & Resizing Logic
+  const startResizing = React.useCallback((mouseDownEvent: React.MouseEvent) => {
+    mouseDownEvent.preventDefault();
+    setIsResizing(true);
+  }, []);
+
+  React.useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!isResizing) return;
+      const sidebarOffset = showProjects ? 300 : 0;
+      const newWidth = e.clientX - sidebarOffset;
+      const minWidth = 380;
+      const maxWidth = Math.min(window.innerWidth - 450, 1100);
+      if (newWidth >= minWidth && newWidth <= maxWidth) {
+        setEditorWidth(newWidth);
+      }
+    };
+
+    const handleMouseUp = () => {
+      setIsResizing(false);
+    };
+
+    if (isResizing) {
+      window.addEventListener("mousemove", handleMouseMove);
+      window.addEventListener("mouseup", handleMouseUp);
+    }
+
+    return () => {
+      window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("mouseup", handleMouseUp);
+    };
+  }, [isResizing, showProjects]);
 
   React.useEffect(() => {
     const updateScale = () => {
@@ -88,7 +125,7 @@ export default function SOPBuilder() {
         setScale(Math.min((width - 60) / 794, 1));
       } else {
         const sidebarWidth =
-          (viewMode === "edit" ? (width < 1280 ? 550 : 700) : 0) +
+          (viewMode === "edit" ? editorWidth : 0) +
           (showProjects ? 300 : 0);
         setScale(Math.min((width - sidebarWidth - 64) / 794, 1));
       }
@@ -96,7 +133,7 @@ export default function SOPBuilder() {
     window.addEventListener("resize", updateScale);
     updateScale();
     return () => window.removeEventListener("resize", updateScale);
-  }, [viewMode, showProjects]);
+  }, [viewMode, showProjects, editorWidth]);
 
   // 5. Handlers
   const showToast = React.useCallback((message: string, type: ToastType = "success") => {
@@ -131,7 +168,7 @@ export default function SOPBuilder() {
   if (authLoading) {
     return (
       <div className="h-screen w-full bg-background flex flex-col items-center justify-center">
-        <Loader2 className="w-8 h-8 text-primary animate-spin mb-3" />
+        <Loader2 className="w-8 h-8 text-[#015C3A] animate-spin mb-3" />
         <p className="text-[9px] font-semibold text-muted-foreground tracking-wide">
           Memuat Sesi...
         </p>
@@ -139,31 +176,20 @@ export default function SOPBuilder() {
     );
   }
 
-  // 7. Main Builder UI
   return (
     <div className="h-screen bg-slate-50/30 dark:bg-slate-950 flex flex-col text-foreground overflow-hidden print:overflow-visible print:h-auto print:bg-white relative">
-      {/* Background Decorations */}
-      <div className="absolute top-0 right-0 w-[800px] h-[800px] bg-[#015C3A]/[0.03] dark:bg-emerald-900/10 rounded-full blur-3xl animate-float pointer-events-none" />
-      <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-amber-400/[0.02] dark:bg-amber-900/10 rounded-full blur-3xl animate-float-delayed pointer-events-none" />
-      <div className="absolute inset-0 bg-dot-grid-subtle pointer-events-none opacity-40" />
-
-      <div className="relative z-10 flex flex-col flex-1 min-h-0">
       <BuilderHeader
         user={user}
         showProjects={showProjects}
         setShowProjects={setShowProjects}
         isSyncing={isSyncing}
-        currentId={currentId}
         onSave={handleSave}
         onReset={handleReset}
         onPrint={() => window.print()}
         onLogout={signOut}
-        onLogin={() => {}} // Remove or change since BuilderHeader might not need login inside app if already authenticated
-        authLoading={authLoading}
         lastSaved={lastSaved}
         onOpenAdmin={() => setShowAdmin(true)}
-        viewMode={viewMode}
-        setViewMode={setViewMode}
+        sopTitle={header.namaSOP}
       />
 
       <main className="flex-1 flex overflow-hidden print:overflow-visible print:h-auto print:block relative">
@@ -211,6 +237,7 @@ export default function SOPBuilder() {
         </div>
 
         <EditorPanel
+          editorWidth={editorWidth}
           viewMode={viewMode}
           setViewMode={setViewMode}
           activeSection={activeSection}
@@ -225,6 +252,20 @@ export default function SOPBuilder() {
           setExpandedActivities={setExpandedActivities}
           setConfirm={setConfirm}
         />
+
+        {/* Drag Resizer Divider Bar */}
+        {viewMode !== "preview" && (
+          <div
+            onMouseDown={startResizing}
+            className={cn(
+              "hidden lg:flex w-2 hover:w-2.5 bg-slate-200/80 dark:bg-slate-800 hover:bg-[#015C3A] dark:hover:bg-[#015C3A] cursor-col-resize select-none items-center justify-center transition-colors duration-150 relative z-30 shrink-0 group shadow-xs",
+              isResizing && "bg-[#015C3A] dark:bg-[#015C3A] w-2.5"
+            )}
+            title="Geser untuk mengubah ukuran panel editor"
+          >
+            <div className="w-1 h-8 rounded-full bg-slate-400 dark:bg-slate-600 group-hover:bg-white transition-colors" />
+          </div>
+        )}
 
         <LivePreview
           viewMode={viewMode}
@@ -266,7 +307,6 @@ export default function SOPBuilder() {
         lockedSopIds={lockedSopIds}
         currentUserEmail={user?.email}
       />
-      </div>
     </div>
   );
 }

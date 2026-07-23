@@ -12,7 +12,7 @@ export async function checkRbacAccess(email: string) {
     // Fetch user directly using SQL to bypass PostgREST schema limitations
     const users = await sql`
       SELECT id, role 
-      FROM kemenag_pusdatin.users 
+      FROM kemenag_pusdatin.profiles 
       WHERE email = ${email}
     `;
 
@@ -77,7 +77,7 @@ export async function getUserRole(email: string) {
     const sql = postgres(process.env.DATABASE_URL!);
     const users = await sql`
       SELECT role 
-      FROM kemenag_pusdatin.users 
+      FROM kemenag_pusdatin.profiles 
       WHERE email = ${email}
     `;
     if (users.length > 0) return users[0].role;

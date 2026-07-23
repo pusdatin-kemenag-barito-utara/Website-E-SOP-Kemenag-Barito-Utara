@@ -53,7 +53,7 @@ export async function proxy(request: NextRequest) {
       }
     }
   } catch (error) {
-    console.error("[PROXY] Failed to fetch maintenance status:", error);
+    // console.error("[PROXY] Failed to fetch maintenance status:", error);
   }
 
   // === SESSION HANDLING ===
@@ -126,7 +126,7 @@ export async function proxy(request: NextRequest) {
       );
       
       const { data: userRecord } = await supabaseAdmin
-        .from('users')
+        .from('profiles')
         .select('role')
         .eq('id', user.id)
         .single();

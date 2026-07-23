@@ -28,8 +28,9 @@ export function FlowLines({
         const endGap = 0; // Touch the symbol directly
         const ySourceBottom = start.y + start.h / 2 + startGap;
         const yTargetTop = end.y - end.h / 2 - endGap;
-        const midY = ySourceBottom + (yTargetTop - ySourceBottom) * 0.75; // More aggressive offset to clear row borders
+        const midY = ySourceBottom + (yTargetTop - ySourceBottom) * 0.75;
 
+        const isSourceDecision = act.symbol === "decision";
         const isTargetDecision = nextAct.symbol === "decision";
         const isMovingRight = end.x > start.x;
 
@@ -42,6 +43,13 @@ export function FlowLines({
         if (isVertical) {
           pathD = `M ${start.x} ${ySourceBottom} L ${start.x} ${yTargetTop}`;
           arrowD = `M ${start.x - 3.5} ${yTargetTop - 6} L ${start.x} ${yTargetTop} L ${start.x + 3.5} ${yTargetTop - 6}`;
+        } else if (isSourceDecision && isTargetDecision) {
+          // Logika khusus: Jika alur Keputusan bertemu dengan simbol Keputusan lagi sebelumnya,
+          // alur diteruskan untuk mengarah ke sisi kanan (right port) dari logo keputusan di sebelahnya.
+          const portX = end.x + end.w / 2 + endGap;
+          const portY = end.y;
+          pathD = `M ${start.x} ${ySourceBottom} L ${start.x} ${portY} L ${portX} ${portY}`;
+          arrowD = `M ${portX + 6} ${portY - 3.5} L ${portX} ${portY} L ${portX + 6} ${portY + 3.5}`;
         } else if (isTargetDecision && isMovingRight) {
           const portX = targetX - end.w / 2 - endGap;
           const portY = end.y;
@@ -69,33 +77,30 @@ export function FlowLines({
               strokeWidth="1.2"
               strokeLinecap="round"
             />
-            {act.symbol === "process" && nextAct.symbol === "decision" && (
-              <g>
-                {/* RETURN LINE (Loop back for 'No' path) */}
-                {/* Routing STRAIGHT UP from decision column, then horizontal to target */}
-                <path
-                  d={`M ${end.x} ${end.y - end.h / 2} 
+            {(act.symbol === "process" || act.symbol === "decision") &&
+              nextAct.symbol === "decision" && (
+                <g>
+                  {/* RETURN LINE (Loop back for 'No' path) */}
+                  <path
+                    d={`M ${end.x} ${end.y - end.h / 2} 
                        L ${end.x} ${start.y} 
                        L ${start.x + start.w / 2 + 1} ${start.y}`}
-                  fill="none"
-                  stroke="#000"
-                  strokeWidth="1.2"
-                  strokeLinejoin="round"
-                  className=""
-                />
-                {/* RETURN ARROW */}
-                <path
-                  d={`M ${start.x + start.w / 2 + 5} ${start.y - 2.5} 
+                    fill="none"
+                    stroke="#000"
+                    strokeWidth="1.2"
+                    strokeLinejoin="round"
+                  />
+                  {/* RETURN ARROW */}
+                  <path
+                    d={`M ${start.x + start.w / 2 + 5} ${start.y - 2.5} 
                        L ${start.x + start.w / 2 + 1} ${start.y} 
                        L ${start.x + start.w / 2 + 5} ${start.y + 2.5}`}
-                  fill="none"
-                  stroke="#000"
-                  strokeWidth="1.2"
-                  className=""
-                />
-                {/* "TIDAK" TEXT LABEL REMOVED */}
-              </g>
-            )}
+                    fill="none"
+                    stroke="#000"
+                    strokeWidth="1.2"
+                  />
+                </g>
+              )}
           </g>
         );
       })}

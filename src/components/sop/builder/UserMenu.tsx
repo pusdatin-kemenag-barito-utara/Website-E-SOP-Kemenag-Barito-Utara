@@ -71,8 +71,8 @@ export function UserMenu({ user, onLogout }: UserMenuProps) {
           />
         ) : (
           <Image
-            src="/kemenag-512.png"
-            alt="Logo Kemenag"
+            src="/sop.png"
+            alt="Logo SOP"
             width={36}
             height={36}
             className="object-contain w-full h-full p-1"
@@ -104,8 +104,8 @@ export function UserMenu({ user, onLogout }: UserMenuProps) {
                   />
                 ) : (
                   <Image
-                    src="/kemenag-512.png"
-                    alt="Logo Kemenag"
+                    src="/sop.png"
+                    alt="Logo SOP"
                     width={44}
                     height={44}
                     className="object-contain w-full h-full p-1.5"

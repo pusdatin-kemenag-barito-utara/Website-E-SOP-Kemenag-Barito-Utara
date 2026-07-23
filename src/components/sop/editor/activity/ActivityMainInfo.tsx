@@ -45,7 +45,7 @@ export function ActivityMainInfo({
             value={act.kegiatan}
             onChange={(e) => onUpdate(act.id, "kegiatan", e.target.value)}
             placeholder="Apa yang dilakukan pada tahap ini?"
-            className="min-h-[80px] max-h-[120px] md:max-h-none overflow-y-auto text-sm leading-relaxed bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 rounded-xl focus-visible:ring-[#015C3A] focus-visible:border-[#015C3A] shadow-inner"
+            className="min-h-[80px] max-h-[120px] md:max-h-none overflow-y-auto text-sm leading-relaxed bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 rounded-xl focus-visible:ring-[#015C3A] focus-visible:border-[#015C3A]"
           />
           {act.symbol === "decision" &&
             !act.kegiatan.toLowerCase().includes("ya") &&
@@ -69,7 +69,7 @@ export function ActivityMainInfo({
                 if (val) onUpdate(act.id, "symbol", val);
               }}
             >
-              <SelectTrigger className="h-10 bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 rounded-xl focus:ring-[#015C3A]">
+              <SelectTrigger className="h-10 bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 rounded-xl focus:ring-[#015C3A]">
                 <SelectValue>
                   <div className="flex items-center gap-2">
                     {React.createElement(SYMBOL_ICONS[act.symbol] || Square, {
@@ -113,10 +113,10 @@ export function ActivityMainInfo({
                 if (val) onUpdate(act.id, "roleForSymbol", val);
               }}
             >
-              <SelectTrigger className="h-10 bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 rounded-xl focus:ring-[#015C3A]">
+              <SelectTrigger className="h-10 bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 rounded-xl focus:ring-[#015C3A]">
                 <SelectValue placeholder="Pilih Pelaksana">
                   <div className="flex items-center gap-2">
-                    <Users className="w-3.5 h-3.5 text-blue-500" />
+                    <Users className="w-3.5 h-3.5 text-[#015C3A]" />
                     <span className="font-medium text-sm text-foreground truncate max-w-[100px]">
                       {act.roleForSymbol || "Pilih"}
                     </span>
@@ -128,11 +128,11 @@ export function ActivityMainInfo({
                   <SelectItem
                     key={role}
                     value={role}
-                    className="py-2.5 px-3 focus:bg-blue-50 dark:focus:bg-blue-900/20 cursor-pointer rounded-xl transition-colors"
+                    className="py-2.5 px-3 focus:bg-emerald-50 dark:focus:bg-emerald-950/20 cursor-pointer rounded-xl transition-colors"
                   >
                     <div className="flex items-center gap-3">
                       <div className="p-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 shadow-sm">
-                        <Users className="w-4 h-4 text-blue-500" />
+                        <Users className="w-4 h-4 text-[#015C3A]" />
                       </div>
                       <span className="font-semibold text-sm text-slate-700 dark:text-slate-200 tracking-wide">{role}</span>
                     </div>

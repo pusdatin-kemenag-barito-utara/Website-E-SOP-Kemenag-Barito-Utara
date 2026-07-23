@@ -52,7 +52,7 @@ export function ProjectSidebar({
             placeholder="Cari proyek..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full h-9 pl-9 pr-4 rounded-xl bg-slate-50 dark:bg-slate-800 border-none text-sm font-medium placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#015C3A]/30 focus:bg-white dark:focus:bg-slate-900 transition-all shadow-inner"
+            className="w-full h-9 pl-9 pr-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-sm font-medium placeholder:text-slate-400 focus:outline-none focus:border-[#015C3A] focus:ring-1 focus:ring-[#015C3A] transition-all"
           />
         </div>
       </div>

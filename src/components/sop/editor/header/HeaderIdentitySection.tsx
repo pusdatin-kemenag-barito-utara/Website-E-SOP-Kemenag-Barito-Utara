@@ -35,7 +35,7 @@ export function HeaderIdentitySection({
             value={header.namaSOP}
             onChange={(e) => updateHeader("namaSOP", e.target.value)}
             className={cn(
-              "h-12 text-sm bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl focus-visible:ring-2 focus-visible:ring-[#015C3A]/20 focus-visible:bg-white focus-visible:border-[#015C3A] transition-all font-semibold text-slate-800 dark:text-slate-100 px-4 shadow-inner",
+              "h-11 text-sm bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:border-[#015C3A] focus:ring-1 focus:ring-[#015C3A] transition-all font-semibold text-slate-800 dark:text-slate-100 px-4",
               isDefaultName && "text-slate-400 italic font-medium",
             )}
             placeholder="Masukan judul SOP ..."
@@ -45,13 +45,13 @@ export function HeaderIdentitySection({
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
           <div className="space-y-2">
             <label className="text-xs font-bold text-slate-700 dark:text-slate-200 ml-1 tracking-wide flex items-center gap-1.5 mb-1.5">
-              <BadgeCheck className="w-4 h-4 text-blue-500" /> Nomor SOP
+              <BadgeCheck className="w-4 h-4 text-emerald-600" /> Nomor SOP
             </label>
             <Input
               value={header.nomor}
               onChange={(e) => updateHeader("nomor", e.target.value)}
               className={cn(
-                "h-12 text-sm bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl focus-visible:ring-2 focus-visible:ring-[#015C3A]/20 focus-visible:bg-white focus-visible:border-[#015C3A] transition-all font-semibold text-slate-800 dark:text-slate-100 px-4 shadow-inner",
+                "h-11 text-sm bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:border-[#015C3A] focus:ring-1 focus:ring-[#015C3A] transition-all font-semibold text-slate-800 dark:text-slate-100 px-4",
                 isDefaultNomor && "text-slate-400 italic font-medium",
               )}
               placeholder="Masukan Nomor Surat .."
@@ -59,12 +59,12 @@ export function HeaderIdentitySection({
           </div>
           <div className="space-y-2">
             <label className="text-xs font-bold text-slate-700 dark:text-slate-200 ml-1 tracking-wide flex items-center gap-1.5 mb-1.5">
-              <UserCheck className="w-4 h-4 text-amber-500" /> Jabatan Pengesah
+              <UserCheck className="w-4 h-4 text-emerald-600" /> Jabatan Pengesah
             </label>
             <Input
               value={header.disahkanOleh}
               onChange={(e) => updateHeader("disahkanOleh", e.target.value)}
-              className="h-12 text-sm bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl focus-visible:ring-2 focus-visible:ring-[#015C3A]/20 focus-visible:bg-white focus-visible:border-[#015C3A] transition-all font-semibold text-slate-800 dark:text-slate-100 px-4 shadow-inner"
+              className="h-11 text-sm bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:border-[#015C3A] focus:ring-1 focus:ring-[#015C3A] transition-all font-semibold text-slate-800 dark:text-slate-100 px-4"
             />
           </div>
         </div>
@@ -77,7 +77,7 @@ export function HeaderIdentitySection({
             <Input
               value={header.pejabatNama}
               onChange={(e) => updateHeader("pejabatNama", e.target.value)}
-              className="h-12 text-sm bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl focus-visible:ring-2 focus-visible:ring-[#015C3A]/20 focus-visible:bg-white focus-visible:border-[#015C3A] transition-all font-semibold text-slate-800 dark:text-slate-100 px-4 shadow-inner"
+              className="h-11 text-sm bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:border-[#015C3A] focus:ring-1 focus:ring-[#015C3A] transition-all font-semibold text-slate-800 dark:text-slate-100 px-4"
             />
           </div>
           <div className="space-y-2">
@@ -87,7 +87,7 @@ export function HeaderIdentitySection({
             <Input
               value={header.pejabatNip}
               onChange={(e) => updateHeader("pejabatNip", e.target.value)}
-              className="h-12 text-sm bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl focus-visible:ring-2 focus-visible:ring-[#015C3A]/20 focus-visible:bg-white focus-visible:border-[#015C3A] transition-all font-semibold text-slate-800 dark:text-slate-100 px-4 shadow-inner font-mono tracking-wider"
+              className="h-11 text-sm bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:border-[#015C3A] focus:ring-1 focus:ring-[#015C3A] transition-all font-semibold text-slate-800 dark:text-slate-100 px-4 font-mono tracking-wider"
             />
           </div>
         </div>
