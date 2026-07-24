@@ -15,45 +15,30 @@ export async function proxy(request: NextRequest) {
     const appId = "sop-kemenag";
 
     const maintenanceRes = await fetch(
-      `${pusdatinUrl}/api/public/apps/${appId}/status`,
+      `${pusdatinUrl}/api/public/apps/${appId}/status?t=${Date.now()}`,
       {
-        next: { revalidate: 30 },
+        cache: "no-store",
+        headers: {
+          "Cache-Control": "no-cache, no-store, must-revalidate",
+        },
       }
     );
 
     if (maintenanceRes.ok) {
       const data = await maintenanceRes.json();
-      if (data.status === "maintenance") {
-        return new NextResponse(
-          `
-          <!DOCTYPE html>
-          <html lang="id">
-            <head>
-              <meta charset="utf-8">
-              <meta name="viewport" content="width=device-width, initial-scale=1">
-              <title>Sistem Sedang Pemeliharaan</title>
-              <link rel="icon" href="${pusdatinUrl}/branding/kemenag.svg" type="image/svg+xml">
-              <style>
-                body { margin: 0; overflow: hidden; background-color: #f8fafc; }
-                iframe { width: 100vw; height: 100vh; border: none; }
-              </style>
-            </head>
-            <body>
-              <iframe src="${pusdatinUrl}/maintenance?app=E-SOP+Digital" title="Maintenance"></iframe>
-            </body>
-          </html>
-        `,
-          {
-            status: 503,
-            headers: {
-              "Content-Type": "text/html; charset=utf-8",
-            },
-          }
-        );
+      const isMaintenance = data.status === "maintenance";
+
+      if (isMaintenance) {
+        if (pathname !== "/maintenance") {
+          return NextResponse.redirect(new URL("/maintenance", request.url));
+        }
+        return NextResponse.next();
+      } else if (pathname === "/maintenance") {
+        return NextResponse.redirect(new URL("/", request.url));
       }
     }
-  } catch (error) {
-    // console.error("[PROXY] Failed to fetch maintenance status:", error);
+  } catch {
+    // console.error("[PROXY] Failed to fetch maintenance status");
   }
 
   // === SESSION HANDLING ===
