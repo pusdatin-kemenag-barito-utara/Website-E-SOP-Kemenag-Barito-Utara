@@ -45,7 +45,10 @@ RUN npm run build
 # ==========================================
 FROM node:22-alpine
 
-RUN apk add --no-cache ca-certificates tzdata
+RUN apk add --no-cache ca-certificates tzdata curl
+
+HEALTHCHECK --interval=5s --timeout=3s --start-period=10s --retries=3 \
+  CMD curl -f http://127.0.0.1:3000/ || exit 1
 
 WORKDIR /app
 
