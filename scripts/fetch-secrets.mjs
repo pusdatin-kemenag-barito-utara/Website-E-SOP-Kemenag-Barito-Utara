@@ -1,6 +1,4 @@
 // scripts/fetch-secrets.mjs
-import fs from "fs";
-
 const domain = (process.env.INFISICAL_DOMAIN || "https://env.kemenag-baritoutara.com").replace(/\/$/, "");
 const clientId = process.env.INFISICAL_CLIENT_ID;
 const clientSecret = process.env.INFISICAL_CLIENT_SECRET;
@@ -13,7 +11,7 @@ if (!clientId || !clientSecret || !projectId) {
 }
 
 async function main() {
-  console.log("[Infisical] Logging in via Universal Auth to", domain);
+  console.error("[Infisical] Logging in via Universal Auth to " + domain + "...");
   const loginRes = await fetch(`${domain}/api/v1/auth/universal-auth/login`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -27,7 +25,7 @@ async function main() {
 
   const { accessToken } = await loginRes.json();
 
-  console.log(`[Infisical] Fetching secrets for environment '${envName}'...`);
+  console.error(`[Infisical] Fetching secrets for environment '${envName}'...`);
   const secretsRes = await fetch(
     `${domain}/api/v3/secrets/raw?workspaceId=${projectId}&environment=${envName}`,
     {
@@ -44,7 +42,6 @@ async function main() {
   const secrets = data.secrets || [];
 
   const envLines = secrets.map((s) => {
-    // If value contains newlines or quotes, format safely
     let val = s.secretValue;
     if (val.includes("\n") || val.includes(" ") || val.includes('"')) {
       val = `"${val.replace(/"/g, '\\"')}"`;
@@ -52,8 +49,9 @@ async function main() {
     return `${s.secretKey}=${val}`;
   });
 
-  fs.writeFileSync(".env", envLines.join("\n") + "\n", "utf8");
-  console.log(`[Infisical] Done! Successfully wrote ${secrets.length} secrets to .env`);
+  const envContent = envLines.join("\n") + "\n";
+  process.stdout.write(envContent);
+  console.error(`[Infisical] Successfully synced ${secrets.length} secrets!`);
 }
 
 main().catch((err) => {
