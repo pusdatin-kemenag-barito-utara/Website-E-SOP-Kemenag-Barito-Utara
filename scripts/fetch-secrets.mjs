@@ -2,10 +2,15 @@
 import fs from "fs";
 
 const domain = (process.env.INFISICAL_DOMAIN || "https://env.kemenag-baritoutara.com").replace(/\/$/, "");
-const clientId = process.env.INFISICAL_CLIENT_ID || "1c253ced-fd46-4dc0-9361-8cafa58b5163";
-const clientSecret = process.env.INFISICAL_CLIENT_SECRET || "7449d4dbdcad8a5f74de462359c86c482d863cc57b4c7ff56580cfd98f218df4";
-const projectId = process.env.INFISICAL_PROJECT_ID || "648d29ff-c7b9-46dd-926f-cd739808a4df";
+const clientId = process.env.INFISICAL_CLIENT_ID;
+const clientSecret = process.env.INFISICAL_CLIENT_SECRET;
+const projectId = process.env.INFISICAL_PROJECT_ID;
 const envName = process.env.INFISICAL_ENV || "prod";
+
+if (!clientId || !clientSecret || !projectId) {
+  console.error("[Infisical Error] Missing required credentials: INFISICAL_CLIENT_ID, INFISICAL_CLIENT_SECRET, or INFISICAL_PROJECT_ID must be set in Environment Variables.");
+  process.exit(1);
+}
 
 async function main() {
   console.log("[Infisical] Logging in via Universal Auth to", domain);
