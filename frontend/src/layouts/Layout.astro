@@ -1,0 +1,200 @@
+---
+interface Props {
+  title?: string;
+  description?: string;
+  jsonLd?: Record<string, unknown>;
+}
+
+const {
+  title = "E-SOP Digital | Kemenag Kabupaten Barito Utara",
+  description = "Portal Resmi Sistem Informasi dan Penyusunan Standar Operasional Prosedur (SOP) Digital Kantor Kementerian Agama Kabupaten Barito Utara berstandar KMA No. 9 Tahun 2016.",
+  jsonLd,
+} = Astro.props;
+
+const siteUrl = import.meta.env.PUBLIC_SITE_URL || "https://sop.kemenag-baritoutara.com";
+const pageTitle = title;
+const GA_MEASUREMENT_ID = "G-4BS781XVQP";
+const GOOGLE_TAG_ID = "GT-NNVBZNJ7";
+const CF_BEACON_TOKEN = import.meta.env.PUBLIC_CF_BEACON_TOKEN || "";
+
+const defaultJsonLd = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebApplication",
+      "@id": `${siteUrl}/#webapp`,
+      name: "E-SOP Digital Kemenag Barito Utara",
+      url: siteUrl,
+      description: "Sistem Informasi Penyusunan dan Manajemen Standar Operasional Prosedur (SOP) Digital Kantor Kementerian Agama Kabupaten Barito Utara.",
+      applicationCategory: "GovernmentApplication",
+      operatingSystem: "All (Modern Web Browser, Android, iOS, Windows, macOS, Linux)",
+      browserRequirements: "Requires JavaScript. Requires HTML5.",
+      softwareVersion: "2.0.0",
+      inLanguage: "id-ID",
+      provider: {
+        "@type": "GovernmentOrganization",
+        "@id": "https://baritoutara.kemenag.go.id/#organization",
+        name: "Kantor Kementerian Agama Kabupaten Barito Utara",
+        url: "https://baritoutara.kemenag.go.id",
+        logo: {
+          "@type": "ImageObject",
+          url: `${siteUrl}/kemenag-512.png`,
+          width: 512,
+          height: 512,
+        },
+        address: {
+          "@type": "PostalAddress",
+          streetAddress: "Jalan Ahmad Yani Nomor 28",
+          addressLocality: "Muara Teweh",
+          addressRegion: "Kalimantan Tengah",
+          postalCode: "73611",
+          addressCountry: "ID",
+        },
+      },
+    },
+    {
+      "@type": "WebSite",
+      "@id": `${siteUrl}/#website`,
+      url: siteUrl,
+      name: "E-SOP Digital Kemenag Barito Utara",
+      publisher: {
+        "@id": "https://baritoutara.kemenag.go.id/#organization",
+      },
+      inLanguage: "id-ID",
+    },
+  ],
+};
+
+const jsonLdData = jsonLd || defaultJsonLd;
+---
+
+<!doctype html>
+<html lang="id" class="h-full">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, viewport-fit=cover" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+
+    <!-- ⚡ Cloudflare, Google & CDN Early Hints: Preconnect & DNS-Prefetch Priorities -->
+    <link rel="dns-prefetch" href="https://static.cloudflareinsights.com" />
+    <link rel="dns-prefetch" href="https://cloudflareinsights.com" />
+    <link rel="dns-prefetch" href="https://challenges.cloudflare.com" />
+    <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
+    <link rel="dns-prefetch" href="https://www.google-analytics.com" />
+    <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
+    <link rel="dns-prefetch" href="https://fonts.gstatic.com" />
+
+    <link rel="preconnect" href="https://static.cloudflareinsights.com" crossorigin />
+    <link rel="preconnect" href="https://challenges.cloudflare.com" crossorigin />
+    <link rel="preconnect" href="https://www.googletagmanager.com" crossorigin />
+    <link rel="preconnect" href="https://www.google-analytics.com" crossorigin />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+    <!-- 🚀 Priority Hints (Critical LCP Resource Preloading) -->
+    <link rel="preload" href="/sop.png" as="image" type="image/png" fetchpriority="high" />
+    <link rel="preload" href="/kemenag-512.png" as="image" type="image/png" fetchpriority="high" />
+
+    <!-- 📱 PWA & Mobile Web App Meta -->
+    <meta name="theme-color" content="#015C3A" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#022c1c" media="(prefers-color-scheme: dark)" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="E-SOP Digital" />
+    <meta name="application-name" content="E-SOP Digital Kemenag Barito Utara" />
+    <meta name="msapplication-TileColor" content="#015C3A" />
+    <link rel="icon" type="image/png" href="/sop.png" />
+    <link rel="apple-touch-icon" href="/sop.png" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+
+    <!-- 🌐 SEO Core Meta -->
+    <title>{pageTitle}</title>
+    <meta name="description" content={description} />
+    <meta name="keywords" content="SOP Digital, Kemenag Barito Utara, Standar Operasional Prosedur, Kementerian Agama RI, E-SOP Kemenag, Muara Teweh, Pelayanan Publik Kemenag, Kabupaten Barito Utara, Tata Naskah Dinas Kemenag, KMA No 9 Tahun 2016" />
+    <meta name="author" content="Kantor Kementerian Agama Kabupaten Barito Utara" />
+    <meta name="creator" content="Pusdatin Kemenag Barito Utara" />
+    <meta name="publisher" content="Kementerian Agama Republik Indonesia" />
+    <meta name="category" content="government" />
+    <meta name="referrer" content="origin-when-cross-origin" />
+    <meta name="format-detection" content="email=no, telephone=no, address=no" />
+    <link rel="canonical" href={siteUrl} />
+
+    <!-- 🤖 Search Engine Indexing Directives -->
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+    <meta name="googlebot" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+
+    <!-- 🖼️ Open Graph Protocol (Facebook, WhatsApp, LinkedIn) -->
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="id_ID" />
+    <meta property="og:url" content={siteUrl} />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:site_name" content="E-SOP Digital Kemenag Barito Utara" />
+    <meta property="og:image" content={`${siteUrl}/sop.png`} />
+    <meta property="og:image:secure_url" content={`${siteUrl}/sop.png`} />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:width" content="512" />
+    <meta property="og:image:height" content="512" />
+    <meta property="og:image:alt" content="Logo Resmi E-SOP Digital Kemenag Barito Utara" />
+
+    <!-- 🐦 Twitter Card Metadata -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={pageTitle} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={`${siteUrl}/sop.png`} />
+    <meta name="twitter:image:alt" content="Logo Resmi E-SOP Digital Kemenag Barito Utara" />
+
+    <!-- 📊 Google Analytics 4 & Google Tag (gtag.js) -->
+    <script is:inline async src={`https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`}></script>
+    <script is:inline define:vars={{ GA_MEASUREMENT_ID, GOOGLE_TAG_ID }}>
+      window.dataLayer = window.dataLayer || [];
+      function gtag() {
+        window.dataLayer.push(arguments);
+      }
+      gtag("js", new Date());
+
+      // Configure GA4 Measurement ID
+      gtag("config", GA_MEASUREMENT_ID, {
+        send_page_view: true,
+        cookie_flags: "SameSite=None;Secure",
+      });
+
+      // Configure Google Tag ID
+      gtag("config", GOOGLE_TAG_ID, {
+        send_page_view: false,
+      });
+    </script>
+
+    <!-- 🛡️ Cloudflare Real User Monitoring (RUM) & Web Analytics Integration -->
+    {CF_BEACON_TOKEN ? (
+      <script
+        is:inline
+        defer
+        src="https://static.cloudflareinsights.com/beacon.min.js"
+        data-cf-beacon={`{"token": "${CF_BEACON_TOKEN}", "spa": true}`}
+      />
+    ) : null}
+
+    <!-- 📜 Structured Data (Schema.org JSON-LD) -->
+    <script is:inline type="application/ld+json" set:html={JSON.stringify(jsonLdData)} />
+
+    <!-- 🎨 Dark/Light Theme Immediate Hydration (Default: Light Mode) -->
+    <script is:inline>
+      try {
+        const theme = localStorage.getItem("theme");
+        if (theme === "dark") {
+          document.documentElement.classList.add("dark");
+        } else {
+          document.documentElement.classList.remove("dark");
+        }
+      } catch (e) {}
+    </script>
+
+    <!-- 🔤 Google Web Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  </head>
+  <body class="min-h-full flex flex-col antialiased selection:bg-[#015C3A]/20 selection:text-[#015C3A]" style="font-family: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;">
+    <slot />
+  </body>
+</html>

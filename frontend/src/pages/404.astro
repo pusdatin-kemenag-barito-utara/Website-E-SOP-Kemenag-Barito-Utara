@@ -1,0 +1,83 @@
+---
+import Layout from "@/layouts/Layout.astro";
+import "../styles/global.css";
+import { MaintenanceListener } from "@/components/maintenance-listener";
+
+const API_URL = process.env.PUBLIC_API_URL || "http://localhost:8080";
+
+try {
+  const res = await fetch(`${API_URL}/api/maintenance/status?t=${Date.now()}`);
+  if (res.ok) {
+    const data = await res.json();
+    if (data.status === "maintenance") {
+      return Astro.redirect("/maintenance", 307);
+    }
+  }
+} catch {}
+
+const requestedPath = Astro.url.pathname;
+---
+
+<Layout title="404 - Halaman Tidak Ditemukan | E-SOP Digital Kemenag Barito Utara">
+  <MaintenanceListener client:load />
+
+  <div class="min-h-screen flex flex-col items-center justify-center bg-slate-50 relative overflow-hidden select-none p-4 sm:p-6">
+    {/* Decorative background glows */}
+    <div class="absolute top-1/4 left-1/4 h-80 w-80 rounded-full bg-[#015C3A]/10 blur-[100px] pointer-events-none" />
+    <div class="absolute bottom-1/4 right-1/4 h-80 w-80 rounded-full bg-blue-500/10 blur-[100px] pointer-events-none" />
+
+    <div class="relative z-10 w-full max-w-lg mx-auto text-center">
+      {/* Brand Icon Header */}
+      <div class="mb-6 flex flex-col items-center">
+        <div class="w-16 h-16 bg-white rounded-2xl p-2.5 flex items-center justify-center shadow-sm border border-slate-200 mb-3">
+          <img src="/sop.png" alt="Logo E-SOP" class="w-full h-full object-contain" />
+        </div>
+        <span class="text-[11px] font-black tracking-widest text-[#015C3A] uppercase">
+          E-SOP DIGITAL &bull; KEMENAG BARITO UTARA
+        </span>
+      </div>
+
+      {/* 404 Main Card */}
+      <div class="bg-white rounded-2xl border border-slate-200 p-8 sm:p-10 shadow-sm">
+        <div class="inline-flex items-center justify-center px-4 py-1.5 rounded-full bg-emerald-50 border border-emerald-200/60 mb-4">
+          <span class="text-xs font-black tracking-wider text-[#015C3A] uppercase">Error 404</span>
+        </div>
+
+        <h1 class="text-2xl sm:text-3xl font-black text-slate-800 tracking-tight mb-2">
+          Halaman Tidak Ditemukan
+        </h1>
+
+        <p class="text-xs sm:text-sm text-slate-500 leading-relaxed mb-6 font-medium">
+          Maaf, halaman <code class="px-2 py-0.5 rounded bg-slate-100 text-slate-700 font-mono text-xs">{requestedPath}</code> tidak ditemukan di server atau telah dipindahkan.
+        </p>
+
+        <div class="flex flex-col sm:flex-row items-center justify-center gap-3">
+          <a
+            href="/"
+            class="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl bg-[#015C3A] hover:bg-[#014a2e] px-6 py-3 text-xs font-bold tracking-wider text-white uppercase transition-all shadow-sm focus:ring-2 focus:ring-[#015C3A] focus:ring-offset-2"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+              <polyline points="9 22 9 12 15 12 15 22"/>
+            </svg>
+            <span>Ke Dashboard SOP</span>
+          </a>
+
+          <a
+            href="/tools"
+            class="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl bg-slate-100 hover:bg-slate-200 px-6 py-3 text-xs font-bold tracking-wider text-slate-700 uppercase transition-all"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
+            </svg>
+            <span>Alat Pendukung</span>
+          </a>
+        </div>
+      </div>
+
+      <p class="mt-8 text-[10px] font-bold tracking-[0.2em] text-slate-400 uppercase">
+        &copy; {new Date().getFullYear()} PUSDATIN KEMENAG BARITO UTARA
+      </p>
+    </div>
+  </div>
+</Layout>

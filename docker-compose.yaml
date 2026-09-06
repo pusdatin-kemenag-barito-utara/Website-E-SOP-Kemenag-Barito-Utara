@@ -1,0 +1,56 @@
+version: "3.8"
+
+services:
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        - PUBLIC_SITE_URL=${PUBLIC_SITE_URL}
+        - PUBLIC_API_URL=${PUBLIC_API_URL}
+        - PUBLIC_SUPABASE_URL=${PUBLIC_SUPABASE_URL}
+        - PUBLIC_SUPABASE_ANON_KEY=${PUBLIC_SUPABASE_ANON_KEY}
+        - PUBLIC_TURNSTILE_SITE_KEY=${PUBLIC_TURNSTILE_SITE_KEY}
+        - PUBLIC_PUSDATIN_URL=${PUBLIC_PUSDATIN_URL}
+    container_name: sop-frontend
+    restart: unless-stopped
+    ports:
+      - "${FRONTEND_PORT:-3000}:3000"
+    environment:
+      - PUBLIC_SITE_URL=${PUBLIC_SITE_URL:-https://sop.kemenag-baritoutara.com}
+      - PUBLIC_SUPABASE_URL=${PUBLIC_SUPABASE_URL}
+      - PUBLIC_SUPABASE_ANON_KEY=${PUBLIC_SUPABASE_ANON_KEY}
+      - PUBLIC_TURNSTILE_SITE_KEY=${PUBLIC_TURNSTILE_SITE_KEY}
+      - PUBLIC_PUSDATIN_URL=${PUBLIC_PUSDATIN_URL}
+      - PUBLIC_API_URL=${PUBLIC_API_URL:-http://backend:8080}
+    depends_on:
+      - backend
+    networks:
+      - sop-network
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: sop-backend
+    restart: unless-stopped
+    ports:
+      - "${BACKEND_PORT:-8080}:8080"
+    environment:
+      - APP_ENV=${APP_ENV:-production}
+      - SERVER_PORT=8080
+      - SUPABASE_URL=${SUPABASE_URL}
+      - SUPABASE_ANON_KEY=${SUPABASE_ANON_KEY}
+      - SUPABASE_JWT_SECRET=${SUPABASE_JWT_SECRET}
+      - SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY}
+      - DATABASE_URL=${DATABASE_URL}
+      - PUSDATIN_URL=${PUSDATIN_URL}
+      - FRONTEND_URL=${FRONTEND_URL:-http://localhost:3000}
+      - SUPER_ADMIN_EMAIL=${SUPER_ADMIN_EMAIL:-baritoutara@kemenag.go.id}
+      - TURNSTILE_SECRET_KEY=${TURNSTILE_SECRET_KEY}
+    networks:
+      - sop-network
+
+networks:
+  sop-network:
+    driver: bridge

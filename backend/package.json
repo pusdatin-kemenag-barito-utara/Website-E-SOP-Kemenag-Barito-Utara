@@ -1,0 +1,11 @@
+{
+  "name": "sop-kemenag-backend",
+  "version": "1.0.0",
+  "private": true,
+  "description": "E-SOP Digital Backend (Go Fiber V3) - dijalankan via AIR untuk hot reload",
+  "scripts": {
+    "dev": "air",
+    "build": "go build -o bin/server .",
+    "start": "go run ."
+  }
+}

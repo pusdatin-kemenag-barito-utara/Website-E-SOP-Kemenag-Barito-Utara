@@ -1,36 +1,92 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# E-SOP Digital — Kemenag Barito Utara
 
-## Getting Started
+Aplikasi pembuat **Standar Operasional Prosedur (SOP)** untuk Kantor Kementerian Agama Barito Utara. Bisa membuat, mengedit, live-preview, ekspor PDF, dan mengelola SOP secara kolaboratif (real-time presence).
 
-First, run the development server:
+## Arsitektur (Monorepo)
+
+Proyek ini adalah monorepo dengan dua service terpisah:
+
+| Service | Teknologi | Direktori |
+|---------|-----------|-----------|
+| **Frontend** | Astro 7 + React (islands) + Tailwind v4 | `frontend/` |
+| **Backend (API)** | Go Fiber V3 + PostgreSQL (pgx) | `backend/` |
+
+- **Database**: Supabase PostgreSQL (auth client-side via Supabase JS di browser).
+- **RBAC**: dicek lewat Go API (`POST /api/auth/check-rbac`) terhadap `kemenag_pusdatin.profiles` + `kemenag_pusdatin.app_permissions`.
+- **Admin user**: `SUPER_ADMIN_EMAIL` (default `baritoutara@kemenag.go.id`) via Supabase service role key.
+
+## Environment (Single `.env` di Root)
+
+Semua konfigurasi aplikasi dipusatkan di **satu file `.env` di root repo**. File ini dipakai bersama oleh Frontend (Astro), Backend (Go), dan Docker Compose — tidak ada `.env` terpisah di folder `frontend/` atau `backend/`.
+
+Buat file tersebut dari nilai yang tersedia (variabel `SUPABASE_JWT_SECRET` wajib diisi dari dashboard Supabase):
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+# salin contoh (jika ada) atau isi manual, lalu:
+# .env sudah dibaca otomatis oleh FE, BE, dan compose.
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+> `.env` tidak perlu dicommit (ter-ignore oleh `.gitignore`).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Menjalankan (Development)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Frontend
+```bash
+cd frontend
+npm install
+npm run dev   # http://localhost:3000
+```
+> Astro membaca `.env` root via `envDir: "../"` di `astro.config.mjs`.
 
-## Learn More
+### Backend
+```bash
+cd backend
+go run .      # http://localhost:8080/api/health
+```
+> `config.Load()` otomatis memuat `.env` root (dari `../.env` atau `.env`).
 
-To learn more about Next.js, take a look at the following resources:
+## Menjalankan (Docker)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Pastikan `.env` root sudah terisi, lalu:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```bash
+docker compose up --build
+```
+- Frontend: `http://localhost:3000`
+- Backend: `http://localhost:8080`
+> Compose membaca `.env` root dan meneruskan variabel `PUBLIC_*` sebagai build-arg serta env runtime.
 
-## Deploy on Vercel
+## Struktur Direktori
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```
+├── frontend/            # Astro 7 + React frontend
+│   ├── src/
+│   │   ├── components/  # React islands (SOP builder/editor/preview, ui, tools)
+│   │   ├── hooks/       # useAuth, useSOPData, useSOPPresence, dll.
+│   │   ├── layouts/     # Layout.astro
+│   │   ├── lib/         # supabase, constants, schemas, utils, pdf-service
+│   │   ├── pages/       # index, maintenance, tools, robots, sitemap
+│   │   ├── styles/      # global.css (Tailwind v4)
+│   │   └── types/       # sop.ts, d.ts
+│   └── public/          # aset statis (sop.png, favicon, manifest)
+├── backend/             # Go Fiber V3 API
+│   ├── config/          # env loader
+│   ├── database/        # pgxpool connection
+│   ├── docs/            # referensi skema DB (supabase-schema.sql)
+│   ├── handlers/        # health, auth, admin, maintenance, user-role
+│   ├── middleware/      # auth, rbac, cors, ratelimit
+│   ├── models/          # struct
+│   └── routes/          # registrasi route
+├── .env                 # satu-satunya environment untuk FE, BE & Docker
+└── docker-compose.yml
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Endpoint Backend Utama
+
+- `GET /api/health`
+- `GET /api/keep-alive`
+- `GET /api/maintenance/status`
+- `POST /api/auth/check-rbac`
+- `GET /api/admin/user-role` (login)
+- `GET|POST /api/admin/users` (super admin)
+- `DELETE /api/admin/users/:id`

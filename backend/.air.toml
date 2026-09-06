@@ -1,0 +1,26 @@
+# Config for Air (v1.67+ compatible & optimized for Go Fiber v3)
+root = "."
+tmp_dir = "tmp"
+
+[build]
+  cmd = "go build -o ./tmp/main.exe ."
+  entrypoint = "./tmp/main.exe"
+  include_ext = ["go", "env", "mod", "sum"]
+  exclude_dir = ["tmp", "bin", "docs"]
+  exclude_regex = ["_test.go"]
+  exclude_unchanged = true
+  delay = 300
+  stop_on_error = false
+  send_interrupt = false
+  kill_delay = "500ms"
+
+[log]
+  time = true
+  main_only = false
+
+[misc]
+  clean_on_exit = true
+
+[screen]
+  clear_on_rebuild = false
+  keep_scroll = true

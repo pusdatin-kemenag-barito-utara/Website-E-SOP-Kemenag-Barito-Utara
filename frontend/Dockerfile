@@ -1,0 +1,38 @@
+# Build stage
+FROM node:22-alpine AS builder
+
+WORKDIR /app
+
+COPY package.json package-lock.json ./
+RUN npm ci
+
+COPY . .
+ARG PUBLIC_SITE_URL
+ARG PUBLIC_API_URL
+ARG PUBLIC_SUPABASE_URL
+ARG PUBLIC_SUPABASE_ANON_KEY
+ARG PUBLIC_TURNSTILE_SITE_KEY
+ARG PUBLIC_PUSDATIN_URL
+ENV PUBLIC_SITE_URL=$PUBLIC_SITE_URL \
+    PUBLIC_API_URL=$PUBLIC_API_URL \
+    PUBLIC_SUPABASE_URL=$PUBLIC_SUPABASE_URL \
+    PUBLIC_SUPABASE_ANON_KEY=$PUBLIC_SUPABASE_ANON_KEY \
+    PUBLIC_TURNSTILE_SITE_KEY=$PUBLIC_TURNSTILE_SITE_KEY \
+    PUBLIC_PUSDATIN_URL=$PUBLIC_PUSDATIN_URL
+RUN npm run build
+
+# Runtime stage
+FROM node:22-alpine
+
+RUN adduser -D -H -u 1001 frontenduser
+
+WORKDIR /app
+COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/package.json .
+COPY --from=builder /app/node_modules ./node_modules
+
+USER frontenduser
+ENV PORT=3000 HOST=0.0.0.0
+EXPOSE 3000
+
+CMD ["node", "dist/server/entry.mjs"]
