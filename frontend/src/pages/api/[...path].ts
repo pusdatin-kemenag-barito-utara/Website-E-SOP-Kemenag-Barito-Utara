@@ -1,10 +1,6 @@
 import type { APIRoute } from "astro";
 
-const BACKEND_URL =
-  process.env.BACKEND_URL ||
-  (process.env.APP_ENV === "production"
-    ? "http://backend:8080"
-    : "http://localhost:8080");
+const BACKEND_URL = process.env.BACKEND_URL || "http://127.0.0.1:8080";
 
 export const ALL: APIRoute = async ({ request, params }) => {
   const url = new URL(request.url);
