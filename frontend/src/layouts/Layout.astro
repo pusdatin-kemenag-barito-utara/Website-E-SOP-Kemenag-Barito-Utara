@@ -11,7 +11,12 @@ const {
   jsonLd,
 } = Astro.props;
 
-const siteUrl = import.meta.env.PUBLIC_SITE_URL || "https://sop.kemenag-baritoutara.com";
+const siteUrl = (
+  import.meta.env.PUBLIC_SITE_URL ||
+  (typeof process !== "undefined" && process.env?.PUBLIC_SITE_URL) ||
+  Astro.site?.toString() ||
+  Astro.url.origin
+).replace(/\/$/, "");
 const pageTitle = title;
 const GA_MEASUREMENT_ID = "G-4BS781XVQP";
 const GOOGLE_TAG_ID = "GT-NNVBZNJ7";

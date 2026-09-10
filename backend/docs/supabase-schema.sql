@@ -24,25 +24,42 @@ CREATE TABLE IF NOT EXISTS kemenag_sop.profiles (
 -- Enable RLS for profiles
 ALTER TABLE kemenag_sop.profiles ENABLE ROW LEVEL SECURITY;
 
--- Allow users to view their own profile
-CREATE POLICY "Users can view own profile" 
+-- Allow users to view their own profile & super admin to view all
+CREATE POLICY "profiles_select_policy" 
   ON kemenag_sop.profiles FOR SELECT 
-  USING (auth.uid() = id);
+  TO authenticated
+  USING (
+    (select auth.uid()) = id
+    OR
+    ((select auth.jwt()) ->> 'email') = 'baritoutara@kemenag.go.id'
+  );
 
--- Super admin can view all profiles
-CREATE POLICY "Super admin can view all profiles"
-  ON kemenag_sop.profiles FOR SELECT
-  USING (auth.jwt() ->> 'email' = 'baritoutara@kemenag.go.id');
+-- Super admin can insert profiles
+CREATE POLICY "profiles_insert_policy"
+  ON kemenag_sop.profiles FOR INSERT
+  TO authenticated
+  WITH CHECK (
+    ((select auth.jwt()) ->> 'email') = 'baritoutara@kemenag.go.id'
+  );
 
--- Super admin can manage all profiles
-CREATE POLICY "Super admin can manage profiles"
-  ON kemenag_sop.profiles FOR ALL
-  USING (auth.jwt() ->> 'email' = 'baritoutara@kemenag.go.id');
+-- Super admin can update profiles
+CREATE POLICY "profiles_update_policy"
+  ON kemenag_sop.profiles FOR UPDATE
+  TO authenticated
+  USING (
+    ((select auth.jwt()) ->> 'email') = 'baritoutara@kemenag.go.id'
+  )
+  WITH CHECK (
+    ((select auth.jwt()) ->> 'email') = 'baritoutara@kemenag.go.id'
+  );
 
--- Allow public to select from profiles (for keep-alive ping)
-CREATE POLICY "Allow public read for keep-alive"
-  ON kemenag_sop.profiles FOR SELECT
-  USING (true);
+-- Super admin can delete profiles
+CREATE POLICY "profiles_delete_policy"
+  ON kemenag_sop.profiles FOR DELETE
+  TO authenticated
+  USING (
+    ((select auth.jwt()) ->> 'email') = 'baritoutara@kemenag.go.id'
+  );
 
 -- -------------------------------------------------------------
 -- Tabel 'sops' untuk menyimpan dokumen SOP
@@ -105,7 +122,11 @@ GRANT ALL ON ALL SEQUENCES IN SCHEMA kemenag_sop TO anon, authenticated;
 -- Trigger untuk otomatis membuat profile saat ada user baru daftar
 -- -------------------------------------------------------------
 CREATE OR REPLACE FUNCTION kemenag_sop.handle_new_user() 
-RETURNS trigger AS $$
+RETURNS trigger 
+LANGUAGE plpgsql 
+SECURITY DEFINER
+SET search_path = kemenag_sop, public, pg_temp
+AS $$
 BEGIN
   INSERT INTO kemenag_sop.profiles (id, email, role)
   VALUES (
@@ -118,7 +139,7 @@ BEGIN
   );
   RETURN new;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$;
 
 -- Hapus trigger lama jika ada, lalu pasang yang baru
 DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;

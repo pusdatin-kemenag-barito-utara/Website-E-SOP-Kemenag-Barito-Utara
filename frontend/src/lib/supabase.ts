@@ -3,7 +3,7 @@ import { createClient } from "@supabase/supabase-js";
 const supabaseUrl =
   import.meta.env.PUBLIC_SUPABASE_URL ||
   (typeof process !== "undefined" && process.env?.PUBLIC_SUPABASE_URL) ||
-  "https://db.kemenag-baritoutara.com";
+  "";
 
 const supabaseAnonKey =
   import.meta.env.PUBLIC_SUPABASE_ANON_KEY ||

@@ -3,16 +3,19 @@ package handlers
 import (
 	"context"
 	"log"
+	"strings"
 
 	"github.com/gofiber/fiber/v3"
 	"github.com/jackc/pgx/v5/pgxpool"
+
+	"sop-kemenag-backend/config"
 )
 
 // GetUserRole returns the role of the authenticated user.
 // The identity comes from the verified JWT claims (set by VerifyJWT middleware),
 // so no trust can be placed on a client-supplied email query parameter.
 // GET /api/admin/user-role
-func GetUserRole(db *pgxpool.Pool) fiber.Handler {
+func GetUserRole(db *pgxpool.Pool, cfg *config.Config) fiber.Handler {
 	return func(c fiber.Ctx) error {
 		email, ok := c.Locals("user_email").(string)
 		if !ok || email == "" {
@@ -26,7 +29,7 @@ func GetUserRole(db *pgxpool.Pool) fiber.Handler {
 		).Scan(&role)
 
 		if err != nil {
-			if email == "baritoutara@kemenag.go.id" {
+			if cfg != nil && cfg.SuperAdminEmail != "" && strings.EqualFold(email, cfg.SuperAdminEmail) {
 				return c.JSON(fiber.Map{"role": "super_admin", "email": email})
 			}
 			log.Printf("[ADMIN] GetUserRole error: %v", err)

@@ -2,7 +2,7 @@
 import Layout from "@/layouts/Layout.astro";
 import "../styles/global.css";
 import { MaintenancePage } from "@/components/maintenance/MaintenancePage";
-const API_URL = process.env.PUBLIC_API_URL || "http://localhost:8080";
+const API_URL = process.env.BACKEND_URL || process.env.PUBLIC_API_URL || import.meta.env.PUBLIC_API_URL || "";
 
 try {
   const res = await fetch(`${API_URL}/api/maintenance/status?t=${Date.now()}`);

@@ -42,21 +42,47 @@ DROP POLICY IF EXISTS "Super admin can view all profiles" ON kemenag_sop.profile
 DROP POLICY IF EXISTS "Allow public read for keep-alive" ON kemenag_sop.profiles;
 DROP POLICY IF EXISTS "Super admin can manage profiles" ON kemenag_sop.profiles;
 DROP POLICY IF EXISTS "Allow service_role full access to profiles" ON kemenag_sop.profiles;
+DROP POLICY IF EXISTS "profiles_select_policy" ON kemenag_sop.profiles;
+DROP POLICY IF EXISTS "profiles_insert_policy" ON kemenag_sop.profiles;
+DROP POLICY IF EXISTS "profiles_update_policy" ON kemenag_sop.profiles;
+DROP POLICY IF EXISTS "profiles_delete_policy" ON kemenag_sop.profiles;
 
--- Pengguna dapat melihat profil miliknya sendiri
-CREATE POLICY "Users can view own profile"
+-- Pengguna dapat melihat profil miliknya sendiri & Super admin dapat melihat seluruh profil (Teroptimasi RLS InitPlan & Non-Overlapping)
+CREATE POLICY "profiles_select_policy"
   ON kemenag_sop.profiles FOR SELECT
-  USING (auth.uid() = id);
+  TO authenticated
+  USING (
+    (select auth.uid()) = id 
+    OR 
+    ((select auth.jwt()) ->> 'email') = 'baritoutara@kemenag.go.id'
+  );
 
--- Super admin dapat melihat seluruh profil
-CREATE POLICY "Super admin can view all profiles"
-  ON kemenag_sop.profiles FOR SELECT
-  USING (auth.jwt() ->> 'email' = 'baritoutara@kemenag.go.id');
+-- Super admin dapat menambah profil
+CREATE POLICY "profiles_insert_policy"
+  ON kemenag_sop.profiles FOR INSERT
+  TO authenticated
+  WITH CHECK (
+    ((select auth.jwt()) ->> 'email') = 'baritoutara@kemenag.go.id'
+  );
 
--- Super admin dapat mengubah/menghapus profil
-CREATE POLICY "Super admin can manage profiles"
-  ON kemenag_sop.profiles FOR ALL
-  USING (auth.jwt() ->> 'email' = 'baritoutara@kemenag.go.id');
+-- Super admin dapat mengubah profil
+CREATE POLICY "profiles_update_policy"
+  ON kemenag_sop.profiles FOR UPDATE
+  TO authenticated
+  USING (
+    ((select auth.jwt()) ->> 'email') = 'baritoutara@kemenag.go.id'
+  )
+  WITH CHECK (
+    ((select auth.jwt()) ->> 'email') = 'baritoutara@kemenag.go.id'
+  );
+
+-- Super admin dapat menghapus profil
+CREATE POLICY "profiles_delete_policy"
+  ON kemenag_sop.profiles FOR DELETE
+  TO authenticated
+  USING (
+    ((select auth.jwt()) ->> 'email') = 'baritoutara@kemenag.go.id'
+  );
 
 -- Service role bypass RLS (untuk backend Go Fiber)
 CREATE POLICY "Allow service_role full access to profiles"
@@ -70,9 +96,13 @@ GRANT ALL ON ALL TABLES IN SCHEMA kemenag_sop TO anon, authenticated, service_ro
 GRANT ALL ON ALL ROUTINES IN SCHEMA kemenag_sop TO anon, authenticated, service_role;
 GRANT ALL ON ALL SEQUENCES IN SCHEMA kemenag_sop TO anon, authenticated, service_role;
 
--- 5. Trigger Otomatis Pembuatan Profile saat Auth User Baru Dibuat
+-- 5. Trigger Otomatis Pembuatan Profile saat Auth User Baru Dibuat (SET search_path aman)
 CREATE OR REPLACE FUNCTION kemenag_sop.handle_new_user() 
-RETURNS trigger AS $$
+RETURNS trigger 
+LANGUAGE plpgsql 
+SECURITY DEFINER
+SET search_path = kemenag_sop, public, pg_temp
+AS $$
 BEGIN
   INSERT INTO kemenag_sop.profiles (id, email, nama, role, bidang, is_active)
   VALUES (
@@ -93,21 +123,24 @@ BEGIN
     updated_at = timezone('utc'::text, now());
   RETURN new;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$;
 
 DROP TRIGGER IF EXISTS on_auth_user_created_sop ON auth.users;
 CREATE TRIGGER on_auth_user_created_sop
   AFTER INSERT ON auth.users
   FOR EACH ROW EXECUTE PROCEDURE kemenag_sop.handle_new_user();
 
--- 6. Trigger Pembaruan Otomatis Kolom updated_at
+-- 6. Trigger Pembaruan Otomatis Kolom updated_at (SET search_path aman)
 CREATE OR REPLACE FUNCTION kemenag_sop.set_updated_at()
-RETURNS trigger AS $$
+RETURNS trigger 
+LANGUAGE plpgsql
+SET search_path = kemenag_sop, public, pg_temp
+AS $$
 BEGIN
   new.updated_at = timezone('utc'::text, now());
   RETURN new;
 END;
-$$ LANGUAGE plpgsql;
+$$;
 
 DROP TRIGGER IF EXISTS trg_profiles_updated_at ON kemenag_sop.profiles;
 CREATE TRIGGER trg_profiles_updated_at

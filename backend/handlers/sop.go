@@ -4,12 +4,14 @@ import (
 	"context"
 	"errors"
 	"log"
+	"strings"
 	"time"
 
 	"github.com/gofiber/fiber/v3"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 
+	"sop-kemenag-backend/config"
 	"sop-kemenag-backend/models"
 )
 
@@ -88,7 +90,7 @@ func ListAdminSOPs(db *pgxpool.Pool) fiber.Handler {
 
 // GetSOP returns a single SOP, enforcing ownership unless the user is super admin.
 // GET /api/sops/:id
-func GetSOP(db *pgxpool.Pool) fiber.Handler {
+func GetSOP(db *pgxpool.Pool, cfg *config.Config) fiber.Handler {
 	return func(c fiber.Ctx) error {
 		id := c.Params("id")
 		if id == "" {
@@ -99,7 +101,7 @@ func GetSOP(db *pgxpool.Pool) fiber.Handler {
 		if !ok {
 			return c.Status(fiber.StatusUnauthorized).JSON(models.ErrorResponse{Error: "Unauthorized"})
 		}
-		isAdmin := isSuperAdminEmail(email)
+		isAdmin := isSuperAdminEmail(email, cfg)
 
 		var rec models.SOPRecord
 		err := db.QueryRow(context.Background(),
@@ -168,7 +170,7 @@ func CreateSOP(db *pgxpool.Pool) fiber.Handler {
 
 // UpdateSOP updates a SOP's header/activities/roles, enforcing ownership.
 // PUT /api/sops/:id
-func UpdateSOP(db *pgxpool.Pool) fiber.Handler {
+func UpdateSOP(db *pgxpool.Pool, cfg *config.Config) fiber.Handler {
 	return func(c fiber.Ctx) error {
 		id := c.Params("id")
 		if id == "" {
@@ -179,7 +181,7 @@ func UpdateSOP(db *pgxpool.Pool) fiber.Handler {
 		if !ok {
 			return c.Status(fiber.StatusUnauthorized).JSON(models.ErrorResponse{Error: "Unauthorized"})
 		}
-		isAdmin := isSuperAdminEmail(email)
+		isAdmin := isSuperAdminEmail(email, cfg)
 
 		// ownership check
 		var ownerID *string
@@ -231,7 +233,7 @@ func UpdateSOP(db *pgxpool.Pool) fiber.Handler {
 
 // DeleteSOP removes a SOP, enforcing ownership.
 // DELETE /api/sops/:id
-func DeleteSOP(db *pgxpool.Pool) fiber.Handler {
+func DeleteSOP(db *pgxpool.Pool, cfg *config.Config) fiber.Handler {
 	return func(c fiber.Ctx) error {
 		id := c.Params("id")
 		if id == "" {
@@ -242,7 +244,7 @@ func DeleteSOP(db *pgxpool.Pool) fiber.Handler {
 		if !ok {
 			return c.Status(fiber.StatusUnauthorized).JSON(models.ErrorResponse{Error: "Unauthorized"})
 		}
-		isAdmin := isSuperAdminEmail(email)
+		isAdmin := isSuperAdminEmail(email, cfg)
 
 		var ownerID *string
 		err := db.QueryRow(context.Background(),
@@ -269,7 +271,10 @@ func DeleteSOP(db *pgxpool.Pool) fiber.Handler {
 	}
 }
 
-// isSuperAdminEmail matches the configured super admin email (hardcoded fallback).
-func isSuperAdminEmail(email string) bool {
-	return email == "baritoutara@kemenag.go.id"
+// isSuperAdminEmail matches the configured super admin email from environment.
+func isSuperAdminEmail(email string, cfg *config.Config) bool {
+	if cfg == nil || cfg.SuperAdminEmail == "" {
+		return false
+	}
+	return strings.EqualFold(email, cfg.SuperAdminEmail)
 }
