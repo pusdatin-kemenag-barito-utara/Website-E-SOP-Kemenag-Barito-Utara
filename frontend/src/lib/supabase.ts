@@ -1,23 +1,18 @@
 import { createClient } from "@supabase/supabase-js";
 import { getEnv } from "./env";
 
-const supabaseUrl =
-  import.meta.env.PUBLIC_SUPABASE_URL ||
-  (typeof process !== "undefined" && process.env?.PUBLIC_SUPABASE_URL) ||
-  "";
-
 const createKemenagClient = () => {
-  const { url, anonKey } = getSupabaseConfig();
-
-if (!supabaseUrl || !supabaseAnonKey) {
-  console.warn("Supabase credentials missing. Check your environment variables / .env file.");
-}
+  const url = getEnv("PUBLIC_SUPABASE_URL");
+  const anonKey = getEnv("PUBLIC_SUPABASE_ANON_KEY");
 
   if (!url || !anonKey) {
     if (typeof window !== "undefined") {
-      console.warn("Supabase credentials missing or pending injection.");
+      console.warn("Supabase credentials missing. Check your environment variables / .env file.");
     }
   }
+
+  const safeUrl = url || "http://localhost:54321";
+  const safeKey = anonKey || "placeholder-key";
 
   return createClient(safeUrl, safeKey, {
     db: { schema: "kemenag_sop" },
