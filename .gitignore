@@ -1,6 +1,4 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
-
-# dependencies
+# Dependencies
 /node_modules
 **/node_modules
 /.pnp
@@ -11,55 +9,64 @@
 !.yarn/releases
 !.yarn/versions
 
-# testing & reports
+# Testing & Reports
 /coverage
 test-results/
 playwright-report/
 
-# next.js & build
-/.next/
+# Astro & Build Output
+.astro/
+**/.astro/
 /out/
 /build
 **/dist/
 .cache/
 .turbo/
 
-# go backend
+# Go Backend & Binaries
 /backend/bin/
 /backend/tmp/
 /backend/sop-backend
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
 
-# misc & OS
+# Misc & OS
 .DS_Store
 Thumbs.db
+desktop.ini
 *.pem
 
-# debug
+# Debug & Logs
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
+*.log
 
-# env files (can opt-in for committing if needed)
+# Environment & Infisical
 .env*
 .env.local
 .env*.local
+!.env.example
+.infisical/
 
-# vercel
-.vercel
+# Docker Local Overrides
+docker-compose.override.yml
+docker-compose.override.yaml
 
-# typescript
+# TypeScript
 *.tsbuildinfo
-next-env.d.ts
 
-# IDE & Editor settings
+# IDE & Editor Settings
 .vscode/
 .idea/
 
-# AI Assistants & Temporary / Scratchpad scripts
+# AI Assistants & Temporary / Scratchpad
 .claude/
 .opencode/
 .antigravitycli/
 .gemini/
 scratch/
-
