@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Settings, Wrench, AlertTriangle, Clock } from "lucide-react";
+import { getEnv } from "@/lib/env";
 
-const API_URL = import.meta.env.PUBLIC_API_URL || "";
+const getApiUrl = () => getEnv("PUBLIC_API_URL", "");
 
 export function MaintenancePage() {
   const [appName, setAppName] = useState("E-SOP Digital");
@@ -13,7 +14,7 @@ export function MaintenancePage() {
 
     const checkStatus = async () => {
       try {
-        const res = await fetch(`${API_URL}/api/maintenance/status?t=${Date.now()}`);
+        const res = await fetch(`${getApiUrl()}/api/maintenance/status?t=${Date.now()}`);
         if (res.ok) {
           const data = await res.json();
           if (data.status !== "maintenance") {

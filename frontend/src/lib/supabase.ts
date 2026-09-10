@@ -1,23 +1,29 @@
 import { createClient } from "@supabase/supabase-js";
+import { getEnv } from "./env";
 
-const supabaseUrl =
-  import.meta.env.PUBLIC_SUPABASE_URL ||
-  (typeof process !== "undefined" && process.env?.PUBLIC_SUPABASE_URL) ||
-  "";
+const getSupabaseConfig = () => {
+  const url = getEnv("PUBLIC_SUPABASE_URL");
+  const anonKey = getEnv("PUBLIC_SUPABASE_ANON_KEY");
+  return { url, anonKey };
+};
 
-const supabaseAnonKey =
-  import.meta.env.PUBLIC_SUPABASE_ANON_KEY ||
-  (typeof process !== "undefined" && process.env?.PUBLIC_SUPABASE_ANON_KEY) ||
-  "";
+const createKemenagClient = () => {
+  const { url, anonKey } = getSupabaseConfig();
 
-if (!supabaseAnonKey) {
-  console.warn("Supabase credentials missing. Check your .env file.");
-}
+  // Gunakan fallback aman agar createClient tidak melempar fatal exception jika env belum ter-inject saat evaluasi modul
+  const safeUrl = url || "https://placeholder-kemenag.supabase.co";
+  const safeKey = anonKey || "placeholder-anon-key";
 
-const createKemenagClient = () =>
-  createClient(supabaseUrl, supabaseAnonKey || "dummy-key", {
+  if (!url || !anonKey) {
+    if (typeof window !== "undefined") {
+      console.warn("Supabase credentials missing or pending injection.");
+    }
+  }
+
+  return createClient(safeUrl, safeKey, {
     db: { schema: "kemenag_sop" },
   });
+};
 
 const globalForSupabase = globalThis as unknown as {
   supabase: ReturnType<typeof createKemenagClient> | undefined;

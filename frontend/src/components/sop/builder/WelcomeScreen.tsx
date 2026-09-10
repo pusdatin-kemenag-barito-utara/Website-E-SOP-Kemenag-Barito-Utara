@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 import { Turnstile } from "@marsidev/react-turnstile";
 import { DewBackground } from "./DewBackground";
 import { trackLogin } from "@/lib/analytics";
+import { getEnv } from "@/lib/env";
 
 interface WelcomeScreenProps {
   onLogin: (
@@ -37,7 +38,7 @@ export function WelcomeScreen({ onLogin, isLoading }: WelcomeScreenProps) {
           window.location.hostname === "127.0.0.1" ||
           window.location.hostname.startsWith("192.168."));
 
-      const envKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY || "";
+      const envKey = getEnv("PUBLIC_TURNSTILE_SITE_KEY", "");
       setSiteKey(envKey);
 
       // Ambil preferensi "Ingat Saya" dan email yang tersimpan

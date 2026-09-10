@@ -12,15 +12,43 @@ const {
 } = Astro.props;
 
 const siteUrl = (
-  import.meta.env.PUBLIC_SITE_URL ||
   (typeof process !== "undefined" && process.env?.PUBLIC_SITE_URL) ||
+  import.meta.env.PUBLIC_SITE_URL ||
   Astro.site?.toString() ||
   Astro.url.origin
 ).replace(/\/$/, "");
 const pageTitle = title;
 const GA_MEASUREMENT_ID = "G-4BS781XVQP";
 const GOOGLE_TAG_ID = "GT-NNVBZNJ7";
-const CF_BEACON_TOKEN = import.meta.env.PUBLIC_CF_BEACON_TOKEN || "";
+const CF_BEACON_TOKEN =
+  (typeof process !== "undefined" && process.env?.PUBLIC_CF_BEACON_TOKEN) ||
+  import.meta.env.PUBLIC_CF_BEACON_TOKEN ||
+  "";
+
+const envConfig = {
+  PUBLIC_SITE_URL: siteUrl,
+  PUBLIC_API_URL:
+    (typeof process !== "undefined" && process.env?.PUBLIC_API_URL) ||
+    import.meta.env.PUBLIC_API_URL ||
+    "",
+  PUBLIC_SUPABASE_URL:
+    (typeof process !== "undefined" && process.env?.PUBLIC_SUPABASE_URL) ||
+    import.meta.env.PUBLIC_SUPABASE_URL ||
+    "",
+  PUBLIC_SUPABASE_ANON_KEY:
+    (typeof process !== "undefined" && process.env?.PUBLIC_SUPABASE_ANON_KEY) ||
+    import.meta.env.PUBLIC_SUPABASE_ANON_KEY ||
+    "",
+  PUBLIC_TURNSTILE_SITE_KEY:
+    (typeof process !== "undefined" && process.env?.PUBLIC_TURNSTILE_SITE_KEY) ||
+    import.meta.env.PUBLIC_TURNSTILE_SITE_KEY ||
+    "",
+  PUBLIC_PUSDATIN_URL:
+    (typeof process !== "undefined" && process.env?.PUBLIC_PUSDATIN_URL) ||
+    import.meta.env.PUBLIC_PUSDATIN_URL ||
+    "",
+  PUBLIC_CF_BEACON_TOKEN: CF_BEACON_TOKEN,
+};
 
 const defaultJsonLd = {
   "@context": "https://schema.org",
@@ -79,6 +107,11 @@ const jsonLdData = jsonLd || defaultJsonLd;
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, viewport-fit=cover" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+
+    <!-- 🔑 Client-side Dynamic Runtime Environment Injection -->
+    <script is:inline define:vars={{ envConfig }}>
+      window.__ENV__ = Object.assign(window.__ENV__ || {}, envConfig);
+    </script>
 
     <!-- ⚡ Cloudflare, Google & CDN Early Hints: Preconnect & DNS-Prefetch Priorities -->
     <link rel="dns-prefetch" href="https://static.cloudflareinsights.com" />

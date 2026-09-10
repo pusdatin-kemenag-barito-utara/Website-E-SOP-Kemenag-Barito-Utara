@@ -1,7 +1,8 @@
 import { supabase } from "@/lib/supabase";
+import { getEnv } from "@/lib/env";
 import type { Activity, SOPHeader, SOPListItem, AdminSOPListItem, StoredSOP } from "@/types/sop";
 
-const API_URL = import.meta.env.PUBLIC_API_URL || "";
+export const getApiUrl = () => getEnv("PUBLIC_API_URL", "");
 
 // getAccessToken returns the current Supabase session access token (JWT).
 export async function getAccessToken(): Promise<string | null> {
@@ -30,7 +31,8 @@ export async function authedRequest<T>(
     headers["Content-Type"] = "application/json";
   }
 
-  const res = await fetch(`${API_URL}${path}`, {
+  const apiUrl = getApiUrl();
+  const res = await fetch(`${apiUrl}${path}`, {
     method: options.method ?? "GET",
     headers,
     body: options.body !== undefined ? JSON.stringify(options.body) : undefined,
