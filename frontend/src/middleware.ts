@@ -1,6 +1,9 @@
 import { defineMiddleware } from "astro:middleware";
 
-const API_URL = process.env.PUBLIC_API_URL || "http://localhost:8080";
+const API_URL =
+  process.env.BACKEND_URL ||
+  process.env.PUBLIC_API_URL ||
+  "http://127.0.0.1:8080";
 
 let maintenanceCache: boolean | null = null;
 let lastCheckTime = 0;

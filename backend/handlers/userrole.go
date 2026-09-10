@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"log"
+	"os"
 
 	"github.com/gofiber/fiber/v3"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -26,7 +27,8 @@ func GetUserRole(db *pgxpool.Pool) fiber.Handler {
 		).Scan(&role)
 
 		if err != nil {
-			if email == "baritoutara@kemenag.go.id" {
+			adminEmail := os.Getenv("SUPER_ADMIN_EMAIL")
+			if adminEmail != "" && email == adminEmail {
 				return c.JSON(fiber.Map{"role": "super_admin", "email": email})
 			}
 			log.Printf("[ADMIN] GetUserRole error: %v", err)

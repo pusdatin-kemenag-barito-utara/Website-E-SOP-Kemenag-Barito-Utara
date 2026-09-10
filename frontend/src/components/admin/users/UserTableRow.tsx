@@ -22,8 +22,10 @@ export function UserTableRow({
   onEdit,
   onDelete,
 }: UserTableRowProps) {
+  const superAdminEmail = (import.meta.env.PUBLIC_SUPER_ADMIN_EMAIL as string) || "";
   const isSuperAdmin =
-    user.role === "super_admin" || user.email === "baritoutara@kemenag.go.id";
+    user.role === "super_admin" ||
+    Boolean(superAdminEmail && user.email === superAdminEmail);
   const isCurrentUser =
     currentUserEmail &&
     user.email?.toLowerCase() === currentUserEmail.toLowerCase();

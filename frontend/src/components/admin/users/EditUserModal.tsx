@@ -47,7 +47,8 @@ export function EditUserModal({
 
   if (!user) return null;
 
-  const isPrimarySuperAdmin = user.email === "baritoutara@kemenag.go.id";
+  const superAdminEmail = (import.meta.env.PUBLIC_SUPER_ADMIN_EMAIL as string) || "";
+  const isPrimarySuperAdmin = Boolean(superAdminEmail && user.email === superAdminEmail);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

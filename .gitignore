@@ -16,7 +16,9 @@
 test-results/
 playwright-report/
 
-# next.js & build
+# astro, next.js & build
+.astro/
+**/.astro/
 /.next/
 /out/
 /build
@@ -28,6 +30,7 @@ playwright-report/
 /backend/bin/
 /backend/tmp/
 /backend/sop-backend
+/backend/docs/
 
 # misc & OS
 .DS_Store

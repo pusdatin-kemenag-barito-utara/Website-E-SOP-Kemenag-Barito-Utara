@@ -11,10 +11,10 @@ const {
   jsonLd,
 } = Astro.props;
 
-const siteUrl = import.meta.env.PUBLIC_SITE_URL || "https://sop.kemenag-baritoutara.com";
+const siteUrl = import.meta.env.PUBLIC_SITE_URL || "";
 const pageTitle = title;
-const GA_MEASUREMENT_ID = "G-4BS781XVQP";
-const GOOGLE_TAG_ID = "GT-NNVBZNJ7";
+const GA_MEASUREMENT_ID = import.meta.env.PUBLIC_GA_MEASUREMENT_ID || "";
+const GOOGLE_TAG_ID = import.meta.env.PUBLIC_GOOGLE_TAG_ID || "";
 const CF_BEACON_TOKEN = import.meta.env.PUBLIC_CF_BEACON_TOKEN || "";
 
 const defaultJsonLd = {
@@ -146,25 +146,29 @@ const jsonLdData = jsonLd || defaultJsonLd;
     <meta name="twitter:image:alt" content="Logo Resmi E-SOP Digital Kemenag Barito Utara" />
 
     <!-- 📊 Google Analytics 4 & Google Tag (gtag.js) -->
-    <script is:inline async src={`https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`}></script>
-    <script is:inline define:vars={{ GA_MEASUREMENT_ID, GOOGLE_TAG_ID }}>
-      window.dataLayer = window.dataLayer || [];
-      function gtag() {
-        window.dataLayer.push(arguments);
-      }
-      gtag("js", new Date());
+    {GA_MEASUREMENT_ID ? (
+      <>
+        <script is:inline async src={`https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`}></script>
+        <script is:inline define:vars={{ GA_MEASUREMENT_ID, GOOGLE_TAG_ID }}>
+          window.dataLayer = window.dataLayer || [];
+          function gtag() {
+            window.dataLayer.push(arguments);
+          }
+          gtag("js", new Date());
 
-      // Configure GA4 Measurement ID
-      gtag("config", GA_MEASUREMENT_ID, {
-        send_page_view: true,
-        cookie_flags: "SameSite=None;Secure",
-      });
+          gtag("config", GA_MEASUREMENT_ID, {
+            send_page_view: true,
+            cookie_flags: "SameSite=None;Secure",
+          });
 
-      // Configure Google Tag ID
-      gtag("config", GOOGLE_TAG_ID, {
-        send_page_view: false,
-      });
-    </script>
+          if (GOOGLE_TAG_ID) {
+            gtag("config", GOOGLE_TAG_ID, {
+              send_page_view: false,
+            });
+          }
+        </script>
+      </>
+    ) : null}
 
     <!-- 🛡️ Cloudflare Real User Monitoring (RUM) & Web Analytics Integration -->
     {CF_BEACON_TOKEN ? (

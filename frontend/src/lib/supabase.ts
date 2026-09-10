@@ -3,15 +3,15 @@ import { createClient } from "@supabase/supabase-js";
 const supabaseUrl =
   import.meta.env.PUBLIC_SUPABASE_URL ||
   (typeof process !== "undefined" && process.env?.PUBLIC_SUPABASE_URL) ||
-  "https://db.kemenag-baritoutara.com";
+  "";
 
 const supabaseAnonKey =
   import.meta.env.PUBLIC_SUPABASE_ANON_KEY ||
   (typeof process !== "undefined" && process.env?.PUBLIC_SUPABASE_ANON_KEY) ||
   "";
 
-if (!supabaseAnonKey) {
-  console.warn("Supabase credentials missing. Check your .env file.");
+if (!supabaseUrl || !supabaseAnonKey) {
+  console.warn("Supabase credentials missing. Check your environment variables / .env file.");
 }
 
 const createKemenagClient = () =>

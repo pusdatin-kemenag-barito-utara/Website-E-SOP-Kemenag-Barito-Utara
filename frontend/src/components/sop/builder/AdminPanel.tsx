@@ -31,11 +31,13 @@ interface AdminPanelProps {
   onToast?: (message: string, type?: "success" | "error" | "info") => void;
 }
 
+const superAdminEmail = (import.meta.env.PUBLIC_SUPER_ADMIN_EMAIL as string) || "";
+
 const resolveSopBidang = (sop: AdminSOPListItem): string => {
   if (sop.user_bidang && sop.user_bidang.trim()) {
     return sop.user_bidang.trim();
   }
-  if (sop.user_email === "baritoutara@kemenag.go.id") {
+  if (superAdminEmail && sop.user_email === superAdminEmail) {
     return "Proyek Super Admin";
   }
   if (sop.user_email) {
@@ -334,7 +336,9 @@ export function AdminPanel({
                     )}
                     {filteredSops.map((sop: AdminSOPListItem) => {
                       const isLocked = lockedSopIds.includes(sop.id);
-                      const isSuperAdmin = currentUserEmail === "baritoutara@kemenag.go.id";
+                      const isSuperAdmin = Boolean(
+                        superAdminEmail && currentUserEmail === superAdminEmail
+                      );
                       const canClick = !isLocked || isSuperAdmin;
 
                       return (

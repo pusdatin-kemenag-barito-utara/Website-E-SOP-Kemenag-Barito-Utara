@@ -13,7 +13,7 @@ export default defineConfig({
   adapter: node({
     mode: "standalone",
   }),
-  site: process.env.PUBLIC_SITE_URL || "https://sop.kemenag-baritoutara.com",
+  site: process.env.PUBLIC_SITE_URL || undefined,
   server: {
     port: 3000,
   },

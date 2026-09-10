@@ -37,10 +37,10 @@ func Load() *Config {
 		SupabaseJWTKey:     getEnv("SUPABASE_JWT_SECRET", ""),
 		SupabaseServiceKey: getEnv("SUPABASE_SERVICE_ROLE_KEY", ""),
 		DatabaseURL:        getEnv("DATABASE_URL", ""),
-		PusdatinURL:     getEnv("PUSDATIN_URL", "https://pusdatin.kemenag-baritoutara.go.id"),
-		FrontendURL:     getEnv("FRONTEND_URL", "http://localhost:3000"),
-		SuperAdminEmail: getEnv("SUPER_ADMIN_EMAIL", "baritoutara@kemenag.go.id"),
-		TurnstileSecret: getEnv("TURNSTILE_SECRET_KEY", ""),
+		PusdatinURL:        getEnv("PUSDATIN_URL", ""),
+		FrontendURL:        getEnv("FRONTEND_URL", ""),
+		SuperAdminEmail:    getEnv("SUPER_ADMIN_EMAIL", ""),
+		TurnstileSecret:    getEnv("TURNSTILE_SECRET_KEY", ""),
 	}
 }
 
@@ -53,6 +53,9 @@ func (c *Config) Validate() {
 	}
 	if c.SupabaseJWTKey == "" {
 		log.Fatal("SUPABASE_JWT_SECRET is required")
+	}
+	if c.SuperAdminEmail == "" {
+		log.Fatal("SUPER_ADMIN_EMAIL is required")
 	}
 }
 

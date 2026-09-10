@@ -37,7 +37,7 @@ export function WelcomeScreen({ onLogin, isLoading }: WelcomeScreenProps) {
           window.location.hostname === "127.0.0.1" ||
           window.location.hostname.startsWith("192.168."));
 
-      const envKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY || "0x4AAAAAADR1O_LSp1lgc3km";
+      const envKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY || "";
       setSiteKey(envKey);
 
       // Ambil preferensi "Ingat Saya" dan email yang tersimpan
@@ -171,7 +171,7 @@ export function WelcomeScreen({ onLogin, isLoading }: WelcomeScreenProps) {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="w-full h-full pr-4 bg-transparent text-sm font-medium text-slate-900 outline-none placeholder:text-slate-400"
-                  placeholder="baritoutara@kemenag.go.id"
+                  placeholder="nama@kemenag.go.id"
                   autoComplete="username"
                   required
                 />

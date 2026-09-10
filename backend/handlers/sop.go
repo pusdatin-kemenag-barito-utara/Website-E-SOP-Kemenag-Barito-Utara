@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"log"
+	"os"
 	"time"
 
 	"github.com/gofiber/fiber/v3"
@@ -269,7 +270,8 @@ func DeleteSOP(db *pgxpool.Pool) fiber.Handler {
 	}
 }
 
-// isSuperAdminEmail matches the configured super admin email (hardcoded fallback).
+// isSuperAdminEmail matches the configured super admin email.
 func isSuperAdminEmail(email string) bool {
-	return email == "baritoutara@kemenag.go.id"
+	adminEmail := os.Getenv("SUPER_ADMIN_EMAIL")
+	return adminEmail != "" && email == adminEmail
 }
