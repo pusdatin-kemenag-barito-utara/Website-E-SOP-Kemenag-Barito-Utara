@@ -69,7 +69,11 @@ export function useAuth() {
     if (error || !data.user) {
       isVerifying.current = false;
       console.error("Login error:", error?.message);
-      return { success: false, error: error?.message || "Email atau kata sandi tidak sesuai." };
+      const msg = (error?.message || "").toLowerCase();
+      if (msg.includes("rate limit") || msg.includes("too many requests")) {
+        return { success: false, error: "Terlalu banyak percobaan masuk. Silakan tunggu beberapa saat lagi." };
+      }
+      return { success: false, error: "Akun yang Anda masukkan salah. Silakan periksa kembali." };
     }
 
     // 2. Verifikasi RBAC & Cloudflare Turnstile di Backend Go Fiber

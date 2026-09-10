@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Eye, EyeOff, Loader2, ArrowRight, CheckCircle2, ShieldCheck } from "lucide-react";
+import { Eye, EyeOff, Loader2, ArrowRight, CheckCircle2, ShieldCheck, AlertCircle } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { Turnstile } from "@marsidev/react-turnstile";
@@ -70,7 +70,7 @@ export function WelcomeScreen({ onLogin, isLoading }: WelcomeScreenProps) {
     });
 
     if (!res?.success) {
-      setErrorMsg(res?.error || "Gagal login. Periksa kembali email dan kata sandi Anda.");
+      setErrorMsg(res?.error || "Akun yang Anda masukkan salah. Silakan periksa kembali.");
       setIsLoggingIn(false);
     }
   };
@@ -147,9 +147,10 @@ export function WelcomeScreen({ onLogin, isLoading }: WelcomeScreenProps) {
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -10 }}
-                  className="px-4 py-3 bg-red-50 border border-red-200 text-red-600 text-xs font-semibold rounded-xl text-center leading-relaxed"
+                  className="flex items-center justify-center gap-2 px-4 py-3 bg-red-50 border border-red-200 text-red-600 text-xs font-semibold rounded-xl text-center leading-relaxed"
                 >
-                  {errorMsg}
+                  <AlertCircle className="w-4 h-4 shrink-0 text-red-500" />
+                  <span>{errorMsg}</span>
                 </motion.div>
               )}
             </AnimatePresence>
@@ -246,9 +247,10 @@ export function WelcomeScreen({ onLogin, isLoading }: WelcomeScreenProps) {
             </div>
 
             {siteKey && (
-              <div className="flex w-full items-center justify-center py-1">
+              <div className="w-full py-1">
                 <Turnstile
                   siteKey={siteKey}
+                  className="w-full flex justify-center [&>iframe]:!w-full [&_iframe]:!w-full"
                   onSuccess={(token: string) => {
                     setTurnstileToken(token);
                     setTurnstilePassed(true);
@@ -261,7 +263,7 @@ export function WelcomeScreen({ onLogin, isLoading }: WelcomeScreenProps) {
                     setTurnstilePassed(false);
                     setTurnstileToken("");
                   }}
-                  options={{ theme: "light" }}
+                  options={{ theme: "light", size: "flexible" }}
                 />
               </div>
             )}
