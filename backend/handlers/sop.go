@@ -272,7 +272,10 @@ func DeleteSOP(db *pgxpool.Pool, cfg *config.Config) fiber.Handler {
 }
 
 // isSuperAdminEmail matches the configured super admin email.
-func isSuperAdminEmail(email string) bool {
+func isSuperAdminEmail(email string, cfg *config.Config) bool {
+	if cfg != nil && cfg.SuperAdminEmail != "" {
+		return email == cfg.SuperAdminEmail
+	}
 	adminEmail := os.Getenv("SUPER_ADMIN_EMAIL")
 	return adminEmail != "" && email == adminEmail
 }
