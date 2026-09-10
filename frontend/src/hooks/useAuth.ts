@@ -1,8 +1,7 @@
 import { useEffect, useState, useRef } from "react";
-import type {User} from "@supabase/supabase-js";
+import type { User } from "@supabase/supabase-js";
 import { supabase } from "@/lib/supabase";
-
-const API_URL = import.meta.env.PUBLIC_API_URL || "";
+import { getEnv } from "@/lib/env";
 
 export function useAuth() {
   const [user, setUser] = useState<User | null>(null);
@@ -75,7 +74,8 @@ export function useAuth() {
 
     // 2. Verifikasi RBAC & Cloudflare Turnstile di Backend Go Fiber
     try {
-      const rbacRes = await fetch(`${API_URL}/api/auth/check-rbac`, {
+      const apiUrl = getEnv("PUBLIC_API_URL", "");
+      const rbacRes = await fetch(`${apiUrl}/api/auth/check-rbac`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

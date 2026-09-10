@@ -75,6 +75,11 @@ const jsonLdData = jsonLd || defaultJsonLd;
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, viewport-fit=cover" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
 
+    <!-- 🔑 Client-side Dynamic Runtime Environment Injection -->
+    <script is:inline define:vars={{ envConfig }}>
+      window.__ENV__ = Object.assign(window.__ENV__ || {}, envConfig);
+    </script>
+
     <!-- ⚡ Cloudflare, Google & CDN Early Hints: Preconnect & DNS-Prefetch Priorities -->
     <link rel="dns-prefetch" href="https://static.cloudflareinsights.com" />
     <link rel="dns-prefetch" href="https://cloudflareinsights.com" />

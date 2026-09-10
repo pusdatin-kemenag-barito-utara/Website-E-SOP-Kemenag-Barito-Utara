@@ -1,6 +1,7 @@
 import { useEffect } from "react";
+import { getEnv } from "@/lib/env";
 
-const API_URL = import.meta.env.PUBLIC_API_URL || "";
+const getApiUrl = () => getEnv("PUBLIC_API_URL", "");
 
 export function MaintenanceListener() {
   useEffect(() => {
@@ -8,7 +9,7 @@ export function MaintenanceListener() {
 
     const checkStatus = async () => {
       try {
-        const res = await fetch(`${API_URL}/api/maintenance/status?t=${Date.now()}`, {
+        const res = await fetch(`${getApiUrl()}/api/maintenance/status?t=${Date.now()}`, {
           cache: "no-store",
           headers: { "Cache-Control": "no-cache, no-store" },
         });

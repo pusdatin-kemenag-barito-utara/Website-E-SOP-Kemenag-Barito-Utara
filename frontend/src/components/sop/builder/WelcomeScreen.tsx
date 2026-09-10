@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 import { Turnstile } from "@marsidev/react-turnstile";
 import { DewBackground } from "./DewBackground";
 import { trackLogin } from "@/lib/analytics";
+import { getEnv } from "@/lib/env";
 
 interface WelcomeScreenProps {
   onLogin: (
