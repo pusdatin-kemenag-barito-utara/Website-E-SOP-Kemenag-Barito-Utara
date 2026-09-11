@@ -17,6 +17,7 @@ import {
 import { Button } from "@/components/ui/button";
 import type { AdminSOPListItem } from "@/types/sop";
 import { cn } from "@/lib/utils";
+import { getEnv } from "@/lib/env";
 import { UserManagementTab } from "@/components/admin/UserManagementTab";
 
 interface AdminPanelProps {
@@ -31,7 +32,7 @@ interface AdminPanelProps {
   onToast?: (message: string, type?: "success" | "error" | "info") => void;
 }
 
-const superAdminEmail = (import.meta.env.PUBLIC_SUPER_ADMIN_EMAIL as string) || "";
+const superAdminEmail = getEnv("PUBLIC_SUPER_ADMIN_EMAIL", "");
 
 const resolveSopBidang = (sop: AdminSOPListItem): string => {
   if (sop.user_bidang && sop.user_bidang.trim()) {

@@ -11,20 +11,20 @@ const {
   jsonLd,
 } = Astro.props;
 
-const siteUrl = import.meta.env.PUBLIC_SITE_URL || "";
+const siteUrl = process.env.PUBLIC_SITE_URL || import.meta.env.PUBLIC_SITE_URL || "";
 const pageTitle = title;
-const GA_MEASUREMENT_ID = import.meta.env.PUBLIC_GA_MEASUREMENT_ID || "";
-const GOOGLE_TAG_ID = import.meta.env.PUBLIC_GOOGLE_TAG_ID || "";
-const CF_BEACON_TOKEN = import.meta.env.PUBLIC_CF_BEACON_TOKEN || "";
+const GA_MEASUREMENT_ID = process.env.PUBLIC_GA_MEASUREMENT_ID || import.meta.env.PUBLIC_GA_MEASUREMENT_ID || "";
+const GOOGLE_TAG_ID = process.env.PUBLIC_GOOGLE_TAG_ID || import.meta.env.PUBLIC_GOOGLE_TAG_ID || "";
+const CF_BEACON_TOKEN = process.env.PUBLIC_CF_BEACON_TOKEN || import.meta.env.PUBLIC_CF_BEACON_TOKEN || "";
 
 const envConfig = {
   PUBLIC_SITE_URL: siteUrl,
-  PUBLIC_API_URL: import.meta.env.PUBLIC_API_URL || "",
-  PUBLIC_SUPABASE_URL: import.meta.env.PUBLIC_SUPABASE_URL || "",
-  PUBLIC_SUPABASE_ANON_KEY: import.meta.env.PUBLIC_SUPABASE_ANON_KEY || "",
-  PUBLIC_TURNSTILE_SITE_KEY: import.meta.env.PUBLIC_TURNSTILE_SITE_KEY || "",
-  PUBLIC_PUSDATIN_URL: import.meta.env.PUBLIC_PUSDATIN_URL || "",
-  PUBLIC_SUPER_ADMIN_EMAIL: import.meta.env.PUBLIC_SUPER_ADMIN_EMAIL || "",
+  PUBLIC_API_URL: process.env.PUBLIC_API_URL || import.meta.env.PUBLIC_API_URL || "",
+  PUBLIC_SUPABASE_URL: process.env.PUBLIC_SUPABASE_URL || import.meta.env.PUBLIC_SUPABASE_URL || "",
+  PUBLIC_SUPABASE_ANON_KEY: process.env.PUBLIC_SUPABASE_ANON_KEY || import.meta.env.PUBLIC_SUPABASE_ANON_KEY || "",
+  PUBLIC_TURNSTILE_SITE_KEY: process.env.PUBLIC_TURNSTILE_SITE_KEY || import.meta.env.PUBLIC_TURNSTILE_SITE_KEY || "",
+  PUBLIC_PUSDATIN_URL: process.env.PUBLIC_PUSDATIN_URL || import.meta.env.PUBLIC_PUSDATIN_URL || "",
+  PUBLIC_SUPER_ADMIN_EMAIL: process.env.PUBLIC_SUPER_ADMIN_EMAIL || import.meta.env.PUBLIC_SUPER_ADMIN_EMAIL || "",
   PUBLIC_GA_MEASUREMENT_ID: GA_MEASUREMENT_ID,
   PUBLIC_GOOGLE_TAG_ID: GOOGLE_TAG_ID,
   PUBLIC_CF_BEACON_TOKEN: CF_BEACON_TOKEN,

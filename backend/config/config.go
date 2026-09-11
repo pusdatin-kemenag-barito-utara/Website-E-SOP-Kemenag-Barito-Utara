@@ -22,9 +22,8 @@ type Config struct {
 }
 
 func Load() *Config {
-	// Muat .env tunggal dari root repo. Coba beberapa lokasi kandidat
-	// bergantung pada working directory saat `go run` dijalankan
-	// (dari repo root: ".env", dari backend/: "../.env").
+	// Variabel lingkungan diinjeksi langsung ke proses via Infisical CLI / runtime container.
+	// godotenv dipertahankan sebagai silent fallback opsional jika ada file lokal.
 	for _, p := range []string{".env", "../.env"} {
 		_ = godotenv.Load(p)
 	}

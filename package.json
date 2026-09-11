@@ -4,9 +4,11 @@
   "private": true,
   "description": "E-SOP Digital Kemenag Barito Utara - Monorepo (Astro FE + Go Fiber BE)",
   "scripts": {
-    "dev": "concurrently -k -n FRONTEND,BACKEND -c cyan,magenta \"npm:dev:frontend\" \"npm:dev:backend\"",
-    "dev:frontend": "npm --prefix frontend run dev",
-    "dev:backend": "npm --prefix backend run dev",
+    "dev": "infisical run --env=dev --path=/sop-kemenag -- npx -y concurrently -k -p \"[{name}]\" -c \"cyan,magenta\" -n \"FRONTEND,BACKEND\" \"npm --prefix frontend run dev\" \"npm --prefix backend run dev\"",
+    "dev:prod": "infisical run --env=prod --path=/sop-kemenag -- npx -y concurrently -k -p \"[{name}]\" -c \"cyan,magenta\" -n \"FRONTEND,BACKEND\" \"npm --prefix frontend run dev\" \"npm --prefix backend run dev\"",
+    "dev:frontend": "infisical run --env=dev --path=/sop-kemenag -- npm --prefix frontend run dev",
+    "dev:backend": "infisical run --env=dev --path=/sop-kemenag -- npm --prefix backend run dev",
+    "dev:local": "npx -y concurrently -k -p \"[{name}]\" -c \"cyan,magenta\" -n \"FRONTEND,BACKEND\" \"npm --prefix frontend run dev\" \"npm --prefix backend run dev\"",
     "build": "npm --prefix frontend run build && npm --prefix backend run build",
     "start": "concurrently -k -n FRONTEND,BACKEND -c cyan,magenta \"npm --prefix frontend run start\" \"npm --prefix backend run start\"",
     "install:all": "npm --prefix frontend install && npm --prefix backend install"

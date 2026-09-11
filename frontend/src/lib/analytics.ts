@@ -6,6 +6,8 @@
  * Google Tag ID: GT-NNVBZNJ7
  */
 
+import { getEnv } from "./env";
+
 declare global {
   interface Window {
     dataLayer: any[];
@@ -13,8 +15,14 @@ declare global {
   }
 }
 
-export const GA_MEASUREMENT_ID = "G-4BS781XVQP";
-export const GOOGLE_TAG_ID = "GT-NNVBZNJ7";
+export const getGaMeasurementId = () => getEnv("PUBLIC_GA_MEASUREMENT_ID", "");
+export const getGoogleTagId = () => getEnv("PUBLIC_GOOGLE_TAG_ID", "");
+
+function getSendToIds(): string[] {
+  const gaId = getGaMeasurementId();
+  const tagId = getGoogleTagId();
+  return [gaId, tagId].filter(Boolean);
+}
 
 /**
  * Send custom event to Google Analytics 4 & Google Tag
@@ -22,8 +30,9 @@ export const GOOGLE_TAG_ID = "GT-NNVBZNJ7";
 export function trackEvent(action: string, params: Record<string, any> = {}) {
   if (typeof window !== "undefined" && typeof window.gtag === "function") {
     try {
+      const sendTo = getSendToIds();
       window.gtag("event", action, {
-        send_to: [GA_MEASUREMENT_ID, GOOGLE_TAG_ID],
+        ...(sendTo.length > 0 ? { send_to: sendTo } : {}),
         ...params,
       });
     } catch (e) {
@@ -38,10 +47,11 @@ export function trackEvent(action: string, params: Record<string, any> = {}) {
 export function trackPageView(pagePath: string, pageTitle?: string) {
   if (typeof window !== "undefined" && typeof window.gtag === "function") {
     try {
+      const sendTo = getSendToIds();
       window.gtag("event", "page_view", {
         page_path: pagePath,
         page_title: pageTitle || document.title,
-        send_to: [GA_MEASUREMENT_ID, GOOGLE_TAG_ID],
+        ...(sendTo.length > 0 ? { send_to: sendTo } : {}),
       });
     } catch (e) {
       console.debug("[Analytics] Page view tracking error:", e);

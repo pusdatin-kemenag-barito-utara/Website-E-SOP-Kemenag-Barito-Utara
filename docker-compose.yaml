@@ -1,58 +1,25 @@
 version: "3.8"
 
 services:
-  frontend:
+  app:
     build:
-      context: ./frontend
+      context: .
       dockerfile: Dockerfile
-      args:
-        - PUBLIC_SITE_URL=${PUBLIC_SITE_URL}
-        - PUBLIC_API_URL=${PUBLIC_API_URL}
-        - PUBLIC_SUPABASE_URL=${PUBLIC_SUPABASE_URL}
-        - PUBLIC_SUPABASE_ANON_KEY=${PUBLIC_SUPABASE_ANON_KEY}
-        - PUBLIC_TURNSTILE_SITE_KEY=${PUBLIC_TURNSTILE_SITE_KEY}
-        - PUBLIC_PUSDATIN_URL=${PUBLIC_PUSDATIN_URL}
-    container_name: sop-frontend
+    container_name: sop-kemenag-app
     restart: unless-stopped
-    expose:
-      - "3000"
+    ports:
+      - "${PORT:-3000}:3000"
     environment:
-      - APP_ENV=${APP_ENV}
-      - BACKEND_URL=${BACKEND_URL:-http://backend:8080}
-      - PUBLIC_SITE_URL=${PUBLIC_SITE_URL}
-      - PUBLIC_SUPABASE_URL=${PUBLIC_SUPABASE_URL}
-      - PUBLIC_SUPABASE_ANON_KEY=${PUBLIC_SUPABASE_ANON_KEY}
-      - PUBLIC_TURNSTILE_SITE_KEY=${PUBLIC_TURNSTILE_SITE_KEY}
-      - PUBLIC_PUSDATIN_URL=${PUBLIC_PUSDATIN_URL}
-      - PUBLIC_API_URL=${PUBLIC_API_URL}
-    depends_on:
-      - backend
-    networks:
-      - sop-network
-
-  backend:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
-    container_name: sop-backend
-    restart: unless-stopped
-    expose:
-      - "8080"
-    environment:
-      - APP_ENV=${APP_ENV}
-      - SERVER_PORT=${SERVER_PORT:-8080}
-      - SUPABASE_URL=${SUPABASE_URL}
-      - SUPABASE_ANON_KEY=${SUPABASE_ANON_KEY}
-      - SUPABASE_JWT_SECRET=${SUPABASE_JWT_SECRET}
-      - SUPABASE_SERVICE_ROLE_KEY=${SUPABASE_SERVICE_ROLE_KEY}
-      - DATABASE_URL=${DATABASE_URL}
-      - PUSDATIN_URL=${PUSDATIN_URL}
-      - FRONTEND_URL=${FRONTEND_URL}
-      - SUPER_ADMIN_EMAIL=${SUPER_ADMIN_EMAIL}
-      - TURNSTILE_SECRET_KEY=${TURNSTILE_SECRET_KEY}
-    networks:
-      - sop-network
-
-networks:
-  sop-network:
-    driver: bridge
+      - PORT
+      - INFISICAL_API_URL
+      - INFISICAL_CLIENT_ID
+      - INFISICAL_CLIENT_SECRET
+      - INFISICAL_PROJECT_ID
+      - INFISICAL_ENV
+      - INFISICAL_SECRET_PATH
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 25s

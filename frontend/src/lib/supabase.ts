@@ -7,7 +7,7 @@ const createKemenagClient = () => {
 
   if (!url || !anonKey) {
     if (typeof window !== "undefined") {
-      console.warn("Supabase credentials missing. Check your environment variables / .env file.");
+      console.warn("Supabase credentials missing. Check your Infisical Cloud configuration.");
     }
   }
 

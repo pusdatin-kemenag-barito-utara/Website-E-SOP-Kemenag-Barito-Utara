@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import type { UserProfile } from "@/types/user";
 import { cn, formatIndonesianDate } from "@/lib/utils";
+import { getEnv } from "@/lib/env";
 
 interface UserTableRowProps {
   user: UserProfile;
@@ -22,7 +23,7 @@ export function UserTableRow({
   onEdit,
   onDelete,
 }: UserTableRowProps) {
-  const superAdminEmail = (import.meta.env.PUBLIC_SUPER_ADMIN_EMAIL as string) || "";
+  const superAdminEmail = getEnv("PUBLIC_SUPER_ADMIN_EMAIL", "");
   const isSuperAdmin =
     user.role === "super_admin" ||
     Boolean(superAdminEmail && user.email === superAdminEmail);

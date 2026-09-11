@@ -11,6 +11,7 @@ import {
 import { Button } from "@/components/ui/button";
 import type { UserProfile, UpdateUserInput } from "@/types/user";
 import { cn } from "@/lib/utils";
+import { getEnv } from "@/lib/env";
 
 interface EditUserModalProps {
   user: UserProfile | null;
@@ -47,7 +48,7 @@ export function EditUserModal({
 
   if (!user) return null;
 
-  const superAdminEmail = (import.meta.env.PUBLIC_SUPER_ADMIN_EMAIL as string) || "";
+  const superAdminEmail = getEnv("PUBLIC_SUPER_ADMIN_EMAIL", "");
   const isPrimarySuperAdmin = Boolean(superAdminEmail && user.email === superAdminEmail);
 
   const handleSubmit = async (e: React.FormEvent) => {

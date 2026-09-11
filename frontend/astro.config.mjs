@@ -2,11 +2,13 @@ import { defineConfig } from "astro/config";
 import react from "@astrojs/react";
 import tailwindcss from "@tailwindcss/vite";
 import node from "@astrojs/node";
-import { loadEnv } from "vite";
-
-// Load .env from root monorepo directory
-const rootEnv = loadEnv(process.env.NODE_ENV || "development", "../", "");
-Object.assign(process.env, rootEnv);
+// Expose process.env variables (injected via Infisical CLI or container runtime) to Vite
+const publicEnvDefines = {};
+for (const [key, value] of Object.entries(process.env)) {
+  if (key.startsWith("PUBLIC_")) {
+    publicEnvDefines[`import.meta.env.${key}`] = JSON.stringify(value);
+  }
+}
 
 export default defineConfig({
   output: "server",
@@ -18,7 +20,9 @@ export default defineConfig({
     port: 3000,
   },
   vite: {
-    envDir: "../",
+    define: {
+      ...publicEnvDefines,
+    },
     plugins: [tailwindcss()],
     optimizeDeps: {
       include: [

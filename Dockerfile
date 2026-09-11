@@ -23,27 +23,6 @@ COPY frontend/package.json frontend/package-lock.json ./
 RUN npm ci
 
 COPY frontend/ .
-
-ARG PUBLIC_SITE_URL
-ARG PUBLIC_API_URL
-ARG PUBLIC_SUPABASE_URL
-ARG PUBLIC_SUPABASE_ANON_KEY
-ARG PUBLIC_TURNSTILE_SITE_KEY
-ARG PUBLIC_PUSDATIN_URL
-ARG PUBLIC_SUPER_ADMIN_EMAIL
-ARG PUBLIC_GA_MEASUREMENT_ID
-ARG PUBLIC_GOOGLE_TAG_ID
-
-ENV PUBLIC_SITE_URL=$PUBLIC_SITE_URL \
-    PUBLIC_API_URL=$PUBLIC_API_URL \
-    PUBLIC_SUPABASE_URL=$PUBLIC_SUPABASE_URL \
-    PUBLIC_SUPABASE_ANON_KEY=$PUBLIC_SUPABASE_ANON_KEY \
-    PUBLIC_TURNSTILE_SITE_KEY=$PUBLIC_TURNSTILE_SITE_KEY \
-    PUBLIC_PUSDATIN_URL=$PUBLIC_PUSDATIN_URL \
-    PUBLIC_SUPER_ADMIN_EMAIL=$PUBLIC_SUPER_ADMIN_EMAIL \
-    PUBLIC_GA_MEASUREMENT_ID=$PUBLIC_GA_MEASUREMENT_ID \
-    PUBLIC_GOOGLE_TAG_ID=$PUBLIC_GOOGLE_TAG_ID
-
 RUN npm run build
 
 # ==========================================
@@ -51,7 +30,9 @@ RUN npm run build
 # ==========================================
 FROM node:22-alpine
 
-RUN apk add --no-cache ca-certificates tzdata curl
+RUN apk add --no-cache ca-certificates tzdata curl bash && \
+    curl -1sLf 'https://dl.cloudsmith.io/public/infisical/infisical-cli/setup.alpine.sh' | bash && \
+    apk add --no-cache infisical
 
 HEALTHCHECK --interval=10s --timeout=5s --start-period=20s --retries=3 \
   CMD curl -f http://127.0.0.1:3000/api/health || exit 1
@@ -66,7 +47,10 @@ COPY --from=frontend-builder /app/frontend/dist /app/dist
 COPY --from=frontend-builder /app/frontend/package.json /app/package.json
 COPY --from=frontend-builder /app/frontend/node_modules /app/node_modules
 
-# Salin skrip startup
+# Salin skrip entrypoint & startup
+COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
 COPY start.sh /app/start.sh
 RUN chmod +x /app/start.sh
 
@@ -77,4 +61,5 @@ ENV PORT=3000 \
 
 EXPOSE 3000
 
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
 CMD ["/app/start.sh"]

@@ -29,20 +29,20 @@ export function getEnv(key: string, defaultValue = ""): string {
     }
   }
 
-  // 2. Vite build-time inlined environment variables
+  // 2. SSR / Node.js runtime process.env (injected by Infisical / Docker)
   try {
-    if (typeof import.meta !== "undefined" && (import.meta as any).env?.[key]) {
-      const val = (import.meta as any).env[key];
+    if (typeof process !== "undefined" && process.env?.[key]) {
+      const val = process.env[key];
       if (val && typeof val === "string" && val.trim() !== "") {
         return val.trim();
       }
     }
   } catch {}
 
-  // 3. SSR / Node.js runtime process.env
+  // 3. Vite build-time / define inlined environment variables
   try {
-    if (typeof process !== "undefined" && process.env?.[key]) {
-      const val = process.env[key];
+    if (typeof import.meta !== "undefined" && (import.meta as any).env?.[key]) {
+      const val = (import.meta as any).env[key];
       if (val && typeof val === "string" && val.trim() !== "") {
         return val.trim();
       }
