@@ -1,9 +1,8 @@
 package handlers
 
 import (
-	"context"
 	"encoding/json"
-	"errors"
+	"fmt"
 	"log"
 	"net/http"
 	"net/url"
@@ -11,11 +10,10 @@ import (
 	"time"
 
 	"github.com/gofiber/fiber/v3"
-	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgxpool"
 
 	"sop-kemenag-backend/config"
 	"sop-kemenag-backend/models"
+	"sop-kemenag-backend/pocketbase"
 )
 
 // verifyCloudflareTurnstile validates the Turnstile response with Cloudflare API.
@@ -58,7 +56,7 @@ func verifyCloudflareTurnstile(secret, token, remoteIP string) bool {
 
 // CheckRbac verifies whether a user (by email) has access to the sop-kemenag app
 // and verifies anti-bot Cloudflare Turnstile token.
-func CheckRbac(db *pgxpool.Pool, cfg *config.Config) fiber.Handler {
+func CheckRbac(pb *pocketbase.Client, cfg *config.Config) fiber.Handler {
 	return func(c fiber.Ctx) error {
 		var req models.CheckRbacRequest
 		if err := c.Bind().JSON(&req); err != nil {
@@ -86,31 +84,82 @@ func CheckRbac(db *pgxpool.Pool, cfg *config.Config) fiber.Handler {
 			}
 		}
 
-		var userID, role string
-		var isActive bool
-		err := db.QueryRow(context.Background(),
-			`SELECT id, role, COALESCE(is_active, true) 
-			 FROM kemenag_sop.profiles 
-			 WHERE LOWER(email) = $1`,
-			cleanEmail,
-		).Scan(&userID, &role, &isActive)
-
-		if errors.Is(err, pgx.ErrNoRows) {
-			if cleanEmail == strings.ToLower(cfg.SuperAdminEmail) {
-				return c.JSON(models.CheckRbacResponse{Success: true})
+		// 1. Jika token otentikasi disertakan di header (dikirim oleh frontend useAuth),
+		// verifikasi klaim pengguna langsung via PocketBase auth-refresh
+		authHeader := c.Get("Authorization")
+		if strings.HasPrefix(authHeader, "Bearer ") {
+			token := strings.TrimSpace(strings.TrimPrefix(authHeader, "Bearer "))
+			if token != "" {
+				claims, err := pb.VerifyUserToken(token)
+				if err == nil && claims != nil {
+					if !claims.IsActive {
+						return c.JSON(models.CheckRbacResponse{
+							Success: false,
+							Error:   "Akun Anda telah dinonaktifkan. Silakan hubungi Super Admin.",
+						})
+					}
+					return c.JSON(models.CheckRbacResponse{Success: true})
+				}
 			}
-			log.Printf("[RBAC] User not found: %s", cleanEmail)
+		}
+
+		// 2. Super Admin bypass
+		if strings.EqualFold(cleanEmail, cfg.SuperAdminEmail) {
+			return c.JSON(models.CheckRbacResponse{Success: true})
+		}
+
+		// Cari profil pengguna di koleksi users PocketBase
+		q := url.Values{}
+		q.Set("filter", fmt.Sprintf("email='%s'", cleanEmail))
+		q.Set("perPage", "1")
+
+		resp, err := pb.Request(http.MethodGet, "/api/collections/users/records", q, nil, "")
+		if err != nil {
+			log.Printf("[RBAC] PocketBase request error: %v", err)
+			return c.Status(fiber.StatusInternalServerError).JSON(models.CheckRbacResponse{
+				Success: false,
+				Error:   "Terjadi kesalahan sistem saat memverifikasi akses ke PocketBase.",
+			})
+		}
+		defer resp.Body.Close()
+
+		if resp.StatusCode != http.StatusOK {
+			log.Printf("[RBAC] PocketBase returned status %d", resp.StatusCode)
+			return c.Status(fiber.StatusInternalServerError).JSON(models.CheckRbacResponse{
+				Success: false,
+				Error:   "Gagal membaca data dari server PocketBase.",
+			})
+		}
+
+		var searchRes struct {
+			Items []struct {
+				ID       string `json:"id"`
+				Email    string `json:"email"`
+				Role     string `json:"role"`
+				IsActive *bool  `json:"is_active"`
+			} `json:"items"`
+		}
+
+		if err := json.NewDecoder(resp.Body).Decode(&searchRes); err != nil {
+			log.Printf("[RBAC] Decode error: %v", err)
+			return c.Status(fiber.StatusInternalServerError).JSON(models.CheckRbacResponse{
+				Success: false,
+				Error:   "Gagal memproses data otentikasi.",
+			})
+		}
+
+		if len(searchRes.Items) == 0 {
+			log.Printf("[RBAC] User not found in PocketBase: %s", cleanEmail)
 			return c.JSON(models.CheckRbacResponse{
 				Success: false,
 				Error:   "Akun belum terdaftar di aplikasi E-SOP Digital. Silakan hubungi Super Admin.",
 			})
 		}
-		if err != nil {
-			log.Printf("[RBAC] Query error: %v", err)
-			return c.Status(fiber.StatusInternalServerError).JSON(models.CheckRbacResponse{
-				Success: false,
-				Error:   "Terjadi kesalahan sistem saat memverifikasi akses.",
-			})
+
+		userItem := searchRes.Items[0]
+		isActive := true
+		if userItem.IsActive != nil {
+			isActive = *userItem.IsActive
 		}
 
 		if !isActive {

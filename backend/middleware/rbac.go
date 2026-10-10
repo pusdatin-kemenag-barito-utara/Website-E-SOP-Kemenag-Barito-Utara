@@ -1,20 +1,22 @@
 package middleware
 
 import (
-	"context"
+	"strings"
 
 	"github.com/gofiber/fiber/v3"
-	"github.com/jackc/pgx/v5/pgxpool"
 
 	"sop-kemenag-backend/config"
+	"sop-kemenag-backend/pocketbase"
 )
 
-// VerifySuperAdmin ensures the authenticated user (from JWT) is the super admin.
-// It checks the JWT email claim against the configured super admin email.
+// VerifySuperAdmin ensures the authenticated user is the super admin.
 func VerifySuperAdmin(cfg *config.Config) fiber.Handler {
 	return func(c fiber.Ctx) error {
-		email, ok := c.Locals("user_email").(string)
-		if !ok || email != cfg.SuperAdminEmail {
+		email, _ := c.Locals("user_email").(string)
+		role, _ := c.Locals("user_role").(string)
+
+		isSuper := strings.EqualFold(email, cfg.SuperAdminEmail) || role == "super_admin"
+		if !isSuper {
 			return c.Status(fiber.StatusForbidden).JSON(map[string]string{
 				"error": "Forbidden: insufficient permissions",
 			})
@@ -23,9 +25,9 @@ func VerifySuperAdmin(cfg *config.Config) fiber.Handler {
 	}
 }
 
-// RequireRbac checks the user's access via kemenag_sop.profiles.
+// RequireRbac checks the user's access via PocketBase users record.
 // Allows any active user (super_admin or admin_bidang).
-func RequireRbac(db *pgxpool.Pool, cfg *config.Config) fiber.Handler {
+func RequireRbac(pb *pocketbase.Client, cfg *config.Config) fiber.Handler {
 	return func(c fiber.Ctx) error {
 		userID, ok := c.Locals("user_id").(string)
 		if !ok || userID == "" {
@@ -35,24 +37,18 @@ func RequireRbac(db *pgxpool.Pool, cfg *config.Config) fiber.Handler {
 		}
 
 		userEmail, _ := c.Locals("user_email").(string)
-		if userEmail == cfg.SuperAdminEmail {
+		if strings.EqualFold(userEmail, cfg.SuperAdminEmail) {
 			c.Locals("user_role", "super_admin")
 			return c.Next()
 		}
 
-		var role string
-		var isActive bool
-		err := db.QueryRow(context.Background(),
-			`SELECT role, COALESCE(is_active, true) FROM kemenag_sop.profiles WHERE id = $1`, userID,
-		).Scan(&role, &isActive)
-
-		if err != nil || !isActive {
+		role, _ := c.Locals("user_role").(string)
+		if role == "" {
 			return c.Status(fiber.StatusForbidden).JSON(map[string]string{
 				"error": "Forbidden: you do not have access to this application",
 			})
 		}
 
-		c.Locals("user_role", role)
 		return c.Next()
 	}
 }

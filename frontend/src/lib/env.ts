@@ -6,8 +6,7 @@
 export interface ClientEnvConfig {
   PUBLIC_SITE_URL?: string;
   PUBLIC_API_URL?: string;
-  PUBLIC_SUPABASE_URL?: string;
-  PUBLIC_SUPABASE_ANON_KEY?: string;
+  PUBLIC_POCKETBASE_URL?: string;
   PUBLIC_TURNSTILE_SITE_KEY?: string;
   PUBLIC_PUSDATIN_URL?: string;
   PUBLIC_CF_BEACON_TOKEN?: string;

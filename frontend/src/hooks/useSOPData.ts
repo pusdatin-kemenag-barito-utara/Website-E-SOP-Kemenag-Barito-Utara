@@ -6,13 +6,127 @@ import { sopsApi } from "@/lib/api";
 import { formatIndonesianDate } from "@/lib/utils";
 
 function normalizeHeaderDates(h: SOPHeader): SOPHeader {
-  if (!h) return h;
+  if (!h || typeof h !== "object") return { ...DEFAULT_HEADER };
+  const merged: SOPHeader = { ...DEFAULT_HEADER, ...h };
   return {
-    ...h,
-    tglBuat: h.tglBuat ? formatIndonesianDate(h.tglBuat) : h.tglBuat,
-    tglRevisi: h.tglRevisi === "-" ? "-" : (h.tglRevisi ? formatIndonesianDate(h.tglRevisi) : "-"),
-    tglEfektif: h.tglEfektif ? formatIndonesianDate(h.tglEfektif) : h.tglEfektif,
+    ...merged,
+    tglBuat: merged.tglBuat ? formatIndonesianDate(merged.tglBuat) : merged.tglBuat,
+    tglRevisi: merged.tglRevisi === "-" ? "-" : (merged.tglRevisi ? formatIndonesianDate(merged.tglRevisi) : "-"),
+    tglEfektif: merged.tglEfektif ? formatIndonesianDate(merged.tglEfektif) : merged.tglEfektif,
   };
+}
+
+export function normalizeRoles(raw: unknown): string[] {
+  if (!Array.isArray(raw)) return [...INITIAL_ROLES];
+  const list = raw
+    .map((r) => {
+      if (typeof r === "string") return r.trim();
+      if (r && typeof r === "object" && "name" in r) return String((r as { name: unknown }).name).trim();
+      return String(r || "").trim();
+    })
+    .filter((r) => r.length > 0);
+  return list.length > 0 ? list : [...INITIAL_ROLES];
+}
+
+export function normalizeActivities(raw: unknown, safeRoles: string[]): Activity[] {
+  if (!Array.isArray(raw)) return [];
+  const validSymbols: Activity["symbol"][] = ["terminator", "process", "decision", "offpage", "offpage-up"];
+  const fallbackRole = safeRoles[0] || "Petugas PTSP";
+
+  return raw.map((item: any, index: number) => {
+    if (!item || typeof item !== "object") {
+      return {
+        id: `act-${index + 1}`,
+        no: String(index + 1),
+        kegiatan: "",
+        pelaksana: [fallbackRole],
+        persyaratan: "",
+        waktu: "15 Menit",
+        output: "",
+        keterangan: "",
+        symbol: index === 0 ? "terminator" : "process",
+        roleForSymbol: fallbackRole,
+      };
+    }
+
+    const kegiatan = (
+      typeof item.kegiatan === "string"
+        ? item.kegiatan
+        : typeof item.deskripsi === "string"
+        ? item.deskripsi
+        : typeof item.title === "string"
+        ? item.title
+        : ""
+    ).trim();
+
+    let pelaksana: string[] = [];
+    if (Array.isArray(item.pelaksana)) {
+      pelaksana = item.pelaksana.map((p: any) => String(p || "").trim()).filter(Boolean);
+    } else if (typeof item.pelaksana === "string" && item.pelaksana.trim()) {
+      pelaksana = [item.pelaksana.trim()];
+    }
+
+    const mutuBaku = item.mutuBaku && typeof item.mutuBaku === "object" ? item.mutuBaku : {};
+    const persyaratan = (
+      typeof item.persyaratan === "string"
+        ? item.persyaratan
+        : typeof mutuBaku.kelengkapan === "string"
+        ? mutuBaku.kelengkapan
+        : typeof mutuBaku.persyaratan === "string"
+        ? mutuBaku.persyaratan
+        : ""
+    ).trim();
+
+    const waktu = (
+      typeof item.waktu === "string"
+        ? item.waktu
+        : typeof mutuBaku.waktu === "string"
+        ? mutuBaku.waktu
+        : ""
+    ).trim();
+
+    const output = (
+      typeof item.output === "string"
+        ? item.output
+        : typeof mutuBaku.output === "string"
+        ? mutuBaku.output
+        : ""
+    ).trim();
+
+    const keterangan = (
+      typeof item.keterangan === "string"
+        ? item.keterangan
+        : ""
+    ).trim();
+
+    let symbol: Activity["symbol"] = "process";
+    if (validSymbols.includes(item.symbol)) {
+      symbol = item.symbol;
+    } else if (index === 0) {
+      symbol = "terminator";
+    }
+
+    let roleForSymbol = typeof item.roleForSymbol === "string" ? item.roleForSymbol.trim() : "";
+    if (!roleForSymbol || !safeRoles.includes(roleForSymbol)) {
+      roleForSymbol = pelaksana.find((p) => safeRoles.includes(p)) || fallbackRole;
+    }
+
+    const no = String(item.no || item.nomor || index + 1);
+    const id = String(item.id || `act-${index + 1}`);
+
+    return {
+      id,
+      no,
+      kegiatan,
+      pelaksana,
+      persyaratan,
+      waktu,
+      output,
+      keterangan,
+      symbol,
+      roleForSymbol,
+    };
+  });
 }
 
 async function fetchUserSopsFromDb() {
@@ -123,9 +237,11 @@ export function useSOPData(userId?: string, userEmail?: string | null) {
         try {
           const data = await fetchSopById(idFromUrl);
           if (data) {
+            const normalizedRoles = normalizeRoles(data.roles);
+            const normalizedActivities = normalizeActivities(data.activities, normalizedRoles);
             setHeader(normalizeHeaderDates(data.header));
-            setActivities(data.activities);
-            setRoles(data.roles);
+            setRoles(normalizedRoles);
+            setActivities(normalizedActivities);
             setCurrentId(data.id);
             setLastSaved(new Date(data.updated_at));
             setIsHydrated(true);
@@ -140,9 +256,11 @@ export function useSOPData(userId?: string, userEmail?: string | null) {
       if (saved) {
         try {
           const parsed: SOPData = JSON.parse(saved);
+          const normalizedRoles = normalizeRoles(parsed.roles);
+          const normalizedActivities = normalizeActivities(parsed.activities, normalizedRoles);
           if (parsed.header) setHeader(normalizeHeaderDates(parsed.header));
-          if (parsed.activities) setActivities(parsed.activities);
-          if (parsed.roles) setRoles(parsed.roles);
+          setRoles(normalizedRoles);
+          setActivities(normalizedActivities);
         } catch {}
       }
       setIsHydrated(true);
@@ -206,9 +324,11 @@ export function useSOPData(userId?: string, userEmail?: string | null) {
       try {
         const data = await fetchSopById(id);
         if (data) {
+          const normalizedRoles = normalizeRoles(data.roles);
+          const normalizedActivities = normalizeActivities(data.activities, normalizedRoles);
           setHeader(normalizeHeaderDates(data.header));
-          setActivities(data.activities);
-          setRoles(data.roles);
+          setRoles(normalizedRoles);
+          setActivities(normalizedActivities);
           setCurrentId(data.id);
           setLastSaved(new Date(data.updated_at));
           const newUrl = `${window.location.origin}${window.location.pathname}?id=${id}`;

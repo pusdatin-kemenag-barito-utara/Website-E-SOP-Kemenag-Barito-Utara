@@ -15,9 +15,10 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 
-import type {User} from "@supabase/supabase-js";
+import type { User } from "@/hooks/useAuth";
 import { UserMenu } from "@/components/sop/builder/UserMenu";
 import { authedRequest } from "@/lib/api";
+import { getEnv } from "@/lib/env";
 
 interface BuilderHeaderProps {
   user: User | null;
@@ -46,7 +47,13 @@ export function BuilderHeader({
   onOpenAdmin,
   sopTitle,
 }: BuilderHeaderProps) {
-  const [isAdmin, setIsAdmin] = useState(false);
+  const superAdminEmail = getEnv("PUBLIC_SUPER_ADMIN_EMAIL", "baritoutara@kemenag.go.id");
+  const isSuperAdminEmail = Boolean(
+    user?.email && user.email.toLowerCase() === superAdminEmail.toLowerCase()
+  );
+  const isSuperAdminRole = user?.role === "super_admin";
+
+  const [isSuperAdminOverride, setIsSuperAdminOverride] = useState<boolean | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   React.useEffect(() => {
@@ -54,18 +61,23 @@ export function BuilderHeader({
 
     const checkAdmin = async () => {
       if (!user?.email) {
-        if (isMounted) setIsAdmin(false);
+        if (isMounted) setIsSuperAdminOverride(false);
+        return;
+      }
+
+      // If user is clearly not super admin email and role is admin_bidang, immediately set false
+      if (!isSuperAdminEmail && user.role === "admin_bidang") {
+        if (isMounted) setIsSuperAdminOverride(false);
         return;
       }
 
       try {
         const data = await authedRequest<{ role: string | null }>("/api/admin/user-role");
         if (isMounted) {
-          setIsAdmin(data.role === "super_admin");
+          setIsSuperAdminOverride(data.role === "super_admin");
         }
-      } catch (error) {
-        console.error("Error checking role:", error);
-        if (isMounted) setIsAdmin(false);
+      } catch {
+        if (isMounted) setIsSuperAdminOverride(false);
       }
     };
 
@@ -74,7 +86,9 @@ export function BuilderHeader({
     return () => {
       isMounted = false;
     };
-  }, [user]);
+  }, [user?.email, user?.role, isSuperAdminEmail]);
+
+  const isAdmin = isSuperAdminOverride !== null ? isSuperAdminOverride : (isSuperAdminRole || isSuperAdminEmail);
 
   const formattedTime = lastSaved
     ? lastSaved.toLocaleTimeString("id-ID", {
@@ -129,29 +143,29 @@ export function BuilderHeader({
           <Button
             size="sm"
             onClick={onOpenAdmin}
-            className="h-9 px-3 bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs rounded-xl shadow-xs border border-amber-600/30 flex items-center gap-1.5"
+            className="h-9 px-3 bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs rounded-xl shadow-xs border border-amber-600/30 flex items-center gap-1.5 cursor-pointer"
+            title="Buka Panel Super Admin"
           >
             <ShieldAlert className="w-4 h-4" />
             <span>Panel Admin</span>
           </Button>
         )}
 
-        {!isAdmin && (
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={() => setShowProjects(!showProjects)}
-            className={cn(
-              "h-9 px-3 font-bold text-xs rounded-xl border border-slate-200 dark:border-slate-800 flex items-center gap-1.5 transition-all",
-              showProjects
-                ? "bg-[#015C3A]/10 text-[#015C3A] border-[#015C3A]/30"
-                : "bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800"
-            )}
-          >
-            <LayoutGrid className="w-4 h-4" />
-            <span>Proyek</span>
-          </Button>
-        )}
+        <Button
+          size="sm"
+          variant="outline"
+          onClick={() => setShowProjects(!showProjects)}
+          className={cn(
+            "h-9 px-3 font-bold text-xs rounded-xl border border-slate-200 dark:border-slate-800 flex items-center gap-1.5 transition-all cursor-pointer",
+            showProjects
+              ? "bg-[#015C3A]/10 text-[#015C3A] border-[#015C3A]/30"
+              : "bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800"
+          )}
+          title="Buka / Tutup Daftar Proyek SOP"
+        >
+          <LayoutGrid className="w-4 h-4" />
+          <span>Proyek SOP</span>
+        </Button>
 
         <Button
           size="sm"
@@ -205,6 +219,25 @@ export function BuilderHeader({
                 {sopTitle || "Draft SOP Baru"}
               </span>
             </div>
+
+            {isAdmin && (
+              <Button
+                onClick={() => { onOpenAdmin(); setMobileMenuOpen(false); }}
+                className="bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs h-10 rounded-xl flex items-center justify-center gap-2"
+              >
+                <ShieldAlert className="w-4 h-4" />
+                <span>Panel Super Admin</span>
+              </Button>
+            )}
+
+            <Button
+              variant="outline"
+              onClick={() => { setShowProjects(!showProjects); setMobileMenuOpen(false); }}
+              className="font-bold text-xs h-10 rounded-xl flex items-center justify-center gap-2"
+            >
+              <LayoutGrid className="w-4 h-4" />
+              <span>Proyek SOP</span>
+            </Button>
 
             <Button
               onClick={() => { onSave(); setMobileMenuOpen(false); }}

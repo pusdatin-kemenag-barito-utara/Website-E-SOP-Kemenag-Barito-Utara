@@ -1,60 +1,61 @@
 # E-SOP Digital — Kemenag Barito Utara
 
-Aplikasi pembuat **Standar Operasional Prosedur (SOP)** untuk Kantor Kementerian Agama Barito Utara. Bisa membuat, mengedit, live-preview, ekspor PDF, dan mengelola SOP secara kolaboratif (real-time presence).
+Aplikasi pembuat **Standar Operasional Prosedur (SOP)** untuk Kantor Kementerian Agama Barito Utara. Bisa membuat, mengedit, live-preview, ekspor PDF, dan mengelola SOP secara kolaboratif (real-time presence via PocketBase SSE).
 
 ## Arsitektur (Monorepo)
 
 Proyek ini adalah monorepo dengan dua service terpisah:
 
 | Service | Teknologi | Direktori |
-|---------|-----------|-----------|
-| **Frontend** | Astro 7 + React (islands) + Tailwind v4 | `frontend/` |
-| **Backend (API)** | Go Fiber V3 + PostgreSQL (pgx) | `backend/` |
+|---|---|---|
+| **Frontend** | Astro 7 + React (islands) + Tailwind v4 + PocketBase JS | `frontend/` |
+| **Backend (API)** | Go Fiber V3 + PocketBase Client | `backend/` |
 
-- **Database**: Supabase PostgreSQL (auth client-side via Supabase JS di browser).
-- **RBAC**: dicek lewat Go API (`POST /api/auth/check-rbac`) terhadap `kemenag_pusdatin.profiles` + `kemenag_pusdatin.app_permissions`.
-- **Admin user**: `SUPER_ADMIN_EMAIL` (default `baritoutara@kemenag.go.id`) via Supabase service role key.
+- **Database & Autentikasi**: PocketBase (`db-sop.kemenag-baritoutara.com`) dengan manajemen sesi auth, SSE realtime channel, dan koleksi `sops` serta `users`.
+- **RBAC**: dicek lewat Go API (`POST /api/auth/check-rbac`) terhadap koleksi `users` di PocketBase + Cloudflare Turnstile anti-bot.
+- **Admin user**: `SUPER_ADMIN_EMAIL` (default `baritoutara@kemenag.go.id`).
 
 ## Environment (Single `.env` di Root)
 
-Semua konfigurasi aplikasi dipusatkan di **satu file `.env` di root repo**. File ini dipakai bersama oleh Frontend (Astro), Backend (Go), dan Docker Compose — tidak ada `.env` terpisah di folder `frontend/` atau `backend/`.
-
-Buat file tersebut dari nilai yang tersedia (variabel `SUPABASE_JWT_SECRET` wajib diisi dari dashboard Supabase):
+Semua konfigurasi aplikasi dipusatkan di **satu file `.env` di root repo** atau diinjeksi via **Infisical CLI**:
 
 ```bash
-# salin contoh (jika ada) atau isi manual, lalu:
-# .env sudah dibaca otomatis oleh FE, BE, dan compose.
+PUBLIC_POCKETBASE_URL="https://db-sop.kemenag-baritoutara.com"
+POCKETBASE_URL="https://db-sop.kemenag-baritoutara.com"
+POCKETBASE_ADMIN_EMAIL="baritoutara@kemenag.go.id"
+SUPER_ADMIN_EMAIL="baritoutara@kemenag.go.id"
+PUBLIC_API_URL="http://localhost:8080"
 ```
 
 > `.env` tidak perlu dicommit (ter-ignore oleh `.gitignore`).
 
 ## Menjalankan (Development)
 
+Jalankan kedua service secara serentak dari root repo:
+
+```bash
+npm run dev
+```
+
+Atau secara mandiri:
+
 ### Frontend
 ```bash
-cd frontend
-npm install
-npm run dev   # http://localhost:3000
+npm --prefix frontend run dev   # http://localhost:3000
 ```
-> Astro membaca `.env` root via `envDir: "../"` di `astro.config.mjs`.
 
 ### Backend
 ```bash
-cd backend
-go run .      # http://localhost:8080/api/health
+npm --prefix backend run dev    # http://localhost:8080
 ```
-> `config.Load()` otomatis memuat `.env` root (dari `../.env` atau `.env`).
 
 ## Menjalankan (Docker)
-
-Pastikan `.env` root sudah terisi, lalu:
 
 ```bash
 docker compose up --build
 ```
 - Frontend: `http://localhost:3000`
 - Backend: `http://localhost:8080`
-> Compose membaca `.env` root dan meneruskan variabel `PUBLIC_*` sebagai build-arg serta env runtime.
 
 ## Struktur Direktori
 
@@ -64,29 +65,17 @@ docker compose up --build
 │   │   ├── components/  # React islands (SOP builder/editor/preview, ui, tools)
 │   │   ├── hooks/       # useAuth, useSOPData, useSOPPresence, dll.
 │   │   ├── layouts/     # Layout.astro
-│   │   ├── lib/         # supabase, constants, schemas, utils, pdf-service
+│   │   ├── lib/         # pocketbase, constants, schemas, utils, pdf-service
 │   │   ├── pages/       # index, maintenance, tools, robots, sitemap
 │   │   ├── styles/      # global.css (Tailwind v4)
 │   │   └── types/       # sop.ts, d.ts
-│   └── public/          # aset statis (sop.png, favicon, manifest)
+│   └── public/          # aset statis (sop.png, kemenag.svg, favicon, manifest)
 ├── backend/             # Go Fiber V3 API
 │   ├── config/          # env loader
-│   ├── database/        # pgxpool connection
-│   ├── docs/            # referensi skema DB (supabase-schema.sql)
-│   ├── handlers/        # health, auth, admin, maintenance, user-role
-│   ├── middleware/      # auth, rbac, cors, ratelimit
-│   ├── models/          # struct
-│   └── routes/          # registrasi route
-├── .env                 # satu-satunya environment untuk FE, BE & Docker
-└── docker-compose.yml
+│   ├── pocketbase/      # PocketBase client & token verifier
+│   ├── handlers/        # health, auth, admin, maintenance, user-role, sop
+│   ├── middleware/      # auth, rbac, cors, ratelimit, security
+│   ├── models/          # struct data
+│   └── routes/          # registrasi route Fiber
+└── .env                 # konfigurasi lokal / fallback Infisical
 ```
-
-## Endpoint Backend Utama
-
-- `GET /api/health`
-- `GET /api/keep-alive`
-- `GET /api/maintenance/status`
-- `POST /api/auth/check-rbac`
-- `GET /api/admin/user-role` (login)
-- `GET|POST /api/admin/users` (super admin)
-- `DELETE /api/admin/users/:id`

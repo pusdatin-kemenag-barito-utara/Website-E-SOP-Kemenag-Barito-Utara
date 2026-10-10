@@ -17,9 +17,15 @@ import { useSOPData } from "@/hooks/useSOPData";
 import { useAuth } from "@/hooks/useAuth";
 import { useSOPPresence } from "@/hooks/useSOPPresence";
 import { trackPageView, trackSOPSave, trackSOPPrint, trackSOPDelete } from "@/lib/analytics";
+import { getEnv } from "@/lib/env";
 
 function SOPApp() {
   const { user, signInWithEmail, signOut, loading: authLoading } = useAuth();
+
+  const superAdminEmail = getEnv("PUBLIC_SUPER_ADMIN_EMAIL", "baritoutara@kemenag.go.id");
+  const isSuperAdmin = Boolean(
+    user && (user.role === "super_admin" || user.email?.toLowerCase() === superAdminEmail.toLowerCase())
+  );
 
   const {
     isHydrated,
@@ -44,8 +50,20 @@ function SOPApp() {
   const lockedSopIds = useSOPPresence(user?.id || null, currentId);
 
   const [activeSection, setActiveSection] = useState("header");
-  const [showProjects, setShowProjects] = useState(false);
+  const [showProjects, setShowProjects] = useState(() => {
+    if (typeof window !== "undefined") {
+      return window.innerWidth >= 1024;
+    }
+    return true;
+  });
   const [showAdmin, setShowAdmin] = useState(false);
+
+  // Strictly guard AdminPanel from ever being open for non-super-admin
+  React.useEffect(() => {
+    if (!isSuperAdmin && showAdmin) {
+      setShowAdmin(false);
+    }
+  }, [isSuperAdmin, showAdmin]);
   const [expandedActivities, setExpandedActivities] = useState<string[]>([]);
   const [viewMode, setViewMode] = useState<"edit" | "preview">("edit");
   const [scale, setScale] = useState(1);
@@ -235,6 +253,7 @@ function SOPApp() {
             <ProjectSidebar
               userSops={userSops}
               currentId={currentId}
+              userBidang={user?.bidang}
               onLoad={(id) => {
                 loadSop(id);
                 if (window.innerWidth < 1024) setShowProjects(false);

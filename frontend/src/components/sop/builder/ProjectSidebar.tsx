@@ -8,6 +8,7 @@ import type { SOPListItem } from "@/types/sop";
 interface ProjectSidebarProps {
   userSops: SOPListItem[];
   currentId: string | null;
+  userBidang?: string;
   onLoad: (id: string) => void;
   onDelete: (sop: SOPListItem) => void;
   onNew: () => void;
@@ -16,6 +17,7 @@ interface ProjectSidebarProps {
 export function ProjectSidebar({
   userSops,
   currentId,
+  userBidang,
   onLoad,
   onDelete,
   onNew,
@@ -30,14 +32,21 @@ export function ProjectSidebar({
     <aside className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md flex flex-col h-full print:hidden border-r border-slate-200 dark:border-slate-800 shadow-[2px_0_15px_-3px_rgba(0,0,0,0.05)] relative z-20">
       <div className="p-4 border-b border-slate-100 dark:border-slate-800 space-y-4 bg-white dark:bg-slate-900">
         <div className="flex items-center justify-between">
-          <h2 className="text-sm font-bold text-slate-800 dark:text-slate-100 tracking-wide flex items-center gap-2">
-            <FolderOpen className="w-4 h-4 text-[#015C3A] dark:text-emerald-400" />
-            Proyek Saya
-          </h2>
+          <div className="min-w-0">
+            <h2 className="text-sm font-bold text-slate-800 dark:text-slate-100 tracking-wide flex items-center gap-2">
+              <FolderOpen className="w-4 h-4 text-[#015C3A] dark:text-emerald-400 shrink-0" />
+              <span>Proyek SOP</span>
+            </h2>
+            {userBidang && (
+              <p className="text-[10px] text-slate-500 dark:text-slate-400 font-medium truncate mt-0.5" title={userBidang}>
+                {userBidang}
+              </p>
+            )}
+          </div>
           <Button
             variant="ghost"
             size="icon"
-            className="h-8 w-8 text-[#015C3A] hover:bg-[#015C3A]/10 hover:text-[#014A2E] dark:text-emerald-400 dark:hover:bg-emerald-950 transition-colors rounded-full"
+            className="h-8 w-8 text-[#015C3A] hover:bg-[#015C3A]/10 hover:text-[#014A2E] dark:text-emerald-400 dark:hover:bg-emerald-950 transition-colors rounded-full shrink-0"
             onClick={onNew}
             aria-label="Buat Proyek Baru"
             title="Buat Proyek Baru"

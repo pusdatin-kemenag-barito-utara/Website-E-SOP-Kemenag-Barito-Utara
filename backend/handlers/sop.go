@@ -1,58 +1,82 @@
 package handlers
 
 import (
-	"context"
-	"errors"
+	"encoding/json"
+	"fmt"
+	"io"
 	"log"
-	"os"
+	"net/http"
+	"net/url"
+	"strings"
 	"time"
 
 	"github.com/gofiber/fiber/v3"
-	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgxpool"
 
+	"sop-kemenag-backend/cache"
 	"sop-kemenag-backend/config"
 	"sop-kemenag-backend/models"
+	"sop-kemenag-backend/pocketbase"
 )
 
 // sopClaimsDestructure pulls the authenticated user identity set by VerifyJWT.
-func sopClaims(c fiber.Ctx) (userID string, email string, ok bool) {
+func sopClaims(c fiber.Ctx) (userID string, email string, token string, ok bool) {
 	uid, ok1 := c.Locals("user_id").(string)
 	em, ok2 := c.Locals("user_email").(string)
+	tok, _ := c.Locals("user_token").(string)
 	if !ok1 || !ok2 || uid == "" {
-		return "", "", false
+		return "", "", "", false
 	}
-	return uid, em, true
+	return uid, em, tok, true
 }
 
 // ListUserSOPs returns the authenticated user's own SOP list.
 // GET /api/sops
-func ListUserSOPs(db *pgxpool.Pool) fiber.Handler {
+func ListUserSOPs(pb *pocketbase.Client) fiber.Handler {
 	return func(c fiber.Ctx) error {
-		userID, _, ok := sopClaims(c)
+		userID, email, token, ok := sopClaims(c)
 		if !ok {
 			return c.Status(fiber.StatusUnauthorized).JSON(models.ErrorResponse{Error: "Unauthorized"})
 		}
 
-		rows, err := db.Query(context.Background(),
-			`SELECT id, title, updated_at
-			 FROM kemenag_sop.sops
-			 WHERE user_id = $1
-			 ORDER BY updated_at DESC`, userID)
+		q := url.Values{}
+		q.Set("filter", fmt.Sprintf("user='%s' || user_email='%s'", userID, email))
+		q.Set("sort", "-id")
+		q.Set("perPage", "500")
+		q.Set("fields", "id,title,updated")
+
+		resp, err := pb.Request(http.MethodGet, "/api/collections/sops/records", q, nil, token)
 		if err != nil {
-			log.Printf("[SOP] ListUserSOPs error: %v", err)
+			log.Printf("[SOP] ListUserSOPs network error: %v", err)
+			return c.Status(fiber.StatusInternalServerError).JSON(models.ErrorResponse{Error: "Failed to connect to PocketBase"})
+		}
+		defer resp.Body.Close()
+
+		if resp.StatusCode != http.StatusOK {
+			respBody, _ := io.ReadAll(resp.Body)
+			log.Printf("[SOP] ListUserSOPs PocketBase status=%d body=%s", resp.StatusCode, string(respBody))
+			return c.Status(fiber.StatusInternalServerError).JSON(models.ErrorResponse{Error: "PocketBase error: " + string(respBody)})
+		}
+
+		var pbList struct {
+			Items []struct {
+				ID      string      `json:"id"`
+				Title   string      `json:"title"`
+				Updated interface{} `json:"updated"`
+			} `json:"items"`
+		}
+
+		if err := json.NewDecoder(resp.Body).Decode(&pbList); err != nil {
+			log.Printf("[SOP] ListUserSOPs decode error: %v", err)
 			return c.Status(fiber.StatusInternalServerError).JSON(models.ErrorResponse{Error: "Internal Server Error"})
 		}
-		defer rows.Close()
 
-		items := []models.SOPListItem{}
-		for rows.Next() {
-			var it models.SOPListItem
-			if err := rows.Scan(&it.ID, &it.Title, &it.UpdatedAt); err != nil {
-				log.Printf("[SOP] ListUserSOPs scan error: %v", err)
-				return c.Status(fiber.StatusInternalServerError).JSON(models.ErrorResponse{Error: "Internal Server Error"})
-			}
-			items = append(items, it)
+		items := make([]models.SOPListItem, 0, len(pbList.Items))
+		for _, it := range pbList.Items {
+			items = append(items, models.SOPListItem{
+				ID:        it.ID,
+				Title:     it.Title,
+				UpdatedAt: pocketbase.ParsePBTime(it.Updated),
+			})
 		}
 
 		return c.JSON(items)
@@ -61,28 +85,82 @@ func ListUserSOPs(db *pgxpool.Pool) fiber.Handler {
 
 // ListAdminSOPs returns ALL SOPs (super admin only).
 // GET /api/sops/admin
-func ListAdminSOPs(db *pgxpool.Pool) fiber.Handler {
+func ListAdminSOPs(pb *pocketbase.Client) fiber.Handler {
 	return func(c fiber.Ctx) error {
-		rows, err := db.Query(context.Background(),
-			`SELECT s.id, s.title, s.updated_at, s.user_id, s.user_email, p.bidang, s.header
-			 FROM kemenag_sop.sops s
-			 LEFT JOIN kemenag_sop.profiles p ON s.user_id = p.id
-			 ORDER BY s.updated_at DESC`)
+		_, _, token, ok := sopClaims(c)
+		if !ok {
+			return c.Status(fiber.StatusUnauthorized).JSON(models.ErrorResponse{Error: "Unauthorized"})
+		}
+
+		const cacheKey = "admin_sops_list"
+		if cached, found := cache.DefaultCache.Get(cacheKey); found {
+			if items, ok := cached.([]models.AdminSOPListItem); ok {
+				return c.JSON(items)
+			}
+		}
+
+		q := url.Values{}
+		q.Set("sort", "-id")
+		q.Set("perPage", "500")
+		q.Set("expand", "user")
+		q.Set("fields", "id,title,updated,user,user_email,header,expand.user.bidang,expand.user.nama,expand.user.name")
+
+		resp, err := pb.Request(http.MethodGet, "/api/collections/sops/records", q, nil, token)
 		if err != nil {
-			log.Printf("[SOP] ListAdminSOPs error: %v", err)
+			log.Printf("[SOP] ListAdminSOPs network error: %v", err)
+			return c.Status(fiber.StatusInternalServerError).JSON(models.ErrorResponse{Error: "Failed to connect to PocketBase"})
+		}
+		defer resp.Body.Close()
+
+		if resp.StatusCode != http.StatusOK {
+			respBody, _ := io.ReadAll(resp.Body)
+			log.Printf("[SOP] ListAdminSOPs PocketBase status=%d body=%s", resp.StatusCode, string(respBody))
+			return c.Status(fiber.StatusInternalServerError).JSON(models.ErrorResponse{Error: "PocketBase error: " + string(respBody)})
+		}
+
+		var pbList struct {
+			Items []struct {
+				ID        string                 `json:"id"`
+				Title     string                 `json:"title"`
+				Updated   interface{}            `json:"updated"`
+				User      string                 `json:"user"`
+				UserEmail string                 `json:"user_email"`
+				Header    map[string]interface{} `json:"header"`
+				Expand    struct {
+					User struct {
+						Bidang string `json:"bidang"`
+						Nama   string `json:"nama"`
+						Name   string `json:"name"`
+					} `json:"user"`
+				} `json:"expand"`
+			} `json:"items"`
+		}
+
+		if err := json.NewDecoder(resp.Body).Decode(&pbList); err != nil {
+			log.Printf("[SOP] ListAdminSOPs decode error: %v", err)
 			return c.Status(fiber.StatusInternalServerError).JSON(models.ErrorResponse{Error: "Internal Server Error"})
 		}
-		defer rows.Close()
 
-		items := []models.AdminSOPListItem{}
-		for rows.Next() {
-			var it models.AdminSOPListItem
-			if err := rows.Scan(&it.ID, &it.Title, &it.UpdatedAt, &it.UserID, &it.UserEmail, &it.UserBidang, &it.Header); err != nil {
-				log.Printf("[SOP] ListAdminSOPs scan error: %v", err)
-				return c.Status(fiber.StatusInternalServerError).JSON(models.ErrorResponse{Error: "Internal Server Error"})
-			}
-			items = append(items, it)
+		items := make([]models.AdminSOPListItem, 0, len(pbList.Items))
+		for _, it := range pbList.Items {
+			userID := it.User
+			userEmail := it.UserEmail
+			userBidang := it.Expand.User.Bidang
+			headerBytes, _ := json.Marshal(it.Header)
+
+			items = append(items, models.AdminSOPListItem{
+				ID:         it.ID,
+				Title:      it.Title,
+				UpdatedAt:  pocketbase.ParsePBTime(it.Updated),
+				UserID:     userID,
+				UserEmail:  &userEmail,
+				UserBidang: &userBidang,
+				Header:     headerBytes,
+			})
 		}
+
+		// Cache in memory for 30 seconds
+		cache.DefaultCache.Set(cacheKey, items, 30*time.Second)
 
 		return c.JSON(items)
 	}
@@ -90,48 +168,82 @@ func ListAdminSOPs(db *pgxpool.Pool) fiber.Handler {
 
 // GetSOP returns a single SOP, enforcing ownership unless the user is super admin.
 // GET /api/sops/:id
-func GetSOP(db *pgxpool.Pool, cfg *config.Config) fiber.Handler {
+func GetSOP(pb *pocketbase.Client, cfg *config.Config) fiber.Handler {
 	return func(c fiber.Ctx) error {
 		id := c.Params("id")
 		if id == "" {
 			return c.Status(fiber.StatusBadRequest).JSON(models.ErrorResponse{Error: "id is required"})
 		}
 
-		userID, email, ok := sopClaims(c)
+		userID, email, token, ok := sopClaims(c)
 		if !ok {
 			return c.Status(fiber.StatusUnauthorized).JSON(models.ErrorResponse{Error: "Unauthorized"})
 		}
 		isAdmin := isSuperAdminEmail(email, cfg)
 
-		var rec models.SOPRecord
-		err := db.QueryRow(context.Background(),
-			`SELECT id, user_id, user_email, title, header, activities, roles, created_at, updated_at
-			 FROM kemenag_sop.sops WHERE id = $1`, id,
-		).Scan(&rec.ID, &rec.UserID, &rec.UserEmail, &rec.Title, &rec.Header,
-			&rec.Activities, &rec.Roles, &rec.CreatedAt, &rec.UpdatedAt)
+		resp, err := pb.Request(http.MethodGet, "/api/collections/sops/records/"+id, nil, nil, token)
+		if err != nil {
+			log.Printf("[SOP] GetSOP network error: %v", err)
+			return c.Status(fiber.StatusInternalServerError).JSON(models.ErrorResponse{Error: "Failed to connect to PocketBase"})
+		}
+		defer resp.Body.Close()
 
-		if errors.Is(err, pgx.ErrNoRows) {
+		if resp.StatusCode == http.StatusNotFound {
 			return c.Status(fiber.StatusNotFound).JSON(models.ErrorResponse{Error: "SOP not found"})
 		}
-		if err != nil {
-			log.Printf("[SOP] GetSOP error: %v", err)
+		if resp.StatusCode != http.StatusOK {
+			respBody, _ := io.ReadAll(resp.Body)
+			log.Printf("[SOP] GetSOP PocketBase status=%d body=%s", resp.StatusCode, string(respBody))
+			return c.Status(fiber.StatusInternalServerError).JSON(models.ErrorResponse{Error: "Internal Server Error"})
+		}
+
+		var pbRec struct {
+			ID         string                 `json:"id"`
+			User       string                 `json:"user"`
+			UserEmail  string                 `json:"user_email"`
+			Title      string                 `json:"title"`
+			Header     map[string]interface{} `json:"header"`
+			Activities []interface{}          `json:"activities"`
+			Roles      []interface{}          `json:"roles"`
+			Created    interface{}            `json:"created"`
+			Updated    interface{}            `json:"updated"`
+		}
+
+		if err := json.NewDecoder(resp.Body).Decode(&pbRec); err != nil {
+			log.Printf("[SOP] GetSOP decode error: %v", err)
 			return c.Status(fiber.StatusInternalServerError).JSON(models.ErrorResponse{Error: "Internal Server Error"})
 		}
 
 		// ownership: user must own the SOP, or be super admin
-		if !isAdmin && (rec.UserID == nil || *rec.UserID != userID) {
+		if !isAdmin && (pbRec.User != userID && pbRec.UserEmail != email) {
 			return c.Status(fiber.StatusForbidden).JSON(models.ErrorResponse{Error: "Forbidden"})
 		}
 
-		return c.JSON(rec)
+		headerBytes, _ := json.Marshal(pbRec.Header)
+		actBytes, _ := json.Marshal(pbRec.Activities)
+		rolesBytes, _ := json.Marshal(pbRec.Roles)
+		uID := pbRec.User
+		uEmail := pbRec.UserEmail
+
+		return c.JSON(models.SOPRecord{
+			ID:         pbRec.ID,
+			UserID:     &uID,
+			UserEmail:  &uEmail,
+			Title:      pbRec.Title,
+			Header:     headerBytes,
+			Activities: actBytes,
+			Roles:      rolesBytes,
+			CreatedAt:  pocketbase.ParsePBTime(pbRec.Created),
+			UpdatedAt:  pocketbase.ParsePBTime(pbRec.Updated),
+		})
 	}
 }
 
 // CreateSOP inserts a new SOP owned by the authenticated user.
 // POST /api/sops
-func CreateSOP(db *pgxpool.Pool) fiber.Handler {
+func CreateSOP(pb *pocketbase.Client) fiber.Handler {
 	return func(c fiber.Ctx) error {
-		userID, userEmail, ok := sopClaims(c)
+		userID, userEmail, token, ok := sopClaims(c)
 		if !ok {
 			return c.Status(fiber.StatusUnauthorized).JSON(models.ErrorResponse{Error: "Unauthorized"})
 		}
@@ -144,58 +256,88 @@ func CreateSOP(db *pgxpool.Pool) fiber.Handler {
 		if title == "" {
 			title = "Untitled SOP"
 		}
-		now := time.Now()
 
-		var created models.SOPRecord
-		err := db.QueryRow(context.Background(),
-			`INSERT INTO kemenag_sop.sops
-			   (user_id, user_email, title, header, activities, roles, created_at, updated_at)
-			 VALUES ($1, $2, $3, $4, $5, $6, $7, $7)
-			 RETURNING id, title, updated_at`,
-			userID, userEmail, title, req.Header, req.Activities, req.Roles, now,
-		).Scan(&created.ID, &created.Title, &created.UpdatedAt)
+		var headerObj interface{}
+		var activitiesObj interface{}
+		var rolesObj interface{}
 
+		_ = json.Unmarshal(req.Header, &headerObj)
+		_ = json.Unmarshal(req.Activities, &activitiesObj)
+		_ = json.Unmarshal(req.Roles, &rolesObj)
+
+		payload := map[string]interface{}{
+			"user":       userID,
+			"user_email": userEmail,
+			"title":      title,
+			"header":     headerObj,
+			"activities": activitiesObj,
+			"roles":      rolesObj,
+		}
+
+		resp, err := pb.Request(http.MethodPost, "/api/collections/sops/records", nil, payload, token)
 		if err != nil {
 			log.Printf("[SOP] CreateSOP error: %v", err)
-			return c.Status(fiber.StatusInternalServerError).JSON(models.ErrorResponse{Error: "Internal Server Error"})
+			return c.Status(fiber.StatusInternalServerError).JSON(models.ErrorResponse{Error: "Failed to connect to PocketBase"})
 		}
+		defer resp.Body.Close()
+
+		if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusCreated {
+			respBody, _ := io.ReadAll(resp.Body)
+			log.Printf("[SOP] CreateSOP PocketBase returned %d: %s", resp.StatusCode, string(respBody))
+			return c.Status(fiber.StatusBadRequest).JSON(models.ErrorResponse{Error: string(respBody)})
+		}
+
+		var created struct {
+			ID      string      `json:"id"`
+			Title   string      `json:"title"`
+			Updated interface{} `json:"updated"`
+		}
+		_ = json.NewDecoder(resp.Body).Decode(&created)
+
+		// Invalidate admin cached list & stats
+		cache.DefaultCache.Delete("admin_sops_list")
+		cache.DefaultCache.InvalidatePrefix("admin_stats")
 
 		return c.Status(fiber.StatusCreated).JSON(models.SaveSOPResponse{
 			ID:        created.ID,
 			Title:     created.Title,
-			UpdatedAt: created.UpdatedAt,
+			UpdatedAt: pocketbase.ParsePBTime(created.Updated),
 		})
 	}
 }
 
 // UpdateSOP updates a SOP's header/activities/roles, enforcing ownership.
 // PUT /api/sops/:id
-func UpdateSOP(db *pgxpool.Pool, cfg *config.Config) fiber.Handler {
+func UpdateSOP(pb *pocketbase.Client, cfg *config.Config) fiber.Handler {
 	return func(c fiber.Ctx) error {
 		id := c.Params("id")
 		if id == "" {
 			return c.Status(fiber.StatusBadRequest).JSON(models.ErrorResponse{Error: "id is required"})
 		}
 
-		userID, email, ok := sopClaims(c)
+		userID, email, token, ok := sopClaims(c)
 		if !ok {
 			return c.Status(fiber.StatusUnauthorized).JSON(models.ErrorResponse{Error: "Unauthorized"})
 		}
 		isAdmin := isSuperAdminEmail(email, cfg)
 
 		// ownership check
-		var ownerID *string
-		err := db.QueryRow(context.Background(),
-			`SELECT user_id FROM kemenag_sop.sops WHERE id = $1`, id,
-		).Scan(&ownerID)
-		if errors.Is(err, pgx.ErrNoRows) {
+		getResp, err := pb.Request(http.MethodGet, "/api/collections/sops/records/"+id, nil, nil, token)
+		if err != nil || getResp.StatusCode != http.StatusOK {
+			if getResp != nil {
+				getResp.Body.Close()
+			}
 			return c.Status(fiber.StatusNotFound).JSON(models.ErrorResponse{Error: "SOP not found"})
 		}
-		if err != nil {
-			log.Printf("[SOP] UpdateSOP ownership check error: %v", err)
-			return c.Status(fiber.StatusInternalServerError).JSON(models.ErrorResponse{Error: "Internal Server Error"})
+
+		var ownerCheck struct {
+			User      string `json:"user"`
+			UserEmail string `json:"user_email"`
 		}
-		if !isAdmin && (ownerID == nil || *ownerID != userID) {
+		_ = json.NewDecoder(getResp.Body).Decode(&ownerCheck)
+		getResp.Body.Close()
+
+		if !isAdmin && (ownerCheck.User != userID && ownerCheck.UserEmail != email) {
 			return c.Status(fiber.StatusForbidden).JSON(models.ErrorResponse{Error: "Forbidden"})
 		}
 
@@ -207,65 +349,99 @@ func UpdateSOP(db *pgxpool.Pool, cfg *config.Config) fiber.Handler {
 		if title == "" {
 			title = "Untitled SOP"
 		}
-		now := time.Now()
 
-		var updated models.SOPRecord
-		err = db.QueryRow(context.Background(),
-			`UPDATE kemenag_sop.sops
-			 SET title = $2, header = $3, activities = $4, roles = $5, updated_at = $6
-			 WHERE id = $1
-			 RETURNING id, title, updated_at`,
-			id, title, req.Header, req.Activities, req.Roles, now,
-		).Scan(&updated.ID, &updated.Title, &updated.UpdatedAt)
+		var headerObj interface{}
+		var activitiesObj interface{}
+		var rolesObj interface{}
 
+		_ = json.Unmarshal(req.Header, &headerObj)
+		_ = json.Unmarshal(req.Activities, &activitiesObj)
+		_ = json.Unmarshal(req.Roles, &rolesObj)
+
+		patchPayload := map[string]interface{}{
+			"title":      title,
+			"header":     headerObj,
+			"activities": activitiesObj,
+			"roles":      rolesObj,
+		}
+
+		patchResp, err := pb.Request(http.MethodPatch, "/api/collections/sops/records/"+id, nil, patchPayload, token)
 		if err != nil {
 			log.Printf("[SOP] UpdateSOP error: %v", err)
-			return c.Status(fiber.StatusInternalServerError).JSON(models.ErrorResponse{Error: "Internal Server Error"})
+			return c.Status(fiber.StatusInternalServerError).JSON(models.ErrorResponse{Error: "Failed to connect to PocketBase"})
 		}
+		defer patchResp.Body.Close()
+
+		if patchResp.StatusCode != http.StatusOK {
+			respBody, _ := io.ReadAll(patchResp.Body)
+			log.Printf("[SOP] UpdateSOP PocketBase returned %d: %s", patchResp.StatusCode, string(respBody))
+			return c.Status(fiber.StatusBadRequest).JSON(models.ErrorResponse{Error: string(respBody)})
+		}
+
+		var updated struct {
+			ID      string      `json:"id"`
+			Title   string      `json:"title"`
+			Updated interface{} `json:"updated"`
+		}
+		_ = json.NewDecoder(patchResp.Body).Decode(&updated)
+
+		// Invalidate admin cached list & stats
+		cache.DefaultCache.Delete("admin_sops_list")
+		cache.DefaultCache.InvalidatePrefix("admin_stats")
 
 		return c.JSON(models.SaveSOPResponse{
 			ID:        updated.ID,
 			Title:     updated.Title,
-			UpdatedAt: updated.UpdatedAt,
+			UpdatedAt: pocketbase.ParsePBTime(updated.Updated),
 		})
 	}
 }
 
 // DeleteSOP removes a SOP, enforcing ownership.
 // DELETE /api/sops/:id
-func DeleteSOP(db *pgxpool.Pool, cfg *config.Config) fiber.Handler {
+func DeleteSOP(pb *pocketbase.Client, cfg *config.Config) fiber.Handler {
 	return func(c fiber.Ctx) error {
 		id := c.Params("id")
 		if id == "" {
 			return c.Status(fiber.StatusBadRequest).JSON(models.ErrorResponse{Error: "id is required"})
 		}
 
-		userID, email, ok := sopClaims(c)
+		userID, email, token, ok := sopClaims(c)
 		if !ok {
 			return c.Status(fiber.StatusUnauthorized).JSON(models.ErrorResponse{Error: "Unauthorized"})
 		}
 		isAdmin := isSuperAdminEmail(email, cfg)
 
-		var ownerID *string
-		err := db.QueryRow(context.Background(),
-			`SELECT user_id FROM kemenag_sop.sops WHERE id = $1`, id,
-		).Scan(&ownerID)
-		if errors.Is(err, pgx.ErrNoRows) {
+		// ownership check
+		getResp, err := pb.Request(http.MethodGet, "/api/collections/sops/records/"+id, nil, nil, token)
+		if err != nil || getResp.StatusCode != http.StatusOK {
+			if getResp != nil {
+				getResp.Body.Close()
+			}
 			return c.Status(fiber.StatusNotFound).JSON(models.ErrorResponse{Error: "SOP not found"})
 		}
-		if err != nil {
-			log.Printf("[SOP] DeleteSOP ownership check error: %v", err)
-			return c.Status(fiber.StatusInternalServerError).JSON(models.ErrorResponse{Error: "Internal Server Error"})
+
+		var ownerCheck struct {
+			User      string `json:"user"`
+			UserEmail string `json:"user_email"`
 		}
-		if !isAdmin && (ownerID == nil || *ownerID != userID) {
+		_ = json.NewDecoder(getResp.Body).Decode(&ownerCheck)
+		getResp.Body.Close()
+
+		if !isAdmin && (ownerCheck.User != userID && ownerCheck.UserEmail != email) {
 			return c.Status(fiber.StatusForbidden).JSON(models.ErrorResponse{Error: "Forbidden"})
 		}
 
-		if _, err := db.Exec(context.Background(),
-			`DELETE FROM kemenag_sop.sops WHERE id = $1`, id); err != nil {
+		delResp, err := pb.Request(http.MethodDelete, "/api/collections/sops/records/"+id, nil, nil, token)
+		if err != nil {
 			log.Printf("[SOP] DeleteSOP error: %v", err)
-			return c.Status(fiber.StatusInternalServerError).JSON(models.ErrorResponse{Error: "Internal Server Error"})
+			return c.Status(fiber.StatusInternalServerError).JSON(models.ErrorResponse{Error: "Failed to connect to PocketBase"})
 		}
+		defer delResp.Body.Close()
+
+		// Invalidate admin cached list & stats
+		cache.DefaultCache.Delete("admin_sops_list")
+		cache.DefaultCache.InvalidatePrefix("admin_stats")
 
 		return c.JSON(models.MessageResponse{Success: true, Message: "SOP deleted"})
 	}
@@ -274,8 +450,7 @@ func DeleteSOP(db *pgxpool.Pool, cfg *config.Config) fiber.Handler {
 // isSuperAdminEmail matches the configured super admin email.
 func isSuperAdminEmail(email string, cfg *config.Config) bool {
 	if cfg != nil && cfg.SuperAdminEmail != "" {
-		return email == cfg.SuperAdminEmail
+		return strings.EqualFold(email, cfg.SuperAdminEmail)
 	}
-	adminEmail := os.Getenv("SUPER_ADMIN_EMAIL")
-	return adminEmail != "" && email == adminEmail
+	return false
 }

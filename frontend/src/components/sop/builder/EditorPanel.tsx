@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 import { SOPHeaderEditor } from "@/components/sop/editor/header/SOPHeaderEditor";
 import { RoleManager } from "@/components/sop/editor/RoleManager";
 import { ActivityEditor } from "@/components/sop/editor/activity/ActivityEditor";
+import { ErrorBoundary } from "@/components/common/ErrorBoundary";
 import type { SOPHeader, Activity } from "@/types/sop";
 
 interface EditorPanelProps {
@@ -160,36 +161,42 @@ export function EditorPanel({
         {/* Tab Content Container */}
         <div className="flex-1 overflow-y-auto custom-scrollbar">
           <TabsContent value="header" className="m-0 border-none outline-none">
-            <div className="p-4 md:p-6 max-w-4xl mx-auto space-y-6">
-              <SOPHeaderEditor header={header} setHeader={setHeader} />
-            </div>
+            <ErrorBoundary fallbackTitle="Kendala Memuat Konfigurasi SOP">
+              <div className="p-4 md:p-6 max-w-4xl mx-auto space-y-6">
+                <SOPHeaderEditor header={header} setHeader={setHeader} />
+              </div>
+            </ErrorBoundary>
           </TabsContent>
 
           <TabsContent value="roles" className="m-0 border-none outline-none">
-            <div className="p-4 md:p-6 max-w-4xl mx-auto">
-              <RoleManager
-                roles={roles}
-                setRoles={setRoles}
-                setActivities={setActivities}
-                setConfirm={setConfirm}
-              />
-            </div>
+            <ErrorBoundary fallbackTitle="Kendala Memuat Daftar Pelaksana">
+              <div className="p-4 md:p-6 max-w-4xl mx-auto">
+                <RoleManager
+                  roles={roles}
+                  setRoles={setRoles}
+                  setActivities={setActivities}
+                  setConfirm={setConfirm}
+                />
+              </div>
+            </ErrorBoundary>
           </TabsContent>
 
           <TabsContent
             value="activities"
             className="m-0 border-none outline-none"
           >
-            <div className="max-w-4xl mx-auto">
-              <ActivityEditor
-                activities={activities}
-                setActivities={setActivities}
-                roles={roles}
-                expandedActivities={expandedActivities}
-                setExpandedActivities={setExpandedActivities}
-                setConfirm={setConfirm}
-              />
-            </div>
+            <ErrorBoundary fallbackTitle="Kendala Memuat Alur Kerja">
+              <div className="max-w-4xl mx-auto">
+                <ActivityEditor
+                  activities={activities}
+                  setActivities={setActivities}
+                  roles={roles}
+                  expandedActivities={expandedActivities}
+                  setExpandedActivities={setExpandedActivities}
+                  setConfirm={setConfirm}
+                />
+              </div>
+            </ErrorBoundary>
           </TabsContent>
         </div>
       </Tabs>

@@ -4,20 +4,13 @@ import (
 	"strings"
 
 	"github.com/gofiber/fiber/v3"
-	"github.com/golang-jwt/jwt/v5"
 
 	"sop-kemenag-backend/config"
+	"sop-kemenag-backend/pocketbase"
 )
 
-type Claims struct {
-	Sub   string `json:"sub"`
-	Email string `json:"email"`
-	Role  string `json:"role"`
-	jwt.RegisteredClaims
-}
-
-// VerifyJWT validates the Supabase access token from the Authorization header.
-func VerifyJWT(cfg *config.Config) fiber.Handler {
+// VerifyJWT validates the PocketBase access token from the Authorization header.
+func VerifyJWT(pb *pocketbase.Client, cfg *config.Config) fiber.Handler {
 	return func(c fiber.Ctx) error {
 		authHeader := c.Get("Authorization")
 		if authHeader == "" || !strings.HasPrefix(authHeader, "Bearer ") {
@@ -26,27 +19,37 @@ func VerifyJWT(cfg *config.Config) fiber.Handler {
 			})
 		}
 
-		tokenString := strings.TrimPrefix(authHeader, "Bearer ")
-
-		token, err := jwt.ParseWithClaims(tokenString, &Claims{}, func(token *jwt.Token) (interface{}, error) {
-			return []byte(cfg.SupabaseJWTKey), nil
-		}, jwt.WithValidMethods([]string{"HS256"}))
-		if err != nil || !token.Valid {
+		tokenString := strings.TrimSpace(strings.TrimPrefix(authHeader, "Bearer "))
+		if tokenString == "" {
 			return c.Status(fiber.StatusUnauthorized).JSON(map[string]string{
-				"error": "Invalid or expired token",
+				"error": "Token is empty",
 			})
 		}
 
-		claims, ok := token.Claims.(*Claims)
-		if !ok {
+		claims, err := pb.VerifyUserToken(tokenString)
+		if err != nil {
 			return c.Status(fiber.StatusUnauthorized).JSON(map[string]string{
-				"error": "Invalid token claims",
+				"error": "Invalid or expired PocketBase token",
 			})
 		}
 
-		c.Locals("user_id", claims.Sub)
+		if !claims.IsActive {
+			return c.Status(fiber.StatusForbidden).JSON(map[string]string{
+				"error": "Akun Anda telah dinonaktifkan",
+			})
+		}
+
+		role := claims.Role
+		if strings.EqualFold(claims.Email, cfg.SuperAdminEmail) {
+			role = "super_admin"
+		}
+
+		c.Locals("user_id", claims.UserID)
 		c.Locals("user_email", claims.Email)
-		c.Locals("user_role", claims.Role)
+		c.Locals("user_role", role)
+		c.Locals("user_bidang", claims.Bidang)
+		c.Locals("user_nama", claims.Nama)
+		c.Locals("user_token", tokenString)
 
 		return c.Next()
 	}

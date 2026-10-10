@@ -234,11 +234,13 @@ export function RoleManager({
     setTimeout(() => setFeedbackMsg(null), 3500);
   };
 
+  const safeRoles = Array.isArray(roles) ? roles : [];
+
   const addRole = (roleToAdd?: string) => {
     const targetRole = (roleToAdd || newRole).trim();
     if (!targetRole) return;
 
-    if (roles.some((r) => r.toLowerCase() === targetRole.toLowerCase())) {
+    if (safeRoles.some((r) => (r || "").toLowerCase() === targetRole.toLowerCase())) {
       showFeedback(
         `Pelaksana "${targetRole}" sudah ada di dalam daftar.`,
         true,
@@ -246,7 +248,7 @@ export function RoleManager({
       return;
     }
 
-    setRoles((prev) => [...prev, targetRole]);
+    setRoles((prev) => [...(Array.isArray(prev) ? prev : []), targetRole]);
     if (!roleToAdd) setNewRole("");
     showFeedback(`Pelaksana "${targetRole}" berhasil ditambahkan.`, false);
   };
@@ -254,10 +256,10 @@ export function RoleManager({
   const handleRenameRole = (oldRole: string, newRole: string): boolean => {
     const trimmedNew = newRole.trim();
     if (
-      roles.some(
+      safeRoles.some(
         (r) =>
-          r.toLowerCase() === trimmedNew.toLowerCase() &&
-          r.toLowerCase() !== oldRole.toLowerCase(),
+          (r || "").toLowerCase() === trimmedNew.toLowerCase() &&
+          (r || "").toLowerCase() !== oldRole.toLowerCase(),
       )
     ) {
       showFeedback(
@@ -268,15 +270,17 @@ export function RoleManager({
     }
 
     // 1. Update roles state
-    setRoles((prev) => prev.map((r) => (r === oldRole ? trimmedNew : r)));
+    setRoles((prev) => (Array.isArray(prev) ? prev : []).map((r) => (r === oldRole ? trimmedNew : r)));
 
     // 2. Cascade update to all activities pelaksana and roleForSymbol
     setActivities((prev) =>
-      prev.map((act) => ({
+      (Array.isArray(prev) ? prev : []).map((act) => ({
         ...act,
-        pelaksana: act.pelaksana.map((p) => (p === oldRole ? trimmedNew : p)),
+        pelaksana: Array.isArray(act.pelaksana)
+          ? act.pelaksana.map((p) => (p === oldRole ? trimmedNew : p))
+          : [],
         roleForSymbol:
-          act.roleForSymbol === oldRole ? trimmedNew : act.roleForSymbol,
+          act.roleForSymbol === oldRole ? trimmedNew : (act.roleForSymbol || ""),
       })),
     );
 
@@ -293,13 +297,15 @@ export function RoleManager({
       title: "Hapus Pelaksana?",
       desc: `Apakah Anda yakin ingin menghapus "${roleToRemove}" dari daftar pelaksana? Hubungan pada alur kegiatan terkait akan otomatis disesuaikan.`,
       onConfirm: () => {
-        setRoles((prev) => prev.filter((r) => r !== roleToRemove));
+        setRoles((prev) => (Array.isArray(prev) ? prev : []).filter((r) => r !== roleToRemove));
         setActivities((prev) =>
-          prev.map((act) => ({
+          (Array.isArray(prev) ? prev : []).map((act) => ({
             ...act,
-            pelaksana: act.pelaksana.filter((r) => r !== roleToRemove),
+            pelaksana: Array.isArray(act.pelaksana)
+              ? act.pelaksana.filter((r) => r !== roleToRemove)
+              : [],
             roleForSymbol:
-              act.roleForSymbol === roleToRemove ? "" : act.roleForSymbol,
+              act.roleForSymbol === roleToRemove ? "" : (act.roleForSymbol || ""),
           })),
         );
         showFeedback(`Pelaksana "${roleToRemove}" telah dihapus.`, false);
@@ -354,8 +360,8 @@ export function RoleManager({
         </div>
         <div className="flex flex-wrap gap-1.5">
           {KEMENAG_PRESET_ROLES.map((preset) => {
-            const isAdded = roles.some(
-              (r) => r.toLowerCase() === preset.toLowerCase(),
+            const isAdded = safeRoles.some(
+              (r) => (r || "").toLowerCase() === preset.toLowerCase(),
             );
             return (
               <button
@@ -403,11 +409,11 @@ export function RoleManager({
         <div className="bg-slate-50/90 dark:bg-slate-800/50 border-b border-slate-100 dark:border-slate-800/60 px-4 py-3 flex flex-wrap items-center justify-between gap-2">
           <div className="flex items-center gap-2 text-xs font-bold text-slate-700 dark:text-slate-200 tracking-wide">
             <List className="w-4 h-4 text-slate-500" />
-            <span>Daftar Pelaksana ({roles.length})</span>
+            <span>Daftar Pelaksana ({safeRoles.length})</span>
           </div>
 
           {/* A4 Capacity Badge */}
-          {roles.length <= 5 ? (
+          {safeRoles.length <= 5 ? (
             <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/50 text-[#015C3A] dark:text-emerald-400 border border-emerald-200/80 dark:border-emerald-900/50 text-[10px] font-bold">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
               <span>Optimal Cetak A4</span>
@@ -415,7 +421,7 @@ export function RoleManager({
           ) : (
             <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-amber-50 dark:bg-amber-950/50 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-900/50 text-[10px] font-bold">
               <Info className="w-3 h-3 text-amber-500" />
-              <span>{roles.length} Kolom (Saran: maks 5-6)</span>
+              <span>{safeRoles.length} Kolom (Saran: maks 5-6)</span>
             </div>
           )}
         </div>
@@ -428,10 +434,10 @@ export function RoleManager({
             onDragEnd={handleDragEnd}
           >
             <SortableContext
-              items={roles}
+              items={safeRoles}
               strategy={verticalListSortingStrategy}
             >
-              {roles.map((role, index) => (
+              {safeRoles.map((role, index) => (
                 <SortableRole
                   key={role}
                   role={role}
@@ -443,7 +449,7 @@ export function RoleManager({
             </SortableContext>
           </DndContext>
 
-          {roles.length === 0 && (
+          {safeRoles.length === 0 && (
             <div className="py-12 text-center">
               <Users className="w-8 h-8 mx-auto mb-3 text-slate-300 dark:text-slate-600" />
               <p className="text-xs font-bold text-slate-400 dark:text-slate-500 tracking-wider">

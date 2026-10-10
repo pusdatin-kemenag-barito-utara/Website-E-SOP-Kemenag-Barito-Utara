@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Sun, Moon, LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
-import type {User as SupabaseUser} from "@supabase/supabase-js";
+import type { User } from "@/hooks/useAuth";
 
 interface UserMenuProps {
-  user: SupabaseUser;
+  user: User;
   onLogout: () => void;
 }
 
@@ -41,10 +41,17 @@ export function UserMenu({ user, onLogout }: UserMenuProps) {
   };
 
   const displayName =
-    user.user_metadata?.full_name ||
-    user.user_metadata?.name ||
+    (user as any).name ||
+    (user as any).nama ||
+    (user as any).user_metadata?.full_name ||
+    (user as any).user_metadata?.name ||
     user.email?.split("@")[0] ||
     "Pengguna Kemenag";
+
+  const avatarUrl =
+    (user as any).avatar ||
+    (user as any).avatar_url ||
+    (user as any).user_metadata?.avatar_url;
 
   return (
     <div className="relative" ref={menuRef}>
@@ -56,9 +63,9 @@ export function UserMenu({ user, onLogout }: UserMenuProps) {
         )}
         aria-label="Menu Pengguna"
       >
-        {user.user_metadata?.avatar_url ? (
+        {avatarUrl ? (
           <img
-            src={user.user_metadata.avatar_url}
+            src={avatarUrl}
             alt={displayName}
             className="object-cover w-full h-full"
           />
@@ -82,9 +89,9 @@ export function UserMenu({ user, onLogout }: UserMenuProps) {
             <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/10 rounded-full blur-2xl -translate-y-1/2 translate-x-1/4" />
             <div className="flex items-center gap-3 relative z-10">
               <div className="w-11 h-11 rounded-full bg-white dark:bg-slate-800 flex items-center justify-center overflow-hidden flex-shrink-0 shadow-sm border border-slate-200 dark:border-slate-700">
-                {user.user_metadata?.avatar_url ? (
+                {avatarUrl ? (
                   <img
-                    src={user.user_metadata.avatar_url}
+                    src={avatarUrl}
                     alt={displayName}
                     className="object-cover w-full h-full"
                   />

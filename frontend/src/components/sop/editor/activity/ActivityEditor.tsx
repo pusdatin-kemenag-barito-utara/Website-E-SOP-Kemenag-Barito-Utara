@@ -109,11 +109,14 @@ export function ActivityEditor({
   setExpandedActivities,
   setConfirm,
 }: Props) {
+  const safeActivities = Array.isArray(activities) ? activities : [];
+  const safeRoles = Array.isArray(roles) ? roles : [];
+
   const addActivity = (insertIndex?: number) => {
-    const isFirstStep = activities.length === 0;
+    const isFirstStep = safeActivities.length === 0;
     const newAct: Activity = {
       id: Math.random().toString(36).substring(7),
-      no: ((insertIndex !== undefined ? insertIndex : activities.length) + 1).toString(),
+      no: ((insertIndex !== undefined ? insertIndex : safeActivities.length) + 1).toString(),
       kegiatan: "",
       pelaksana: [],
       persyaratan: "",
@@ -121,11 +124,11 @@ export function ActivityEditor({
       output: "",
       keterangan: "",
       symbol: isFirstStep ? "terminator" : "process",
-      roleForSymbol: roles[0] || "",
+      roleForSymbol: safeRoles[0] || "",
     };
 
     setActivities((prev) => {
-      const updated = [...prev];
+      const updated = [...(Array.isArray(prev) ? prev : [])];
       if (insertIndex !== undefined) {
         updated.splice(insertIndex, 0, newAct);
       } else {
@@ -222,8 +225,8 @@ export function ActivityEditor({
     }
   };
 
-  const totalSLA = React.useMemo(() => calculateTotalTime(activities), [activities]);
-  const isAllExpanded = activities.length > 0 && expandedActivities.length === activities.length;
+  const totalSLA = React.useMemo(() => calculateTotalTime(safeActivities), [safeActivities]);
+  const isAllExpanded = safeActivities.length > 0 && expandedActivities.length === safeActivities.length;
 
   return (
     <div className="p-4 md:p-6 space-y-4">
@@ -239,7 +242,7 @@ export function ActivityEditor({
                 Tahapan Alur Kegiatan
               </h3>
               <span className="px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-[10px] font-bold">
-                {activities.length} Langkah
+                {safeActivities.length} Langkah
               </span>
             </div>
             {totalSLA && (
@@ -253,7 +256,7 @@ export function ActivityEditor({
 
         {/* Quick Toolbar */}
         <div className="flex items-center gap-2">
-          {activities.length > 0 && (
+          {safeActivities.length > 0 && (
             <Button
               type="button"
               variant="outline"
@@ -286,10 +289,10 @@ export function ActivityEditor({
           onDragEnd={handleDragEnd}
         >
           <SortableContext
-            items={activities.map((a) => a.id)}
+            items={safeActivities.map((a) => a.id)}
             strategy={verticalListSortingStrategy}
           >
-            {activities.map((act, index) => (
+            {safeActivities.map((act, index) => (
               <React.Fragment key={act.id}>
                 {/* Insert Step In-Between Hover Divider */}
                 {index > 0 && (
@@ -309,7 +312,7 @@ export function ActivityEditor({
                 <ActivityCard
                   act={act}
                   index={index}
-                  roles={roles}
+                  roles={safeRoles}
                   isExpanded={expandedActivities.includes(act.id)}
                   onToggleExpand={toggleExpand}
                   onUpdate={updateActivity}
@@ -324,7 +327,7 @@ export function ActivityEditor({
       </div>
 
       {/* Empty State */}
-      {activities.length === 0 && (
+      {safeActivities.length === 0 && (
         <div className="text-center py-16 border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-3xl bg-white/60 dark:bg-slate-900/60 p-6">
           <div className="w-12 h-12 rounded-2xl bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200/80 dark:border-emerald-900/50 flex items-center justify-center text-[#015C3A] dark:text-emerald-400 mx-auto mb-3">
             <Layers className="w-6 h-6" />

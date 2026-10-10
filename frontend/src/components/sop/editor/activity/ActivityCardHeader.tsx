@@ -58,7 +58,7 @@ export function ActivityCardHeader({
           </span>
 
           {/* Actor Badge */}
-          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-50 dark:bg-emerald-950/40 text-[#015C3A] dark:text-emerald-400 border border-emerald-200/60 dark:border-emerald-900/50 text-[10px] font-bold truncate max-w-[140px]">
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-emerald-50 dark:bg-emerald-950/40 text-[#015C3A] dark:text-emerald-400 border border-emerald-200/60 dark:border-emerald-900/50 text-[10px] font-bold truncate max-w-[220px] sm:max-w-[320px]">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
             <span className="truncate">{act.roleForSymbol || "Pilih Pelaksana"}</span>
           </span>
@@ -82,7 +82,7 @@ export function ActivityCardHeader({
 
         {/* Live Snippet */}
         <p className="text-xs text-slate-500 dark:text-slate-400 truncate mt-1 font-medium leading-tight">
-          {act.kegiatan.trim() ? act.kegiatan : <span className="italic text-slate-400 dark:text-slate-500">Belum ada deskripsi aktivitas...</span>}
+          {(act.kegiatan || "").trim() ? act.kegiatan : <span className="italic text-slate-400 dark:text-slate-500">Belum ada deskripsi aktivitas...</span>}
         </p>
       </div>
 

@@ -1,63 +1,55 @@
 import { useEffect, useState, useRef } from "react";
-import { supabase } from "@/lib/supabase";
+import { pb } from "@/lib/pocketbase";
 
 export function useSOPPresence(userId: string | null, currentSopId: string | null) {
   const [lockedSopIds, setLockedSopIds] = useState<string[]>([]);
-  const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
+  const isSubscribedRef = useRef(false);
 
   useEffect(() => {
     if (!userId) return;
 
-    // Append a random session string to userId so multiple tabs from the same user have unique keys.
-    // If a user opens the same SOP in two tabs, they should lock each other out (to prevent self-overwrite).
-    const sessionId = `${userId}-${Math.random().toString(36).substring(7)}`;
+    let isMounted = true;
 
-    const channel = supabase.channel("sop-presence", {
-      config: {
-        presence: {
-          key: sessionId,
-        },
-      },
-    });
-
-    channelRef.current = channel;
-
-    channel
-      .on("presence", { event: "sync" }, () => {
-        const state = channel.presenceState();
-        const lockedIds = new Set<string>();
-
-        for (const [key, presences] of Object.entries(state)) {
-          if (key !== sessionId) {
-            presences.forEach((presence: Record<string, unknown>) => {
-              if (typeof presence.editing_sop_id === "string") {
-                lockedIds.add(presence.editing_sop_id);
-              }
-            });
+    // Berlangganan ke realtime updates koleksi sops PocketBase via SSE
+    const subscribeRealtime = async () => {
+      try {
+        await pb.collection("sops").subscribe("*", (e) => {
+          if (!isMounted) return;
+          if (e.action === "update" && e.record) {
+            // Jika ada perubahan realtime pada SOP oleh pengguna lain
+            const updatedId = e.record.id;
+            if (updatedId && updatedId !== currentSopId) {
+              setLockedSopIds((prev) => {
+                if (!prev.includes(updatedId)) {
+                  return [...prev, updatedId];
+                }
+                return prev;
+              });
+              // Lepaskan lock setelah jeda aktif
+              setTimeout(() => {
+                if (isMounted) {
+                  setLockedSopIds((prev) => prev.filter((id) => id !== updatedId));
+                }
+              }, 4000);
+            }
           }
-        }
-        
-        setLockedSopIds(Array.from(lockedIds));
-      })
-      .subscribe(async (status) => {
-        if (status === "SUBSCRIBED") {
-          await channel.track({ editing_sop_id: currentSopId });
-        }
-      });
+        });
+        isSubscribedRef.current = true;
+      } catch (err) {
+        console.warn("PocketBase realtime presence subscription warning:", err);
+      }
+    };
+
+    subscribeRealtime();
 
     return () => {
-      channel.unsubscribe();
-      channelRef.current = null;
+      isMounted = false;
+      if (isSubscribedRef.current) {
+        pb.collection("sops").unsubscribe("*").catch(() => {});
+        isSubscribedRef.current = false;
+      }
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [userId]); 
-
-  // Separate effect to track changes when the user switches to a different SOP
-  useEffect(() => {
-    if (channelRef.current && channelRef.current.state === "joined") {
-      channelRef.current.track({ editing_sop_id: currentSopId });
-    }
-  }, [currentSopId]);
+  }, [userId, currentSopId]);
 
   return lockedSopIds;
 }

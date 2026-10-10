@@ -1,59 +1,116 @@
 package handlers
 
 import (
-	"bytes"
-	"context"
 	"encoding/json"
+	"fmt"
 	"io"
 	"log"
 	"net/http"
+	"net/url"
 	"strings"
 	"time"
 
 	"github.com/gofiber/fiber/v3"
-	"github.com/jackc/pgx/v5/pgxpool"
 
+	"sop-kemenag-backend/cache"
 	"sop-kemenag-backend/config"
 	"sop-kemenag-backend/models"
+	"sop-kemenag-backend/pocketbase"
 )
 
-const supabaseAdminEndpoint = "auth/v1/admin/users"
+const usersListCacheKey = "admin_users_list"
 
-// ListUsers returns all profiles from kemenag_sop.profiles.
+// ListUsers returns all profiles from PocketBase users collection.
 // Protected by super_admin middleware.
-func ListUsers(db *pgxpool.Pool) fiber.Handler {
+func ListUsers(pb *pocketbase.Client) fiber.Handler {
 	return func(c fiber.Ctx) error {
-		rows, err := db.Query(context.Background(),
-			`SELECT id, email, nama, role, bidang, COALESCE(is_active, true), created_at, updated_at
-			 FROM kemenag_sop.profiles
-			 ORDER BY created_at DESC`)
+		if cached, found := cache.DefaultCache.Get(usersListCacheKey); found {
+			if profiles, ok := cached.([]models.Profile); ok {
+				return c.JSON(profiles)
+			}
+		}
+
+		q := url.Values{}
+		q.Set("sort", "-created")
+		q.Set("perPage", "500")
+
+		userToken, _ := c.Locals("user_token").(string)
+		resp, err := pb.Request(http.MethodGet, "/api/collections/users/records", q, nil, userToken)
 		if err != nil {
 			log.Printf("[ADMIN] ListUsers error: %v", err)
 			return c.Status(fiber.StatusInternalServerError).JSON(models.ErrorResponse{
-				Error: "Gagal mengambil daftar pengguna",
+				Error: "Gagal mengambil daftar pengguna dari PocketBase",
 			})
 		}
-		defer rows.Close()
+		defer resp.Body.Close()
 
-		profiles := []models.Profile{}
-		for rows.Next() {
-			var p models.Profile
-			if err := rows.Scan(&p.ID, &p.Email, &p.Nama, &p.Role, &p.Bidang, &p.IsActive, &p.CreatedAt, &p.UpdatedAt); err != nil {
-				log.Printf("[ADMIN] ListUsers scan error: %v", err)
-				return c.Status(fiber.StatusInternalServerError).JSON(models.ErrorResponse{
-					Error: "Gagal membaca data pengguna",
-				})
-			}
-			profiles = append(profiles, p)
+		if resp.StatusCode != http.StatusOK {
+			return c.Status(fiber.StatusInternalServerError).JSON(models.ErrorResponse{
+				Error: fmt.Sprintf("PocketBase error (%d)", resp.StatusCode),
+			})
 		}
+
+		var pbList struct {
+			Items []struct {
+				ID        string    `json:"id"`
+				Email     string    `json:"email"`
+				Name      string    `json:"name"`
+				Nama      string    `json:"nama"`
+				Role      string    `json:"role"`
+				Bidang    string    `json:"bidang"`
+				IsActive  *bool     `json:"is_active"`
+				Created   interface{} `json:"created"`
+				Updated   interface{} `json:"updated"`
+			} `json:"items"`
+		}
+
+		if err := json.NewDecoder(resp.Body).Decode(&pbList); err != nil {
+			log.Printf("[ADMIN] ListUsers decode error: %v", err)
+			return c.Status(fiber.StatusInternalServerError).JSON(models.ErrorResponse{
+				Error: "Gagal membaca data pengguna",
+			})
+		}
+
+		profiles := make([]models.Profile, 0, len(pbList.Items))
+		for _, item := range pbList.Items {
+			nama := item.Nama
+			if nama == "" {
+				nama = item.Name
+			}
+			email := item.Email
+			bidang := item.Bidang
+			isActive := true
+			if item.IsActive != nil {
+				isActive = *item.IsActive
+			}
+
+			role := item.Role
+			if role == "" {
+				role = "admin_bidang"
+			}
+
+			profiles = append(profiles, models.Profile{
+				ID:        item.ID,
+				Email:     &email,
+				Nama:      &nama,
+				Role:      role,
+				Bidang:    &bidang,
+				IsActive:  isActive,
+				CreatedAt: pocketbase.ParsePBTime(item.Created),
+				UpdatedAt: pocketbase.ParsePBTime(item.Updated),
+			})
+		}
+
+		// Cache user list for 60 seconds
+		cache.DefaultCache.Set(usersListCacheKey, profiles, 60*time.Second)
 
 		return c.JSON(profiles)
 	}
 }
 
-// CreateUser creates a new Supabase Auth user, then records their profile in kemenag_sop.profiles.
+// CreateUser creates a new user in PocketBase users collection.
 // Protected by super_admin middleware.
-func CreateUser(db *pgxpool.Pool, cfg *config.Config) fiber.Handler {
+func CreateUser(pb *pocketbase.Client, cfg *config.Config) fiber.Handler {
 	return func(c fiber.Ctx) error {
 		var req models.CreateUserRequest
 		if err := c.Bind().JSON(&req); err != nil {
@@ -80,32 +137,31 @@ func CreateUser(db *pgxpool.Pool, cfg *config.Config) fiber.Handler {
 		}
 		bidang := strings.TrimSpace(req.Bidang)
 
-		// Create user via Supabase Admin API (uses service role key)
 		payload := map[string]interface{}{
-			"email":         cleanEmail,
-			"password":      req.Password,
-			"email_confirm": true,
-			"user_metadata": map[string]interface{}{
-				"nama":      nama,
-				"full_name": nama,
-				"role":      role,
-				"bidang":    bidang,
-			},
+			"email":           cleanEmail,
+			"password":        req.Password,
+			"passwordConfirm": req.Password,
+			"name":            nama,
+			"nama":            nama,
+			"role":            role,
+			"bidang":          bidang,
+			"is_active":       true,
+			"emailVisibility": true,
 		}
-		bodyBytes, _ := json.Marshal(payload)
 
-		resp, err := supabaseAdminRequest(cfg, http.MethodPost, supabaseAdminEndpoint, bodyBytes)
+		userToken, _ := c.Locals("user_token").(string)
+		resp, err := pb.Request(http.MethodPost, "/api/collections/users/records", nil, payload, userToken)
 		if err != nil {
-			log.Printf("[ADMIN] CreateUser supabase error: %v", err)
+			log.Printf("[ADMIN] CreateUser error: %v", err)
 			return c.Status(fiber.StatusInternalServerError).JSON(models.ErrorResponse{
-				Error: "Gagal menghubungi layanan otentikasi",
+				Error: "Gagal membuat pengguna di PocketBase",
 			})
 		}
 		defer resp.Body.Close()
 
 		if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusCreated {
 			respBody, _ := io.ReadAll(resp.Body)
-			log.Printf("[ADMIN] CreateUser Supabase returned %d: %s", resp.StatusCode, string(respBody))
+			log.Printf("[ADMIN] CreateUser PocketBase returned %d: %s", resp.StatusCode, string(respBody))
 			return c.Status(fiber.StatusBadRequest).JSON(models.ErrorResponse{
 				Error: string(respBody),
 			})
@@ -115,28 +171,12 @@ func CreateUser(db *pgxpool.Pool, cfg *config.Config) fiber.Handler {
 			ID    string `json:"id"`
 			Email string `json:"email"`
 		}
-		if err := json.NewDecoder(resp.Body).Decode(&created); err != nil {
-			return c.Status(fiber.StatusInternalServerError).JSON(models.ErrorResponse{
-				Error: "Gagal memproses respon dari Supabase",
-			})
-		}
+		_ = json.NewDecoder(resp.Body).Decode(&created)
 
-		// Insert or update profile directly in kemenag_sop.profiles
-		_, dbErr := db.Exec(context.Background(),
-			`INSERT INTO kemenag_sop.profiles (id, email, nama, role, bidang, is_active, created_at, updated_at)
-			 VALUES ($1, $2, $3, $4, $5, true, now(), now())
-			 ON CONFLICT (id) DO UPDATE SET
-			   email = EXCLUDED.email,
-			   nama = EXCLUDED.nama,
-			   role = EXCLUDED.role,
-			   bidang = EXCLUDED.bidang,
-			   is_active = true,
-			   updated_at = now()`,
-			created.ID, cleanEmail, nama, role, bidang,
-		)
-		if dbErr != nil {
-			log.Printf("[ADMIN] Create profile DB error: %v", dbErr)
-		}
+		// Invalidate user cache and dashboard stats
+		cache.DefaultCache.Delete(usersListCacheKey)
+		cache.DefaultCache.InvalidatePrefix("admin_stats")
+		cache.DefaultCache.InvalidatePrefix("admin_dashboard_stats")
 
 		return c.Status(fiber.StatusCreated).JSON(fiber.Map{
 			"success": true,
@@ -152,9 +192,9 @@ func CreateUser(db *pgxpool.Pool, cfg *config.Config) fiber.Handler {
 	}
 }
 
-// UpdateUser updates profile information (nama, role, bidang, is_active) and optionally resets password.
+// UpdateUser updates profile information and optionally resets password in PocketBase.
 // Protected by super_admin middleware.
-func UpdateUser(db *pgxpool.Pool, cfg *config.Config) fiber.Handler {
+func UpdateUser(pb *pocketbase.Client, cfg *config.Config) fiber.Handler {
 	return func(c fiber.Ctx) error {
 		id := c.Params("id")
 		if id == "" {
@@ -173,19 +213,26 @@ func UpdateUser(db *pgxpool.Pool, cfg *config.Config) fiber.Handler {
 			})
 		}
 
-		// Check current profile
-		var currentEmail string
-		err := db.QueryRow(context.Background(),
-			`SELECT email FROM kemenag_sop.profiles WHERE id = $1`, id,
-		).Scan(&currentEmail)
-		if err != nil {
+		// Check current user record
+		userToken, _ := c.Locals("user_token").(string)
+		getResp, err := pb.Request(http.MethodGet, "/api/collections/users/records/"+id, nil, nil, userToken)
+		if err != nil || getResp.StatusCode != http.StatusOK {
+			if getResp != nil {
+				getResp.Body.Close()
+			}
 			return c.Status(fiber.StatusNotFound).JSON(models.ErrorResponse{
 				Error: "Pengguna tidak ditemukan",
 			})
 		}
 
-		// Don't allow deactivating or demoting the primary super admin
-		if currentEmail == cfg.SuperAdminEmail {
+		var currentRecord struct {
+			Email string `json:"email"`
+		}
+		_ = json.NewDecoder(getResp.Body).Decode(&currentRecord)
+		getResp.Body.Close()
+
+		// Protect Primary Super Admin
+		if strings.EqualFold(currentRecord.Email, cfg.SuperAdminEmail) {
 			req.Role = "super_admin"
 			active := true
 			req.IsActive = &active
@@ -202,7 +249,14 @@ func UpdateUser(db *pgxpool.Pool, cfg *config.Config) fiber.Handler {
 			isActive = *req.IsActive
 		}
 
-		// If password is provided, reset in Supabase Auth via Admin API
+		updatePayload := map[string]interface{}{
+			"name":      nama,
+			"nama":      nama,
+			"role":      role,
+			"bidang":    bidang,
+			"is_active": isActive,
+		}
+
 		if req.Password != nil && strings.TrimSpace(*req.Password) != "" {
 			newPass := strings.TrimSpace(*req.Password)
 			if len(newPass) < 6 {
@@ -210,52 +264,30 @@ func UpdateUser(db *pgxpool.Pool, cfg *config.Config) fiber.Handler {
 					Error: "Kata sandi baru minimal 6 karakter",
 				})
 			}
-			updatePayload := map[string]interface{}{
-				"password": newPass,
-				"user_metadata": map[string]interface{}{
-					"nama":      nama,
-					"full_name": nama,
-					"role":      role,
-					"bidang":    bidang,
-				},
-			}
-			bodyBytes, _ := json.Marshal(updatePayload)
-			resp, sbErr := supabaseAdminRequest(cfg, http.MethodPut, supabaseAdminEndpoint+"/"+id, bodyBytes)
-			if sbErr != nil {
-				log.Printf("[ADMIN] Reset password error: %v", sbErr)
-			} else {
-				resp.Body.Close()
-			}
-		} else {
-			// Update user_metadata in Supabase Auth
-			updatePayload := map[string]interface{}{
-				"user_metadata": map[string]interface{}{
-					"nama":      nama,
-					"full_name": nama,
-					"role":      role,
-					"bidang":    bidang,
-				},
-			}
-			bodyBytes, _ := json.Marshal(updatePayload)
-			resp, sbErr := supabaseAdminRequest(cfg, http.MethodPut, supabaseAdminEndpoint+"/"+id, bodyBytes)
-			if sbErr == nil {
-				resp.Body.Close()
-			}
+			updatePayload["password"] = newPass
+			updatePayload["passwordConfirm"] = newPass
 		}
 
-		// Update database profile
-		_, updateErr := db.Exec(context.Background(),
-			`UPDATE kemenag_sop.profiles
-			 SET nama = $1, role = $2, bidang = $3, is_active = $4, updated_at = now()
-			 WHERE id = $5`,
-			nama, role, bidang, isActive, id,
-		)
-		if updateErr != nil {
-			log.Printf("[ADMIN] Update profile DB error: %v", updateErr)
+		patchResp, patchErr := pb.Request(http.MethodPatch, "/api/collections/users/records/"+id, nil, updatePayload, userToken)
+		if patchErr != nil {
+			log.Printf("[ADMIN] Update profile error: %v", patchErr)
 			return c.Status(fiber.StatusInternalServerError).JSON(models.ErrorResponse{
-				Error: "Gagal memperbarui profil pengguna",
+				Error: "Gagal memperbarui profil pengguna di PocketBase",
 			})
 		}
+		defer patchResp.Body.Close()
+
+		if patchResp.StatusCode != http.StatusOK {
+			respBody, _ := io.ReadAll(patchResp.Body)
+			return c.Status(fiber.StatusBadRequest).JSON(models.ErrorResponse{
+				Error: string(respBody),
+			})
+		}
+
+		// Invalidate user cache and dashboard stats
+		cache.DefaultCache.Delete(usersListCacheKey)
+		cache.DefaultCache.InvalidatePrefix("admin_stats")
+		cache.DefaultCache.InvalidatePrefix("admin_dashboard_stats")
 
 		return c.JSON(fiber.Map{
 			"success": true,
@@ -264,9 +296,9 @@ func UpdateUser(db *pgxpool.Pool, cfg *config.Config) fiber.Handler {
 	}
 }
 
-// DeleteUser deletes a Supabase Auth user by ID and removes profile.
+// DeleteUser deletes a PocketBase user by ID.
 // Protected by super_admin middleware.
-func DeleteUser(db *pgxpool.Pool, cfg *config.Config) fiber.Handler {
+func DeleteUser(pb *pocketbase.Client, cfg *config.Config) fiber.Handler {
 	return func(c fiber.Ctx) error {
 		id := c.Params("id")
 		if id == "" {
@@ -278,30 +310,39 @@ func DeleteUser(db *pgxpool.Pool, cfg *config.Config) fiber.Handler {
 			})
 		}
 
-		// Protect Super Admin email from deletion
-		var email string
-		_ = db.QueryRow(context.Background(),
-			`SELECT email FROM kemenag_sop.profiles WHERE id = $1`, id,
-		).Scan(&email)
+		userToken, _ := c.Locals("user_token").(string)
 
-		if email == cfg.SuperAdminEmail {
-			return c.Status(fiber.StatusForbidden).JSON(models.ErrorResponse{
-				Error: "Akun Super Admin utama tidak dapat dihapus",
-			})
+		// Get user email to protect Super Admin
+		getResp, err := pb.Request(http.MethodGet, "/api/collections/users/records/"+id, nil, nil, userToken)
+		if err == nil && getResp.StatusCode == http.StatusOK {
+			var current struct {
+				Email string `json:"email"`
+			}
+			_ = json.NewDecoder(getResp.Body).Decode(&current)
+			getResp.Body.Close()
+
+			if strings.EqualFold(current.Email, cfg.SuperAdminEmail) {
+				return c.Status(fiber.StatusForbidden).JSON(models.ErrorResponse{
+					Error: "Akun Super Admin utama tidak dapat dihapus",
+				})
+			}
+		} else if getResp != nil {
+			getResp.Body.Close()
 		}
 
-		// Delete from Supabase Auth
-		resp, err := supabaseAdminRequest(cfg, http.MethodDelete, supabaseAdminEndpoint+"/"+id, nil)
+		delResp, err := pb.Request(http.MethodDelete, "/api/collections/users/records/"+id, nil, nil, userToken)
 		if err != nil {
-			log.Printf("[ADMIN] DeleteUser supabase error: %v", err)
+			log.Printf("[ADMIN] DeleteUser error: %v", err)
 			return c.Status(fiber.StatusInternalServerError).JSON(models.ErrorResponse{
-				Error: "Gagal menghapus user dari Supabase Auth",
+				Error: "Gagal menghapus pengguna dari PocketBase",
 			})
 		}
-		defer resp.Body.Close()
+		defer delResp.Body.Close()
 
-		// Delete from kemenag_sop.profiles
-		_, _ = db.Exec(context.Background(), `DELETE FROM kemenag_sop.profiles WHERE id = $1`, id)
+		// Invalidate user cache and dashboard stats
+		cache.DefaultCache.Delete(usersListCacheKey)
+		cache.DefaultCache.InvalidatePrefix("admin_stats")
+		cache.DefaultCache.InvalidatePrefix("admin_dashboard_stats")
 
 		return c.JSON(fiber.Map{
 			"success": true,
@@ -310,19 +351,239 @@ func DeleteUser(db *pgxpool.Pool, cfg *config.Config) fiber.Handler {
 	}
 }
 
-// supabaseAdminRequest performs an authenticated call to the Supabase Auth Admin API
-// using the service role key (full admin privileges).
-func supabaseAdminRequest(cfg *config.Config, method, path string, body []byte) (*http.Response, error) {
-	url := cfg.SupabaseURL + "/" + path
-	req, err := http.NewRequest(method, url, bytes.NewReader(body))
-	if err != nil {
-		return nil, err
-	}
-	req.Header.Set("apikey", cfg.SupabaseServiceKey)
-	req.Header.Set("Authorization", "Bearer "+cfg.SupabaseServiceKey)
-	req.Header.Set("Content-Type", "application/json")
+// ResetAllPasswords resets all non-super-admin user passwords to a specified password (default "123456").
+// Super Admin (baritoutara@kemenag.go.id / role super_admin) is strictly protected and never touched.
+func ResetAllPasswords(pb *pocketbase.Client, cfg *config.Config) fiber.Handler {
+	return func(c fiber.Ctx) error {
+		var req struct {
+			Password string `json:"password"`
+		}
+		_ = c.Bind().JSON(&req)
 
-	client := &http.Client{Timeout: 15 * time.Second}
-	return client.Do(req)
+		newPassword := strings.TrimSpace(req.Password)
+		if newPassword == "" {
+			newPassword = "123456"
+		}
+		if len(newPassword) < 6 {
+			return c.Status(fiber.StatusBadRequest).JSON(models.ErrorResponse{
+				Error: "Kata sandi minimal 6 karakter",
+			})
+		}
+
+		userToken, _ := c.Locals("user_token").(string)
+
+		// 1. Fetch all users from PocketBase
+		q := url.Values{}
+		q.Set("perPage", "500")
+		resp, err := pb.Request(http.MethodGet, "/api/collections/users/records", q, nil, userToken)
+		if err != nil {
+			log.Printf("[ADMIN] ResetAllPasswords List error: %v", err)
+			return c.Status(fiber.StatusInternalServerError).JSON(models.ErrorResponse{
+				Error: "Gagal mengambil daftar pengguna dari PocketBase",
+			})
+		}
+		defer resp.Body.Close()
+
+		if resp.StatusCode != http.StatusOK {
+			return c.Status(fiber.StatusInternalServerError).JSON(models.ErrorResponse{
+				Error: fmt.Sprintf("PocketBase error (%d)", resp.StatusCode),
+			})
+		}
+
+		var pbList struct {
+			Items []struct {
+				ID    string `json:"id"`
+				Email string `json:"email"`
+				Role  string `json:"role"`
+				Nama  string `json:"nama"`
+				Name  string `json:"name"`
+			} `json:"items"`
+		}
+		if err := json.NewDecoder(resp.Body).Decode(&pbList); err != nil {
+			log.Printf("[ADMIN] ResetAllPasswords decode error: %v", err)
+			return c.Status(fiber.StatusInternalServerError).JSON(models.ErrorResponse{
+				Error: "Gagal membaca data pengguna",
+			})
+		}
+
+		var updatedCount int
+		var skippedCount int
+		var failedAccounts []string
+		var lastErrorMsg string
+
+		for _, item := range pbList.Items {
+			cleanEmail := strings.TrimSpace(strings.ToLower(item.Email))
+
+			// STRICT SECURITY RULE: Super Admin is protected and never touched under any circumstance
+			if strings.EqualFold(cleanEmail, cfg.SuperAdminEmail) || strings.EqualFold(item.Role, "super_admin") {
+				skippedCount++
+				continue
+			}
+
+			updatePayload := map[string]interface{}{
+				"password":        newPassword,
+				"passwordConfirm": newPassword,
+				"is_active":       true,
+			}
+
+			// Try updating with userToken
+			patchResp, patchErr := pb.Request(http.MethodPatch, "/api/collections/users/records/"+item.ID, nil, updatePayload, userToken)
+			if patchErr != nil || patchResp.StatusCode != http.StatusOK {
+				var errMsg string
+				if patchResp != nil {
+					b, _ := io.ReadAll(patchResp.Body)
+					patchResp.Body.Close()
+					errMsg = string(b)
+				}
+				// Retry with PocketBase admin token fallback if configured
+				patchResp2, patchErr2 := pb.Request(http.MethodPatch, "/api/collections/users/records/"+item.ID, nil, updatePayload, "")
+				if patchErr2 != nil || patchResp2.StatusCode != http.StatusOK {
+					var errMsg2 string
+					if patchResp2 != nil {
+						b2, _ := io.ReadAll(patchResp2.Body)
+						patchResp2.Body.Close()
+						errMsg2 = string(b2)
+					}
+					lastErrorMsg = fmt.Sprintf("UserToken error: %s | Admin fallback error: %s", errMsg, errMsg2)
+					log.Printf("[ADMIN] Failed to reset password for %s (%s): %s", item.ID, cleanEmail, lastErrorMsg)
+					failedAccounts = append(failedAccounts, cleanEmail)
+					continue
+				}
+				patchResp2.Body.Close()
+			} else {
+				patchResp.Body.Close()
+			}
+
+			updatedCount++
+		}
+
+		cache.DefaultCache.Delete(usersListCacheKey)
+
+		if len(failedAccounts) > 0 && updatedCount == 0 {
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+				"success": false,
+				"error":   fmt.Sprintf("Gagal memperbarui sandi pengguna di PocketBase. Detail: %s", lastErrorMsg),
+				"failed":  failedAccounts,
+			})
+		}
+
+		return c.JSON(fiber.Map{
+			"success":       true,
+			"message":       fmt.Sprintf("Berhasil mengatur ulang kata sandi %d akun admin menjadi '%s'. Akun Super Admin tidak diubah.", updatedCount, newPassword),
+			"updated_count": updatedCount,
+			"skipped_count": skippedCount,
+			"failed_count":  len(failedAccounts),
+			"failed":        failedAccounts,
+		})
+	}
+}
+
+// GetAdminStats returns aggregated dashboard statistics for super admins.
+// Results are cached in memory for 60 seconds with automatic invalidation on updates.
+// GET /api/admin/stats
+func GetAdminStats(pb *pocketbase.Client) fiber.Handler {
+	return func(c fiber.Ctx) error {
+		const cacheKey = "admin_dashboard_stats"
+		if cached, found := cache.DefaultCache.Get(cacheKey); found {
+			return c.JSON(cached)
+		}
+
+		userToken, _ := c.Locals("user_token").(string)
+
+		// 1. Fetch user counts & roles
+		uq := url.Values{}
+		uq.Set("perPage", "500")
+		uq.Set("fields", "id,role,bidang,is_active")
+		uResp, err := pb.Request(http.MethodGet, "/api/collections/users/records", uq, nil, userToken)
+		if err != nil {
+			return c.Status(fiber.StatusInternalServerError).JSON(models.ErrorResponse{
+				Error: "Gagal mengambil statistik pengguna",
+			})
+		}
+		defer uResp.Body.Close()
+
+		var uList struct {
+			Items []struct {
+				Role     string `json:"role"`
+				Bidang   string `json:"bidang"`
+				IsActive *bool  `json:"is_active"`
+			} `json:"items"`
+		}
+		_ = json.NewDecoder(uResp.Body).Decode(&uList)
+
+		totalUsers := len(uList.Items)
+		activeUsers := 0
+		inactiveUsers := 0
+		usersByRole := make(map[string]int)
+
+		for _, u := range uList.Items {
+			role := u.Role
+			if role == "" {
+				role = "admin_bidang"
+			}
+			usersByRole[role]++
+
+			if u.IsActive == nil || *u.IsActive {
+				activeUsers++
+			} else {
+				inactiveUsers++
+			}
+		}
+
+		// 2. Fetch SOP counts & bidang distribution
+		sq := url.Values{}
+		sq.Set("perPage", "500")
+		sq.Set("expand", "user")
+		sq.Set("fields", "id,user_bidang,expand.user.bidang")
+		sResp, err := pb.Request(http.MethodGet, "/api/collections/sops/records", sq, nil, userToken)
+		if err != nil {
+			return c.Status(fiber.StatusInternalServerError).JSON(models.ErrorResponse{
+				Error: "Gagal mengambil statistik SOP",
+			})
+		}
+		defer sResp.Body.Close()
+
+		var sList struct {
+			Items []struct {
+				ID         string `json:"id"`
+				UserBidang string `json:"user_bidang"`
+				Expand     struct {
+					User struct {
+						Bidang string `json:"bidang"`
+					} `json:"user"`
+				} `json:"expand"`
+			} `json:"items"`
+		}
+		_ = json.NewDecoder(sResp.Body).Decode(&sList)
+
+		totalSOPs := len(sList.Items)
+		sopsByBidang := make(map[string]int)
+
+		for _, s := range sList.Items {
+			bidang := strings.TrimSpace(s.UserBidang)
+			if bidang == "" {
+				bidang = strings.TrimSpace(s.Expand.User.Bidang)
+			}
+			if bidang == "" {
+				bidang = "Umum"
+			}
+			sopsByBidang[bidang]++
+		}
+
+		stats := fiber.Map{
+			"total_sops":     totalSOPs,
+			"total_users":    totalUsers,
+			"active_users":   activeUsers,
+			"inactive_users": inactiveUsers,
+			"sops_by_bidang": sopsByBidang,
+			"users_by_role":  usersByRole,
+			"cached_at":      time.Now().Format(time.RFC3339),
+		}
+
+		// Cache for 60 seconds
+		cache.DefaultCache.Set(cacheKey, stats, 60*time.Second)
+
+		return c.JSON(stats)
+	}
 }
 

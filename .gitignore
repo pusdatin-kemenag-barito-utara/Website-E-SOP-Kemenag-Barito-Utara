@@ -29,6 +29,10 @@ playwright-report/
 /backend/tmp/
 /backend/sop-backend
 /backend/docs/
+*.exe
+
+# Database Backups
+/backup_supabase/
 
 # Misc & OS
 .DS_Store

@@ -1,20 +1,22 @@
-import { supabase } from "@/lib/supabase";
+import { pb } from "@/lib/pocketbase";
 import { getEnv } from "@/lib/env";
 import type { Activity, SOPHeader, SOPListItem, AdminSOPListItem, StoredSOP } from "@/types/sop";
 
 export const getApiUrl = () => getEnv("PUBLIC_API_URL", "");
 
-// getAccessToken returns the current Supabase session access token (JWT).
+// getAccessToken returns the current PocketBase session access token (JWT).
 export async function getAccessToken(): Promise<string | null> {
   try {
-    const { data } = await supabase.auth.getSession();
-    return data.session?.access_token ?? null;
+    if (pb.authStore.isValid && pb.authStore.token) {
+      return pb.authStore.token;
+    }
+    return null;
   } catch {
     return null;
   }
 }
 
-// authedRequest performs a fetch to the Go backend with the Supabase JWT attached.
+// authedRequest performs a fetch to the Go backend with the PocketBase JWT attached.
 export async function authedRequest<T>(
   path: string,
   options: { method?: string; body?: unknown } = {},
@@ -125,5 +127,18 @@ export const usersApi = {
       `/api/admin/users/${encodeURIComponent(id)}`,
       { method: "DELETE" },
     ),
+
+  resetAllPasswords: (password = "123456") =>
+    authedRequest<{
+      success: boolean;
+      message: string;
+      updated_count: number;
+      skipped_count: number;
+      failed_count?: number;
+      failed?: string[];
+    }>("/api/admin/users/reset-all-passwords", {
+      method: "POST",
+      body: { password },
+    }),
 };
 

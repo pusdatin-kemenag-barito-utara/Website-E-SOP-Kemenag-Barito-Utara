@@ -2,6 +2,7 @@ import React from "react";
 import { Edit3, Eye, ZoomIn, ZoomOut, RotateCcw, Columns2, Maximize2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { SOPPreview } from "@/components/sop/preview/SOPPreview";
+import { ErrorBoundary } from "@/components/common/ErrorBoundary";
 import type { SOPHeader, Activity } from "@/types/sop";
 import { Button } from "@/components/ui/button";
 
@@ -162,13 +163,15 @@ export function LivePreview({
             }}
             className="absolute top-0 left-0 print:static print:transform-none print:w-full shadow-2xl print:shadow-none bg-white rounded-sm print:rounded-none"
           >
-            <SOPPreview
-              header={header}
-              activities={activities}
-              roles={roles}
-              isHydrated={isHydrated}
-              expandedActivities={expandedActivities}
-            />
+            <ErrorBoundary fallbackTitle="Kendala Memuat Preview SOP">
+              <SOPPreview
+                header={header}
+                activities={activities}
+                roles={roles}
+                isHydrated={isHydrated}
+                expandedActivities={expandedActivities}
+              />
+            </ErrorBoundary>
           </div>
         </div>
       </div>

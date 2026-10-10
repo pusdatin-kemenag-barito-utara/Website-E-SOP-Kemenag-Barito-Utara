@@ -9,12 +9,13 @@ import (
 	"time"
 
 	"github.com/gofiber/fiber/v3"
+	"github.com/gofiber/fiber/v3/middleware/compress"
 	"github.com/gofiber/fiber/v3/middleware/recover"
 	"github.com/gofiber/fiber/v3/middleware/requestid"
 
 	"sop-kemenag-backend/config"
-	"sop-kemenag-backend/database"
 	"sop-kemenag-backend/middleware"
+	"sop-kemenag-backend/pocketbase"
 	"sop-kemenag-backend/routes"
 )
 
@@ -24,12 +25,12 @@ func main() {
 
 	log.Printf("Starting E-SOP Digital backend in %s environment", cfg.AppEnv)
 
-	db, err := database.Connect(cfg.DatabaseURL)
-	if err != nil {
-		log.Fatalf("Failed to connect to database: %v", err)
+	pb := pocketbase.NewClient(cfg.PocketbaseURL, cfg.PocketbaseAdminEmail, cfg.PocketbaseAdminPassword)
+	if err := pb.HealthCheck(); err != nil {
+		log.Printf("Warning: PocketBase health check returned: %v (continuing)", err)
+	} else {
+		log.Printf("PocketBase connection verified at %s", cfg.PocketbaseURL)
 	}
-	defer db.Close()
-	log.Printf("Database connection established")
 
 	app := fiber.New(fiber.Config{
 		AppName:      "E-SOP Digital Backend",
@@ -40,6 +41,9 @@ func main() {
 	app.Use(requestid.New())
 	app.Use(middleware.RequestLogger())
 	app.Use(recover.New())
+	app.Use(compress.New(compress.Config{
+		Level: compress.LevelDefault,
+	}))
 	app.Use(middleware.SecurityHeaders())
 	app.Use(middleware.CORS(cfg))
 	app.Use(middleware.RateLimit(120, time.Minute))
@@ -48,7 +52,7 @@ func main() {
 		return c.JSON(fiber.Map{"app": "E-SOP Digital API", "status": "ok"})
 	})
 
-	routes.Setup(app, db, cfg)
+	routes.Setup(app, pb, cfg)
 
 	// Graceful shutdown
 	serverErrors := make(chan error, 1)

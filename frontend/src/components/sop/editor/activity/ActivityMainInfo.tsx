@@ -44,14 +44,14 @@ export function ActivityMainInfo({
           <Textarea
             id={`kegiatan-${act.id}`}
             name={`kegiatan-${act.id}`}
-            value={act.kegiatan}
+            value={act.kegiatan || ""}
             onChange={(e) => onUpdate(act.id, "kegiatan", e.target.value)}
             placeholder="Apa yang dilakukan pada tahap ini?"
             className="min-h-[80px] max-h-[120px] md:max-h-none overflow-y-auto text-sm leading-relaxed bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 rounded-xl focus-visible:ring-[#015C3A] focus-visible:border-[#015C3A]"
           />
           {act.symbol === "decision" &&
-            !act.kegiatan.toLowerCase().includes("ya") &&
-            !act.kegiatan.toLowerCase().includes("tidak") && (
+            !(act.kegiatan || "").toLowerCase().includes("ya") &&
+            !(act.kegiatan || "").toLowerCase().includes("tidak") && (
               <div className="mt-2 flex gap-2 items-start bg-amber-50 dark:bg-amber-950/30 text-amber-700 dark:text-amber-400 p-2.5 rounded-lg border border-amber-200 dark:border-amber-900/50">
                 <AlertTriangle className="w-4 h-4 mt-0.5 shrink-0" />
                 <p className="text-[11px] leading-tight">
@@ -60,44 +60,63 @@ export function ActivityMainInfo({
               </div>
             )}
         </div>
-        <div className="grid grid-cols-2 gap-3 sm:gap-4">
+        {/* Dropdowns: Simbol Alur & Pelaksana Utama */}
+        <div className="space-y-3.5">
+          {/* Simbol Alur */}
           <div className="space-y-1.5">
             <span className="text-xs font-bold text-slate-700 dark:text-slate-200 ml-0.5">
               Simbol Alur
             </span>
             <Select
-              value={act.symbol}
+              value={act.symbol || "process"}
               onValueChange={(val: SymbolType | null) => {
                 if (val) onUpdate(act.id, "symbol", val);
               }}
             >
-              <SelectTrigger className="h-10 bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 rounded-xl focus:ring-[#015C3A]">
+              <SelectTrigger className="w-full h-11 bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-700 rounded-xl focus:ring-[#015C3A] px-3 justify-between shadow-2xs hover:border-slate-300 dark:hover:border-slate-600 transition-all text-left">
                 <SelectValue>
-                  <div className="flex items-center gap-2">
-                    {React.createElement(SYMBOL_ICONS[act.symbol] || Square, {
-                      className: "w-4 h-4 text-[#015C3A] dark:text-emerald-400",
-                    })}
-                    <span className="font-medium text-sm text-foreground">
-                      {SYMBOL_OPTIONS.find((o) => o.value === act.symbol)?.label}
+                  <div className="flex items-center gap-2.5 min-w-0 pr-1">
+                    <div className="w-6 h-6 rounded-lg bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200/70 dark:border-emerald-800/80 flex items-center justify-center shrink-0">
+                      {React.createElement(SYMBOL_ICONS[act.symbol] || Square, {
+                        className: "w-3.5 h-3.5 text-[#015C3A] dark:text-emerald-400",
+                      })}
+                    </div>
+                    <span className="font-bold text-xs sm:text-sm text-slate-800 dark:text-slate-100 truncate">
+                      {SYMBOL_OPTIONS.find((o) => o.value === act.symbol)?.label || "Proses"}
                     </span>
                   </div>
                 </SelectValue>
               </SelectTrigger>
-              <SelectContent alignItemWithTrigger={false} className="min-w-[200px] bg-white/95 dark:bg-slate-900/95 backdrop-blur-md z-50 border-slate-200/60 dark:border-slate-700/60 rounded-2xl shadow-xl overflow-hidden p-2">
+              <SelectContent
+                align="start"
+                alignItemWithTrigger={false}
+                className="w-[var(--anchor-width)] min-w-[280px] sm:min-w-[340px] max-w-[90vw] bg-white/95 dark:bg-slate-900/95 backdrop-blur-md z-50 border border-slate-200/80 dark:border-slate-700 rounded-2xl shadow-xl overflow-y-auto max-h-[300px] p-1.5"
+              >
                 {SYMBOL_OPTIONS.filter((opt) => opt.value !== "offpage").map(
                   (opt) => (
                     <SelectItem
                       key={opt.value}
                       value={opt.value}
-                      className="py-2.5 px-3 focus:bg-[#015C3A]/5 dark:focus:bg-[#015C3A]/20 cursor-pointer rounded-xl transition-colors"
+                      className="py-2.5 px-3 focus:bg-emerald-50 dark:focus:bg-emerald-950/30 cursor-pointer rounded-xl transition-colors"
                     >
-                      <div className="flex items-center gap-3">
-                        <div className="p-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 shadow-sm">
+                      <div className="flex items-center gap-2.5 min-w-0 pr-6">
+                        <div className="w-7 h-7 rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center text-[#015C3A] dark:text-emerald-400 shrink-0">
                           {React.createElement(SYMBOL_ICONS[opt.value], {
-                            className: "w-4 h-4 text-[#015C3A] dark:text-emerald-400",
+                            className: "w-3.5 h-3.5",
                           })}
                         </div>
-                        <span className="font-semibold text-sm text-slate-700 dark:text-slate-200 tracking-wide">{opt.label}</span>
+                        <div className="flex flex-col min-w-0">
+                          <span className="font-bold text-xs sm:text-sm text-slate-800 dark:text-slate-100">
+                            {opt.label}
+                          </span>
+                          <span className="text-[10px] text-slate-400 dark:text-slate-500 font-medium">
+                            {opt.value === "terminator"
+                              ? "Awal / Akhir Prosedur"
+                              : opt.value === "decision"
+                              ? "Percabangan / Validasi (Ya/Tidak)"
+                              : "Aktivitas / Pemrosesan Kerja"}
+                          </span>
+                        </div>
                       </div>
                     </SelectItem>
                   ),
@@ -105,41 +124,56 @@ export function ActivityMainInfo({
               </SelectContent>
             </Select>
           </div>
+
+          {/* Pelaksana Utama */}
           <div className="space-y-1.5">
             <span className="text-xs font-bold text-slate-700 dark:text-slate-200 ml-0.5">
               Pelaksana Utama
             </span>
             <Select
-              value={act.roleForSymbol}
+              value={act.roleForSymbol || ""}
               onValueChange={(val: string | null) => {
                 if (val) onUpdate(act.id, "roleForSymbol", val);
               }}
             >
-              <SelectTrigger className="h-10 bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 rounded-xl focus:ring-[#015C3A]">
+              <SelectTrigger className="w-full h-11 bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-700 rounded-xl focus:ring-[#015C3A] px-3 justify-between shadow-2xs hover:border-slate-300 dark:hover:border-slate-600 transition-all text-left">
                 <SelectValue placeholder="Pilih Pelaksana">
-                  <div className="flex items-center gap-2">
-                    <Users className="w-3.5 h-3.5 text-[#015C3A]" />
-                    <span className="font-medium text-sm text-foreground truncate max-w-[100px]">
-                      {act.roleForSymbol || "Pilih"}
+                  <div className="flex items-center gap-2.5 min-w-0 pr-1">
+                    <div className="w-6 h-6 rounded-lg bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200/70 dark:border-emerald-800/80 flex items-center justify-center shrink-0">
+                      <Users className="w-3.5 h-3.5 text-[#015C3A] dark:text-emerald-400" />
+                    </div>
+                    <span className="font-bold text-xs sm:text-sm text-slate-800 dark:text-slate-100 truncate">
+                      {act.roleForSymbol || "Pilih Pelaksana"}
                     </span>
                   </div>
                 </SelectValue>
               </SelectTrigger>
-              <SelectContent alignItemWithTrigger={false} className="min-w-[200px] bg-white/95 dark:bg-slate-900/95 backdrop-blur-md z-50 border-slate-200/60 dark:border-slate-700/60 rounded-2xl shadow-xl overflow-hidden p-2">
-                {roles.map((role) => (
+              <SelectContent
+                align="start"
+                alignItemWithTrigger={false}
+                className="w-[var(--anchor-width)] min-w-[280px] sm:min-w-[340px] max-w-[90vw] bg-white/95 dark:bg-slate-900/95 backdrop-blur-md z-50 border border-slate-200/80 dark:border-slate-700 rounded-2xl shadow-xl overflow-y-auto max-h-[300px] p-1.5"
+              >
+                {(roles || []).map((role) => (
                   <SelectItem
                     key={role}
                     value={role}
-                    className="py-2.5 px-3 focus:bg-emerald-50 dark:focus:bg-emerald-950/20 cursor-pointer rounded-xl transition-colors"
+                    className="py-2.5 px-3 focus:bg-emerald-50 dark:focus:bg-emerald-950/30 cursor-pointer rounded-xl transition-colors"
                   >
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 shadow-sm">
-                        <Users className="w-4 h-4 text-[#015C3A]" />
+                    <div className="flex items-center gap-2.5 min-w-0 pr-6">
+                      <div className="w-7 h-7 rounded-lg bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200/60 dark:border-emerald-800 flex items-center justify-center text-[#015C3A] dark:text-emerald-400 shrink-0">
+                        <Users className="w-3.5 h-3.5" />
                       </div>
-                      <span className="font-semibold text-sm text-slate-700 dark:text-slate-200 tracking-wide">{role}</span>
+                      <span className="font-bold text-xs sm:text-sm text-slate-800 dark:text-slate-100 whitespace-normal leading-snug">
+                        {role}
+                      </span>
                     </div>
                   </SelectItem>
                 ))}
+                {(roles || []).length === 0 && (
+                  <div className="py-4 px-3 text-center text-xs font-medium text-slate-400">
+                    Belum ada pelaksana. Tambahkan di tab Pelaksana.
+                  </div>
+                )}
               </SelectContent>
             </Select>
           </div>

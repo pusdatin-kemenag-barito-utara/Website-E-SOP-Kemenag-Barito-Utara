@@ -31,7 +31,7 @@ export default defineConfig({
         "@tanstack/react-query",
         "lucide-react",
         "date-fns",
-        "@supabase/supabase-js",
+        "pocketbase",
         "framer-motion",
         "@marsidev/react-turnstile",
         "clsx",
