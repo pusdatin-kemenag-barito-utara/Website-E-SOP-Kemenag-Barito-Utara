@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"github.com/gofiber/fiber/v3"
-	"github.com/gofiber/fiber/v3/middleware/compress"
 	"github.com/gofiber/fiber/v3/middleware/recover"
 	"github.com/gofiber/fiber/v3/middleware/requestid"
 
@@ -41,9 +40,6 @@ func main() {
 	app.Use(requestid.New())
 	app.Use(middleware.RequestLogger())
 	app.Use(recover.New())
-	app.Use(compress.New(compress.Config{
-		Level: compress.LevelDefault,
-	}))
 	app.Use(middleware.SecurityHeaders())
 	app.Use(middleware.CORS(cfg))
 	app.Use(middleware.RateLimit(120, time.Minute))

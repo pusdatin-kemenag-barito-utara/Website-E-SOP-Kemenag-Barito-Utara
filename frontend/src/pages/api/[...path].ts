@@ -9,6 +9,7 @@ export const ALL: APIRoute = async ({ request, params }) => {
 
   const headers = new Headers(request.headers);
   headers.delete("host");
+  headers.delete("accept-encoding");
 
   try {
     const hasBody = !["GET", "HEAD"].includes(request.method);
@@ -21,9 +22,18 @@ export const ALL: APIRoute = async ({ request, params }) => {
       redirect: "manual",
     });
 
-    return new Response(res.body, {
+    const responseHeaders = new Headers(res.headers);
+    responseHeaders.delete("content-length");
+    responseHeaders.delete("content-encoding");
+    responseHeaders.delete("transfer-encoding");
+    responseHeaders.delete("connection");
+    responseHeaders.delete("keep-alive");
+
+    const buffer = await res.arrayBuffer();
+
+    return new Response(buffer, {
       status: res.status,
-      headers: res.headers,
+      headers: responseHeaders,
     });
   } catch (err) {
     console.error(`[API Proxy Error] Failed to fetch ${targetUrl}:`, err);
