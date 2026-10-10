@@ -30,9 +30,9 @@ RUN npm run build
 # ==========================================
 FROM node:22-alpine
 
-RUN apk add --no-cache ca-certificates tzdata curl bash && \
-    curl -1sLf 'https://dl.cloudsmith.io/public/infisical/infisical-cli/setup.alpine.sh' | bash && \
-    apk add --no-cache infisical
+RUN apk add --no-cache ca-certificates tzdata curl wget bash && \
+    wget -qO- 'https://artifacts-cli.infisical.com/setup.apk.sh' | sh && \
+    apk update && apk add --no-cache infisical
 
 HEALTHCHECK --interval=10s --timeout=5s --start-period=20s --retries=3 \
   CMD curl -f http://127.0.0.1:3000/api/health || exit 1
