@@ -9,6 +9,9 @@ export interface ClientEnvConfig {
   PUBLIC_POCKETBASE_URL?: string;
   PUBLIC_TURNSTILE_SITE_KEY?: string;
   PUBLIC_PUSDATIN_URL?: string;
+  PUBLIC_SUPER_ADMIN_EMAIL?: string;
+  PUBLIC_GA_MEASUREMENT_ID?: string;
+  PUBLIC_GOOGLE_TAG_ID?: string;
   PUBLIC_CF_BEACON_TOKEN?: string;
   [key: string]: string | undefined;
 }

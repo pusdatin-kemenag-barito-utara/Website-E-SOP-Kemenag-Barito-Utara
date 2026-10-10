@@ -2,7 +2,7 @@ import PocketBase from "pocketbase";
 import { getEnv } from "./env";
 
 const createPocketBaseClient = () => {
-  const url = getEnv("PUBLIC_POCKETBASE_URL") || "https://db-sop.kemenag-baritoutara.com";
+  const url = getEnv("PUBLIC_POCKETBASE_URL", "");
   const client = new PocketBase(url);
   // Matikan auto-cancellation bawaan PocketBase agar request paralel tidak terbatalkan
   client.autoCancellation(false);

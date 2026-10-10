@@ -71,9 +71,6 @@ type Client struct {
 
 func NewClient(baseURL, adminEmail, adminPassword string) *Client {
 	cleanURL := strings.TrimRight(baseURL, "/")
-	if cleanURL == "" {
-		cleanURL = "https://db-sop.kemenag-baritoutara.com"
-	}
 
 	tr := &http.Transport{
 		Proxy:                 http.ProxyFromEnvironment,

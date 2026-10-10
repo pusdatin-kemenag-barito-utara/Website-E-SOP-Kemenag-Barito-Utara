@@ -351,8 +351,8 @@ func DeleteUser(pb *pocketbase.Client, cfg *config.Config) fiber.Handler {
 	}
 }
 
-// ResetAllPasswords resets all non-super-admin user passwords to a specified password (default "123456").
-// Super Admin (baritoutara@kemenag.go.id / role super_admin) is strictly protected and never touched.
+// ResetAllPasswords resets all non-super-admin user passwords to a specified password or DEFAULT_USER_PASSWORD env.
+// Super Admin (email matches cfg.SuperAdminEmail / role super_admin) is strictly protected and never touched.
 func ResetAllPasswords(pb *pocketbase.Client, cfg *config.Config) fiber.Handler {
 	return func(c fiber.Ctx) error {
 		var req struct {
@@ -361,8 +361,13 @@ func ResetAllPasswords(pb *pocketbase.Client, cfg *config.Config) fiber.Handler 
 		_ = c.Bind().JSON(&req)
 
 		newPassword := strings.TrimSpace(req.Password)
+		if newPassword == "" && cfg != nil && cfg.DefaultUserPassword != "" {
+			newPassword = strings.TrimSpace(cfg.DefaultUserPassword)
+		}
 		if newPassword == "" {
-			newPassword = "123456"
+			return c.Status(fiber.StatusBadRequest).JSON(models.ErrorResponse{
+				Error: "Kata sandi baru wajib disertakan di request payload atau via DEFAULT_USER_PASSWORD di Infisical",
+			})
 		}
 		if len(newPassword) < 6 {
 			return c.Status(fiber.StatusBadRequest).JSON(models.ErrorResponse{

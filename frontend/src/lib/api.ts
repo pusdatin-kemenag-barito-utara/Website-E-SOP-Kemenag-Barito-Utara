@@ -128,7 +128,7 @@ export const usersApi = {
       { method: "DELETE" },
     ),
 
-  resetAllPasswords: (password = "123456") =>
+  resetAllPasswords: (password?: string) =>
     authedRequest<{
       success: boolean;
       message: string;
@@ -138,7 +138,7 @@ export const usersApi = {
       failed?: string[];
     }>("/api/admin/users/reset-all-passwords", {
       method: "POST",
-      body: { password },
+      body: { password: password || "" },
     }),
 };
 

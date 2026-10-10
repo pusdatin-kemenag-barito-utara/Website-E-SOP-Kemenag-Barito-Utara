@@ -11,23 +11,18 @@ Proyek ini adalah monorepo dengan dua service terpisah:
 | **Frontend** | Astro 7 + React (islands) + Tailwind v4 + PocketBase JS | `frontend/` |
 | **Backend (API)** | Go Fiber V3 + PocketBase Client | `backend/` |
 
-- **Database & Autentikasi**: PocketBase (`db-sop.kemenag-baritoutara.com`) dengan manajemen sesi auth, SSE realtime channel, dan koleksi `sops` serta `users`.
+- **Database & Autentikasi**: PocketBase dengan manajemen sesi auth, SSE realtime channel, dan koleksi `sops` serta `users`.
 - **RBAC**: dicek lewat Go API (`POST /api/auth/check-rbac`) terhadap koleksi `users` di PocketBase + Cloudflare Turnstile anti-bot.
-- **Admin user**: `SUPER_ADMIN_EMAIL` (default `baritoutara@kemenag.go.id`).
+- **Admin user**: `SUPER_ADMIN_EMAIL` (dikelola via Infisical).
 
-## Environment (Single `.env` di Root)
+## Environment & Secrets (Infisical Centered)
 
-Semua konfigurasi aplikasi dipusatkan di **satu file `.env` di root repo** atau diinjeksi via **Infisical CLI**:
+Seluruh konfigurasi dan rahasia aplikasi (**Zero Hardcode Policy**) dikelola secara terpusat di **Infisical Cloud** dan diinjeksi secara otomatis saat runtime oleh Infisical CLI:
 
-```bash
-PUBLIC_POCKETBASE_URL="https://db-sop.kemenag-baritoutara.com"
-POCKETBASE_URL="https://db-sop.kemenag-baritoutara.com"
-POCKETBASE_ADMIN_EMAIL="baritoutara@kemenag.go.id"
-SUPER_ADMIN_EMAIL="baritoutara@kemenag.go.id"
-PUBLIC_API_URL="http://localhost:8080"
-```
+- Untuk pengembangan lokal: `npm run dev` menjalankan `infisical run --env=dev ...`
+- Untuk container produksi / Coolify: `docker-entrypoint.sh` login otomatis via Universal Auth dan menginjeksi secrets langsung ke proses container.
 
-> `.env` tidak perlu dicommit (ter-ignore oleh `.gitignore`).
+> File `.env` tidak pernah dicommit (ter-ignore oleh `.gitignore`).
 
 ## Menjalankan (Development)
 

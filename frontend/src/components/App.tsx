@@ -22,9 +22,9 @@ import { getEnv } from "@/lib/env";
 function SOPApp() {
   const { user, signInWithEmail, signOut, loading: authLoading } = useAuth();
 
-  const superAdminEmail = getEnv("PUBLIC_SUPER_ADMIN_EMAIL", "baritoutara@kemenag.go.id");
+  const superAdminEmail = getEnv("PUBLIC_SUPER_ADMIN_EMAIL", "");
   const isSuperAdmin = Boolean(
-    user && (user.role === "super_admin" || user.email?.toLowerCase() === superAdminEmail.toLowerCase())
+    user && (user.role === "super_admin" || (superAdminEmail && user.email?.toLowerCase() === superAdminEmail.toLowerCase()))
   );
 
   const {

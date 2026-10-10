@@ -47,9 +47,9 @@ export function BuilderHeader({
   onOpenAdmin,
   sopTitle,
 }: BuilderHeaderProps) {
-  const superAdminEmail = getEnv("PUBLIC_SUPER_ADMIN_EMAIL", "baritoutara@kemenag.go.id");
+  const superAdminEmail = getEnv("PUBLIC_SUPER_ADMIN_EMAIL", "");
   const isSuperAdminEmail = Boolean(
-    user?.email && user.email.toLowerCase() === superAdminEmail.toLowerCase()
+    superAdminEmail && user?.email && user.email.toLowerCase() === superAdminEmail.toLowerCase()
   );
   const isSuperAdminRole = user?.role === "super_admin";
 
